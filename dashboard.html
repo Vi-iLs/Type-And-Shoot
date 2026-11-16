@@ -385,15 +385,15 @@
             font-size: 10px;
         }
 
-        /* Multi-Web Viewer */
-        .multi-web-shell {
+        /* Single Website Viewer */
+        .web-viewer-shell {
             padding: 12px;
             border: 2px solid #333;
             border-radius: 10px;
             background: var(--bg-container);
             margin-bottom: 24px;
         }
-        .multi-web-heading {
+        .web-viewer-heading {
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -402,17 +402,18 @@
             border-bottom: 1px solid var(--border-color);
             margin-bottom: 12px;
         }
-        .multi-web-heading h2 {
+        .web-viewer-heading h2 {
             margin: 0;
             color: #fff;
             font-size: 17px;
         }
-        .multi-web-heading-actions {
-            display: flex;
-            align-items: center;
-            gap: 8px;
+        .web-viewer-label {
+            margin-top: 4px;
+            color: #94a3b8;
+            font-size: 11px;
         }
-        .multi-web-heading button {
+        .web-viewer-heading button {
+            flex: 0 0 auto;
             background: #1e293b;
             color: white;
             border: 1px solid #334155;
@@ -422,68 +423,15 @@
             border-radius: 5px;
             cursor: pointer;
         }
-        .multi-web-grid {
-            display: grid;
-            grid-template-columns: repeat(5, minmax(0, 1fr));
-            gap: 10px;
-            align-items: stretch;
-        }
-        .web-preview-card {
-            min-width: 0;
-            overflow: hidden;
-            border: 1px solid #334155;
-            border-radius: 8px;
-            background: #0b1220;
-        }
-        .web-preview-card.is-selected {
-            grid-column: 1 / -1;
-            grid-row: 1;
-            border: 2px solid #3b82f6;
-        }
-        .web-preview-card-header {
-            min-height: 34px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 6px;
-            padding: 5px 8px;
-            background: #172033;
-            border-bottom: 1px solid #334155;
-        }
-        .web-preview-select {
-            min-width: 0;
-            border: 0;
-            padding: 3px 4px;
-            background: transparent;
-            color: #cbd5e1;
-            font-size: 11px;
-            font-weight: 800;
-            cursor: pointer;
-            text-align: left;
-        }
-        .web-preview-card.is-selected .web-preview-select {
-            color: #60a5fa;
-        }
-        .web-preview-address {
-            min-width: 0;
-            overflow: hidden;
-            color: #64748b;
-            font-size: 10px;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-        .web-preview-frame-wrap {
+        .web-viewer-frame-wrap {
             position: relative;
-            height: 118px;
+            height: min(68vh, 620px);
+            min-height: 360px;
             overflow: auto;
             background: #fff;
             -webkit-overflow-scrolling: touch;
         }
-        .web-preview-card.is-selected .web-preview-frame-wrap {
-            height: min(68vh, 620px);
-            min-height: 360px;
-        }
-        .web-preview-frame {
+        .web-viewer-frame {
             display: block;
             width: 100%;
             height: 100%;
@@ -491,52 +439,26 @@
             border: 0;
             background: #fff;
         }
-        .web-preview-empty {
-            padding: 30px 12px;
-            color: #94a3b8;
-            text-align: center;
-            font-size: 13px;
-        }
-        .multi-web-footer {
+        .web-viewer-footer {
             display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 6px;
-            margin-top: 12px;
-            padding-top: 12px;
+            justify-content: center;
+            margin-top: 10px;
+            padding-top: 9px;
             border-top: 1px solid var(--border-color);
-        }
-        .multi-web-refresh-all {
-            min-width: 190px;
-            border: 1px solid #3b82f6;
-            border-radius: 6px;
-            padding: 8px 16px;
-            color: #fff;
-            background: #1d4ed8;
-            font-size: 11px;
-            font-weight: 700;
-            cursor: pointer;
-        }
-        .multi-web-refresh-all:hover {
-            background: #2563eb;
         }
         #webRefreshStatus {
             color: #94a3b8;
             font-size: 10px;
             text-align: center;
         }
-        @media (max-width: 850px) {
-            .multi-web-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-        }
         @media (max-width: 560px) {
             .web-url-panel-content { padding: 9px; }
             .web-url-panel-heading { align-items: flex-start; flex-direction: column; }
             .web-url-actions { align-items: stretch; }
             .web-url-action { flex: 1; }
-            .multi-web-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; }
-            .web-preview-card.is-selected .web-preview-frame-wrap { height: 58vh; min-height: 300px; }
-            .multi-web-heading { align-items: flex-start; }
-            .multi-web-heading h2 { font-size: 15px; }
+            .web-viewer-heading { align-items: flex-start; }
+            .web-viewer-heading h2 { font-size: 15px; }
+            .web-viewer-frame-wrap { height: 58vh; min-height: 300px; }
         }
 
     </style>
@@ -563,22 +485,6 @@
                 <div class="web-url-field">
                     <label for="webUrl1">SD/SG/HK</label>
                     <input type="url" id="webUrl1" inputmode="url">
-                </div>
-                <div class="web-url-field">
-                    <label for="webUrl2">CAM</label>
-                    <input type="url" id="webUrl2" inputmode="url">
-                </div>
-                <div class="web-url-field">
-                    <label for="webUrl3">CHN</label>
-                    <input type="url" id="webUrl3" inputmode="url">
-                </div>
-                <div class="web-url-field">
-                    <label for="webUrl4">JPN</label>
-                    <input type="url" id="webUrl4" inputmode="url">
-                </div>
-                <div class="web-url-field">
-                    <label for="webUrl5">TWN</label>
-                    <input type="url" id="webUrl5" inputmode="url">
                 </div>
             </div>
             <div class="web-url-actions">
@@ -711,22 +617,21 @@
     </div>
 </div>
 
-<section class="multi-web-shell" aria-labelledby="multiWebTitle">
-    <div class="multi-web-heading">
+<section class="web-viewer-shell" aria-labelledby="webViewerTitle">
+    <div class="web-viewer-heading">
         <div>
-            <h2 id="multiWebTitle">LIVE WEBSITE VIEWER</h2>
-            <div id="selectedWebLabel" style="color:#94a3b8;font-size:11px;margin-top:4px;">Pilih website dari thumbnail di bawah</div>
+            <h2 id="webViewerTitle">LIVE WEBSITE VIEWER</h2>
+            <div class="web-viewer-label">SD/SG/HK</div>
         </div>
-        <div class="multi-web-heading-actions">
-            <button type="button" onclick="refreshSelectedWebsite()">↻ Refresh</button>
-        </div>
+        <button type="button" onclick="refreshSelectedWebsite()">↻ Refresh</button>
     </div>
-    <div id="multiWebGrid" class="multi-web-grid">
-        <div class="web-preview-empty">Masukkan link website pada bagian PENGATURAN WEBSITE di atas, lalu tekan TERAPKAN LINK.</div>
+    <div class="web-viewer-frame-wrap">
+        <iframe id="webIframe" class="web-viewer-frame" title="SD/SG/HK"
+            loading="eager" referrerpolicy="strict-origin-when-cross-origin"
+            allow="fullscreen" src="about:blank"></iframe>
     </div>
-    <div class="multi-web-footer">
-        <button type="button" class="multi-web-refresh-all" onclick="refreshAllWebsites()">↻ REFRESH ALL WEBSITE</button>
-        <span id="webRefreshStatus" role="status" aria-live="polite">Semua website dimuat otomatis saat dashboard dibuka.</span>
+    <div class="web-viewer-footer">
+        <span id="webRefreshStatus" role="status" aria-live="polite">Website dimuat otomatis saat dashboard dibuka.</span>
     </div>
 </section>
 
@@ -1360,17 +1265,9 @@ function toggleWebsiteSettings() {
     button.setAttribute('aria-expanded', 'true');
 }
 
-// MULTI-WEB VIEWER
+// SINGLE WEBSITE VIEWER — hanya satu URL untuk SD/SG/HK.
 const DASHBOARD_WEB_URLS_KEY = 'dashboard1_web_urls_v1';
-const DEFAULT_DASHBOARD_WEB_URLS = ['https://toto.sdy2024.com', '', '', '', ''];
-const DASHBOARD_WEB_LABELS = [
-    'SD/SG/HK',
-    'CAM',
-    'CHN',
-    'JPN',
-    'TWN'
-];
-let selectedDashboardWebIndex = 0;
+const DEFAULT_DASHBOARD_WEB_URL = 'https://toto.sdy2024.com';
 
 function normalizeWebsiteUrl(value) {
     const raw = String(value || '').trim();
@@ -1388,28 +1285,23 @@ function normalizeWebsiteUrl(value) {
     return parsed.href;
 }
 
-function getWebsiteUrlInputs() {
-    return Array.from({ length: 5 }, (_, index) => {
-        const input = document.getElementById('webUrl' + (index + 1));
-        return input ? input.value.trim() : '';
-    });
-}
-
-function loadSavedWebsiteUrls() {
-    let urls = DEFAULT_DASHBOARD_WEB_URLS.slice();
+function loadSavedWebsiteUrl() {
+    let url = DEFAULT_DASHBOARD_WEB_URL;
     try {
         const saved = JSON.parse(localStorage.getItem(DASHBOARD_WEB_URLS_KEY) || 'null');
         if (Array.isArray(saved)) {
-            urls = Array.from({ length: 5 }, (_, index) => String(saved[index] || ''));
+            // Migrasi otomatis: ambil hanya slot pertama (SD/SG/HK) dari format lima website lama.
+            url = String(saved[0] || '');
+        } else if (typeof saved === 'string') {
+            url = saved;
         }
     } catch (error) {
         console.warn('Pengaturan URL website tidak dapat dibaca:', error);
     }
-    urls.forEach((url, index) => {
-        const input = document.getElementById('webUrl' + (index + 1));
-        if (input) input.value = url;
-    });
-    return urls;
+
+    const input = document.getElementById('webUrl1');
+    if (input) input.value = url;
+    return url;
 }
 
 function applyWebsiteUrls() {
@@ -1419,125 +1311,64 @@ function applyWebsiteUrls() {
     }
 
     const status = document.getElementById('webUrlStatus');
-    const rawUrls = getWebsiteUrlInputs();
-    const urls = [];
+    const input = document.getElementById('webUrl1');
+    const rawUrl = input ? input.value.trim() : '';
+
+    if (!rawUrl) {
+        status.textContent = 'Masukkan link website.';
+        status.style.color = '#f87171';
+        return;
+    }
+
+    let url;
     try {
-        rawUrls.forEach((raw, index) => {
-            if (!raw) {
-                urls[index] = '';
-                return;
-            }
-            urls[index] = normalizeWebsiteUrl(raw);
-        });
+        url = normalizeWebsiteUrl(rawUrl);
     } catch (error) {
         status.textContent = error.message;
         status.style.color = '#f87171';
         return;
     }
 
-    const activeUrls = urls.map((url, index) => ({ url, index })).filter(item => item.url);
-    if (!activeUrls.length) {
-        status.textContent = 'Masukkan minimal satu link website.';
-        status.style.color = '#f87171';
-        return;
-    }
-
     try {
-        localStorage.setItem(DASHBOARD_WEB_URLS_KEY, JSON.stringify(urls));
+        // Simpan satu URL saja. Format array lama tetap dibaca saat migrasi.
+        localStorage.setItem(DASHBOARD_WEB_URLS_KEY, JSON.stringify(url));
     } catch (error) {
         console.warn('URL tidak dapat disimpan di browser:', error);
     }
 
-    renderDashboardWebsites(activeUrls);
-    status.textContent = activeUrls.length + ' website diterapkan dan disimpan di browser ini.';
+    renderDashboardWebsite(url);
+    status.textContent = 'Link SD/SG/HK diterapkan dan disimpan di browser ini.';
     status.style.color = '#34d399';
 }
 
-
-function renderDashboardWebsites(items) {
-    const grid = document.getElementById('multiWebGrid');
-    if (!grid) return;
-    grid.replaceChildren();
-
-    if (!items.length) {
-        grid.innerHTML = '<div class="web-preview-empty">Belum ada website yang ditambahkan.</div>';
-        return;
-    }
-
-    const selectedExists = items.some(item => item.index === selectedDashboardWebIndex);
-    if (!selectedExists) selectedDashboardWebIndex = items[0].index;
-
-    items.forEach(item => {
-        const card = document.createElement('article');
-        card.className = 'web-preview-card' + (item.index === selectedDashboardWebIndex ? ' is-selected' : '');
-        card.dataset.webIndex = String(item.index);
-
-        const header = document.createElement('div');
-        header.className = 'web-preview-card-header';
-
-        const selectButton = document.createElement('button');
-        selectButton.type = 'button';
-        selectButton.className = 'web-preview-select';
-        selectButton.textContent = DASHBOARD_WEB_LABELS[item.index] || ('WEB ' + (item.index + 1));
-        selectButton.setAttribute('aria-pressed', item.index === selectedDashboardWebIndex ? 'true' : 'false');
-        selectButton.addEventListener('click', () => selectDashboardWebsite(item.index));
-
-        header.append(selectButton);
-
-        const frameWrap = document.createElement('div');
-        frameWrap.className = 'web-preview-frame-wrap';
-
-        const frame = document.createElement('iframe');
-        frame.className = 'web-preview-frame';
-        frame.dataset.originalUrl = item.url;
-        frame.src = buildFreshWebsiteUrl(item.url, Date.now() + '-' + item.index);
-        frame.title = 'Pratinjau WEB ' + (item.index + 1);
-        frame.loading = 'eager';
-        frame.referrerPolicy = 'strict-origin-when-cross-origin';
-        frame.setAttribute('allow', 'fullscreen');
-        frameWrap.appendChild(frame);
-
-        card.append(header, frameWrap);
-        grid.appendChild(card);
-    });
-
-    updateSelectedWebsiteLabel();
-}
-
-function selectDashboardWebsite(index) {
-    selectedDashboardWebIndex = index;
-    document.querySelectorAll('.web-preview-card').forEach(card => {
-        const selected = Number(card.dataset.webIndex) === index;
-        card.classList.toggle('is-selected', selected);
-        const button = card.querySelector('.web-preview-select');
-        if (button) button.setAttribute('aria-pressed', selected ? 'true' : 'false');
-    });
-    updateSelectedWebsiteLabel();
-}
-
-function updateSelectedWebsiteLabel() {
-    const label = document.getElementById('selectedWebLabel');
-    const card = document.querySelector('.web-preview-card.is-selected');
-    if (!label) return;
-    if (!card) {
-        label.textContent = 'Pilih website dari thumbnail di bawah';
-        return;
-    }
-    const index = Number(card.dataset.webIndex);
-    label.textContent = DASHBOARD_WEB_LABELS[index] || ('WEB ' + (index + 1));
-}
-
-// Tambahkan token pada URL agar browser meminta dokumen website terbaru.
+// Tambahkan token agar browser meminta dokumen website terbaru.
 function buildFreshWebsiteUrl(rawUrl, token) {
     const freshUrl = new URL(rawUrl);
     freshUrl.searchParams.set('_dashboard_refresh', String(token));
     return freshUrl.href;
 }
 
+function renderDashboardWebsite(url) {
+    const frame = document.getElementById('webIframe');
+    const status = document.getElementById('webRefreshStatus');
+    if (!frame) return;
+
+    if (!url) {
+        frame.src = 'about:blank';
+        frame.dataset.originalUrl = '';
+        if (status) status.textContent = 'Masukkan link website melalui pengaturan.';
+        return;
+    }
+
+    frame.dataset.originalUrl = url;
+    frame.src = buildFreshWebsiteUrl(url, Date.now());
+    if (status) status.textContent = 'Website SD/SG/HK dimuat otomatis.';
+}
+
 function reloadWebsiteFrame(frame, token) {
     if (!frame) return;
-    const originalUrl = frame.dataset.originalUrl || frame.src;
-    if (!originalUrl || originalUrl === 'about:blank') return;
+    const originalUrl = frame.dataset.originalUrl || '';
+    if (!originalUrl) return;
 
     frame.src = 'about:blank';
     window.setTimeout(() => {
@@ -1546,45 +1377,36 @@ function reloadWebsiteFrame(frame, token) {
 }
 
 function refreshSelectedWebsite() {
-    const card = document.querySelector('.web-preview-card.is-selected');
-    const frame = card ? card.querySelector('iframe') : null;
-    if (!frame) {
-        const status = document.getElementById('webUrlStatus');
-        status.textContent = 'Belum ada website yang dipilih.';
-        status.style.color = '#fbbf24';
-        return;
-    }
-    reloadWebsiteFrame(frame, Date.now());
-}
-
-function refreshAllWebsites() {
-    const frames = Array.from(document.querySelectorAll('#multiWebGrid .web-preview-frame'));
+    const frame = document.getElementById('webIframe');
     const status = document.getElementById('webRefreshStatus');
 
-    if (!frames.length) {
-        if (status) status.textContent = 'Belum ada website yang dapat diperbarui.';
+    if (!frame || !frame.dataset.originalUrl) {
+        if (status) status.textContent = 'Belum ada link website.';
         return;
     }
 
-    const refreshToken = Date.now();
-    frames.forEach((frame, index) => {
-        reloadWebsiteFrame(frame, refreshToken + '-' + index);
-    });
-
-    if (status) {
-        status.textContent = 'Permintaan refresh dikirim ke ' + frames.length + ' website.';
-    }
+    reloadWebsiteFrame(frame, Date.now());
+    if (status) status.textContent = 'Permintaan refresh dikirim ke website SD/SG/HK.';
 }
 
-(function initializeDashboardWebsites() {
-    const urls = loadSavedWebsiteUrls();
-    const entries = urls
-        .map((raw, index) => ({ raw, index }))
-        .filter(item => item.raw.trim())
-        .map(item => ({ url: normalizeWebsiteUrl(item.raw), index: item.index }));
-    if (entries.length) renderDashboardWebsites(entries);
-})();
+// Kompatibilitas dengan tombol refresh lama bila masih dipanggil bagian lain.
+function refreshIframe() {
+    refreshSelectedWebsite();
+}
 
+(function initializeDashboardWebsite() {
+    const savedUrl = loadSavedWebsiteUrl();
+    if (savedUrl) {
+        try {
+            renderDashboardWebsite(normalizeWebsiteUrl(savedUrl));
+        } catch (error) {
+            const status = document.getElementById('webRefreshStatus');
+            if (status) status.textContent = error.message;
+        }
+    } else {
+        renderDashboardWebsite('');
+    }
+})();
 </script>
 
 </body>
