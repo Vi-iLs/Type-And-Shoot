@@ -445,7 +445,7 @@
         }
         .web-viewer-frame {
             display: block;
-            width: 900px;
+            width: 600px;
             height: 1500px;
             max-width: none;
             border: 0;
@@ -1525,7 +1525,7 @@ function fitWebsiteFrame() {
     const frame = document.getElementById('webIframe');
     if (!wrap || !frame) return;
 
-    const desktopWidth = 900;
+    const desktopWidth = 600;
     const scale = Math.min(1, wrap.clientWidth / desktopWidth);
     const internalHeight = Math.max(900, Math.ceil(wrap.clientHeight / scale));
 
