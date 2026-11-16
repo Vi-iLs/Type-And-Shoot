@@ -472,10 +472,10 @@
             flex: 0 0 auto; padding: 7px 10px; border: 1px solid #334155; border-radius: 5px;
             background: #1e293b; color: #fff; font-size: 11px; font-weight: 700; cursor: pointer;
         }
-        .data-history-table-wrap { width: 100%; overflow-x: auto; border: 1px solid var(--border-color); border-radius: 7px; -webkit-overflow-scrolling: touch; }
-        .data-history-table { width: 100%; min-width: 540px; border-collapse: separate; border-spacing: 0; table-layout: fixed; font-variant-numeric: tabular-nums; }
-        .data-history-table th, .data-history-table td { padding: 9px 6px; border-right: 1px solid #27364e; border-bottom: 1px solid #27364e; text-align: center; }
-        .data-history-table th:first-child, .data-history-table td:first-child { width: 104px; text-align: left; }
+        .data-history-table-wrap { width: 100%; overflow-x: hidden; border: 1px solid var(--border-color); border-radius: 7px; }
+        .data-history-table { width: 100%; min-width: 0; border-collapse: separate; border-spacing: 0; table-layout: fixed; font-variant-numeric: tabular-nums; }
+        .data-history-table th, .data-history-table td { padding: 7px 3px; border-right: 1px solid #27364e; border-bottom: 1px solid #27364e; text-align: center; white-space: nowrap; }
+        .data-history-table th:first-child, .data-history-table td:first-child { width: 66px; text-align: center; padding-left: 1px; padding-right: 1px; }
         .data-history-table th:last-child, .data-history-table td:last-child { border-right: 0; }
         .data-history-table tbody tr:last-child td { border-bottom: 0; }
         .data-history-table thead th { position: sticky; top: 0; z-index: 1; background: #101827; font-size: 10px; }
@@ -485,9 +485,11 @@
         .data-category-button[data-category="JPN"] { color: #facc15; }
         .data-category-button[data-category="TWN"] { color: #c084fc; }
         .data-category-button[aria-pressed="true"] { border-color: currentColor; background: rgba(148, 163, 184, .10); box-shadow: 0 0 0 1px currentColor; }
-        .data-history-table tbody td { color: #e2e8f0; font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: 14px; font-weight: 700; }
-        .data-history-table tbody td:first-child { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 11px; font-weight: 600; }
-        .data-date-button { padding: 4px 5px; border: 1px solid transparent; border-radius: 4px; background: transparent; color: #94a3b8; font-size: 11px; font-weight: 700; cursor: pointer; }
+        .data-history-table tbody td { color: #e2e8f0; font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: 13px; font-weight: 700; }
+        .data-history-table tbody td:first-child { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 8.5px; font-weight: 600; }
+        .data-value-prefix { font-size: 1em; }
+        .data-value-suffix { display: inline-block; font-size: 1.05em; }
+        .data-date-button { padding: 3px 1px; border: 1px solid transparent; border-radius: 4px; background: transparent; color: #94a3b8; font-size: 8.5px; font-weight: 700; letter-spacing: -.2px; white-space: nowrap; cursor: pointer; }
         .data-date-button[aria-pressed="true"] { border-color: #94a3b8; background: rgba(148, 163, 184, .16); color: #fff; }
         .data-history-table td.is-empty { color: #64748b; font-weight: 400; }
         .data-history-table .data-row.is-selected td { background: rgba(148, 163, 184, .09); }
@@ -509,6 +511,16 @@
             .web-viewer-heading { align-items: flex-start; }
             .web-viewer-heading h2 { font-size: 15px; }
             .web-viewer-frame-wrap { height: 58vh; min-height: 300px; }
+            .data-history-shell { padding: 8px; }
+            .data-history-heading { gap: 5px; }
+            .data-history-heading h2 { font-size: 13px; }
+            .data-history-refresh { padding: 6px 7px; font-size: 9px; }
+            .data-history-table th, .data-history-table td { padding: 6px 2px; }
+            .data-history-table th:first-child, .data-history-table td:first-child { width: 62px; }
+            .data-history-table thead th { font-size: 9px; }
+            .data-category-button { padding: 4px 0; font-size: 10px; }
+            .data-history-table tbody td { font-size: 12px; }
+            .data-history-table tbody td:first-child, .data-date-button { font-size: 8px; }
         }
 
     </style>
@@ -1662,7 +1674,20 @@ function renderDashboardData(records) {
                 : String(record[category]).trim();
 
             if (value) {
-                cell.textContent = value;
+                // Tampilkan dua digit terakhir 5% lebih besar dari digit sebelumnya.
+                if (/^\d{3,}$/.test(value)) {
+                    const prefix = document.createElement('span');
+                    prefix.className = 'data-value-prefix';
+                    prefix.textContent = value.slice(0, -2);
+
+                    const suffix = document.createElement('span');
+                    suffix.className = 'data-value-suffix';
+                    suffix.textContent = value.slice(-2);
+
+                    cell.append(prefix, suffix);
+                } else {
+                    cell.textContent = value;
+                }
             } else {
                 cell.textContent = '—';
                 cell.classList.add('is-empty');
