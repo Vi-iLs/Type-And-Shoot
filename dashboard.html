@@ -488,15 +488,22 @@
         .data-history-table tbody td { color: #e2e8f0; font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: 13px; font-weight: 700; }
         .data-history-table tbody td:first-child { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 8.5px; font-weight: 600; }
         .data-value-prefix { font-size: 1em; }
-        .data-value-suffix { display: inline-block; font-size: 1.05em; }
+        .data-value-suffix { display: inline-block; font-size: 1.10em; line-height: 1.1; border: 1px solid transparent; border-radius: 4px; padding: 0 1px; }
         .data-date-button { padding: 3px 1px; border: 1px solid transparent; border-radius: 4px; background: transparent; color: #94a3b8; font-size: 8.5px; font-weight: 700; letter-spacing: -.2px; white-space: nowrap; cursor: pointer; }
         .data-date-button[aria-pressed="true"] { border-color: #94a3b8; background: rgba(148, 163, 184, .16); color: #fff; }
         .data-history-table td.is-empty { color: #64748b; font-weight: 400; }
-        .data-history-table .data-row.is-selected td { background: rgba(148, 163, 184, .09); }
-        .data-history-table[data-focus-column="CAM"] tbody td[data-category="CAM"] { background: rgba(239, 68, 68, .13); box-shadow: inset 0 0 0 2px #ef4444; color: #fecaca; }
-        .data-history-table[data-focus-column="CHN"] tbody td[data-category="CHN"] { background: rgba(59, 130, 246, .14); box-shadow: inset 0 0 0 2px #3b82f6; color: #bfdbfe; }
-        .data-history-table[data-focus-column="JPN"] tbody td[data-category="JPN"] { background: rgba(234, 179, 8, .13); box-shadow: inset 0 0 0 2px #eab308; color: #fef08a; }
-        .data-history-table[data-focus-column="TWN"] tbody td[data-category="TWN"] { background: rgba(168, 85, 247, .14); box-shadow: inset 0 0 0 2px #a855f7; color: #e9d5ff; }
+
+        /* Fokus kategori hanya menyalakan dua digit terakhir, bukan seluruh sel. */
+        .data-history-table[data-focus-column="CAM"] tbody td[data-category="CAM"] .data-value-suffix { color: #fecaca; text-shadow: 0 0 4px rgba(239, 68, 68, .85), 0 0 9px rgba(239, 68, 68, .65); }
+        .data-history-table[data-focus-column="CHN"] tbody td[data-category="CHN"] .data-value-suffix { color: #bfdbfe; text-shadow: 0 0 4px rgba(59, 130, 246, .9), 0 0 9px rgba(59, 130, 246, .7); }
+        .data-history-table[data-focus-column="JPN"] tbody td[data-category="JPN"] .data-value-suffix { color: #fef08a; text-shadow: 0 0 4px rgba(234, 179, 8, .9), 0 0 9px rgba(234, 179, 8, .7); }
+        .data-history-table[data-focus-column="TWN"] tbody td[data-category="TWN"] .data-value-suffix { color: #e9d5ff; text-shadow: 0 0 4px rgba(168, 85, 247, .9), 0 0 9px rgba(168, 85, 247, .7); }
+
+        /* Saat tanggal dipilih, hanya dua digit terakhir di empat kolom diberi border. */
+        .data-history-table .data-row.is-selected td[data-category="CAM"] .data-value-suffix { color: #fecaca; background: rgba(239, 68, 68, .12); border-color: #ef4444; box-shadow: 0 0 6px rgba(239, 68, 68, .55); }
+        .data-history-table .data-row.is-selected td[data-category="CHN"] .data-value-suffix { color: #bfdbfe; background: rgba(59, 130, 246, .12); border-color: #3b82f6; box-shadow: 0 0 6px rgba(59, 130, 246, .55); }
+        .data-history-table .data-row.is-selected td[data-category="JPN"] .data-value-suffix { color: #fef08a; background: rgba(234, 179, 8, .12); border-color: #eab308; box-shadow: 0 0 6px rgba(234, 179, 8, .55); }
+        .data-history-table .data-row.is-selected td[data-category="TWN"] .data-value-suffix { color: #e9d5ff; background: rgba(168, 85, 247, .12); border-color: #a855f7; box-shadow: 0 0 6px rgba(168, 85, 247, .55); }
         .data-history-empty {
             padding: 22px 10px !important; color: #94a3b8 !important;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
@@ -1674,7 +1681,7 @@ function renderDashboardData(records) {
                 : String(record[category]).trim();
 
             if (value) {
-                // Tampilkan dua digit terakhir 5% lebih besar dari digit sebelumnya.
+                // Tampilkan dua digit terakhir sekitar 10% lebih besar dari digit sebelumnya.
                 if (/^\d{3,}$/.test(value)) {
                     const prefix = document.createElement('span');
                     prefix.className = 'data-value-prefix';
