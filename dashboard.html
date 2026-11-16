@@ -210,7 +210,7 @@
             border-top: 1px solid var(--border-color);
             display: flex;
             flex-direction: column;
-            gap: 25px;
+            gap: 28px;
         }
 
         .output-container {
@@ -223,23 +223,23 @@
             border: 1px solid var(--border-color);
             color: #34d399;
             font-weight: bold;
-            padding-right: 80px;
+            padding-right: 68px;
             resize: vertical;
-            height: 200px;
-            font-size: 16px;
-            line-height: 1.6;
+            height: 170px;
+            font-size: 13.6px;
+            line-height: 1.36;
             overflow-y: auto;
         }
 
         button.btn-copy {
             position: absolute;
-            top: 10px;
-            right: 10px;
+            top: 8px;
+            right: 8px;
             background-color: #1e293b;
             color: white;
             border: 1px solid var(--border-color);
-            padding: 6px 12px;
-            font-size: 12px;
+            padding: 5px 10px;
+            font-size: 10.2px;
             font-weight: bold;
             border-radius: 6px;
             cursor: pointer;
@@ -252,23 +252,28 @@
 
         .match-box {
             background-color: #0f172a;
-            padding: 15px;
+            padding: 13px;
             border-radius: 8px;
             border: 1px solid var(--border-color);
             box-sizing: border-box;
-            min-height: 320px;
+            min-height: 272px;
+        }
+        .match-box textarea {
+            padding: 10px;
+            font-size: 13.6px;
+            line-height: 1.36;
         }
 
         .match-layout {
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 17px;
         }
 
         .side-by-side-results {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 15px;
+            gap: 13px;
         }
 
         /* GAYA UNTUK TOMBOL NAVIGASI MELAYANG (FLOATING BUTTONS) */
@@ -318,7 +323,7 @@
                 gap: 25px;
             }
             #inputData { height: 340px; }
-            #outputData { height: 340px; }
+            #outputData { height: 289px; }
             
             .match-layout {
                 display: grid;
@@ -387,7 +392,8 @@
 
         /* Single Website Viewer */
         .web-viewer-shell {
-            padding: 12px;
+            margin-top: 18px;
+            padding: 10px;
             border: 2px solid #333;
             border-radius: 10px;
             background: var(--bg-container);
@@ -405,28 +411,31 @@
         .web-viewer-heading h2 {
             margin: 0;
             color: #fff;
-            font-size: 17px;
+            font-size: 14.5px;
         }
         .web-viewer-label {
             margin-top: 4px;
             color: #94a3b8;
-            font-size: 11px;
+            font-size: 9.4px;
         }
         .web-viewer-heading button {
             flex: 0 0 auto;
             background: #1e293b;
             color: white;
             border: 1px solid #334155;
-            padding: 7px 11px;
-            font-size: 12px;
+            padding: 6px 9px;
+            font-size: 10.2px;
             font-weight: 700;
             border-radius: 5px;
             cursor: pointer;
         }
         .web-viewer-frame-wrap {
             position: relative;
-            height: min(68vh, 620px);
-            min-height: 360px;
+            height: min(58vh, 527px);
+            min-height: 306px;
+            margin: 0 6px;
+            padding: 6px;
+            box-sizing: border-box;
             overflow: auto;
             background: #fff;
             -webkit-overflow-scrolling: touch;
@@ -541,6 +550,22 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
             font-size: 12px !important; font-weight: 500 !important; text-align: center !important;
         }
+        .data-row.is-hidden-by-limit { display: none; }
+        .data-history-more-wrap { display: flex; justify-content: center; margin-top: 10px; }
+        .data-history-more {
+            min-width: 112px;
+            padding: 7px 15px;
+            border: 1px solid #3b82f6;
+            border-radius: 6px;
+            background: #172b49;
+            color: #bfdbfe;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: .45px;
+            cursor: pointer;
+        }
+        .data-history-more:hover { background: #1e3a5f; border-color: #60a5fa; }
+        .data-history-more[hidden] { display: none !important; }
         #dataHistoryStatus { display: block; min-height: 14px; margin-top: 8px; color: #94a3b8; font-size: 10px; text-align: center; }
         @media (max-width: 560px) {
             .web-url-panel-content { padding: 9px; }
@@ -549,7 +574,7 @@
             .web-url-action { flex: 1; }
             .web-viewer-heading { align-items: flex-start; }
             .web-viewer-heading h2 { font-size: 15px; }
-            .web-viewer-frame-wrap { height: 58vh; min-height: 300px; }
+            .web-viewer-frame-wrap { height: 49vh; min-height: 255px; }
             .data-history-shell { padding: 8px; }
             .data-history-heading { gap: 5px; }
             .data-history-heading h2 { font-size: 13px; }
@@ -660,13 +685,13 @@
     <div class="bottom-layout">
         <div>
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                <label style="margin: 0; font-size: 16px;">Hasil Akhir / Manual</label>
+                <label style="margin: 0; font-size: 13.6px;">Hasil Akhir / Manual</label>
                 <div style="display: flex; align-items: center; gap: 6px;">
                     <button type="button" onclick="bagiHasilAkhirDuaBagian()" title="Bagi BB 4 angka dan BB 3 angka menjadi 2 bagian"
-                        style="background-color: #1e293b; color: #94a3b8; border: 1px solid #334155; padding: 4px 7px; font-size: 10px; font-weight: 600; border-radius: 4px; cursor: pointer; white-space: nowrap;">
+                        style="background-color: #1e293b; color: #94a3b8; border: 1px solid #334155; padding: 3px 6px; font-size: 8.5px; font-weight: 600; border-radius: 4px; cursor: pointer; white-space: nowrap;">
                         BAGI 2
                     </button>
-                    <button onclick="pasteHasilManual()" style="background-color: #1e293b; color: #3b82f6; border: 1px solid #24324d; padding: 4px 10px; font-size: 11px; font-weight: bold; border-radius: 4px; cursor: pointer;">
+                    <button onclick="pasteHasilManual()" style="background-color: #1e293b; color: #3b82f6; border: 1px solid #24324d; padding: 3.5px 8.5px; font-size: 9.4px; font-weight: bold; border-radius: 4px; cursor: pointer;">
                         PASTE
                     </button>
                 </div>
@@ -681,7 +706,7 @@
 
         <div>
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                <label style="margin: 0; font-size: 16px;">Angka Pembanding</label>
+                <label style="margin: 0; font-size: 13.6px;">Angka Pembanding</label>
                 <button onclick="pastePembanding()" style="background-color: #1e293b; color: #3b82f6; border: 1px solid #24324d; padding: 4px 10px; font-size: 11px; font-weight: bold; border-radius: 4px; cursor: pointer;">
                     PASTE
                 </button>
@@ -690,9 +715,9 @@
                 
                 <div class="match-layout">
                     <div class="match-input-side">
-                        <textarea id="inputPembanding" style="height: 200px; resize: none;"></textarea>
+                        <textarea id="inputPembanding" style="height: 170px; resize: none;"></textarea>
                         
-                        <button class="btn-execute" onclick="cocokkanData()" style="margin-top: 10px; background-color: #2ecc71; font-size: 14px; padding: 12px; letter-spacing: 0;">Cocokkan</button>
+                        <button class="btn-execute" onclick="cocokkanData()" style="margin-top: 8px; background-color: #2ecc71; font-size: 12px; padding: 10px; letter-spacing: 0;">Cocokkan</button>
                     </div>
 
                     <div class="match-result-side">
@@ -700,23 +725,23 @@
                         <div id="wrapperHasilCocok" style="display: none; flex-direction: column; gap: 15px;">
                             
                             <div id="boxDouble" style="display: none;">
-                                <label style="color: #3498db; font-size: 12px; margin-bottom: 5px; display: block;">Angka Double</label>
-                                <textarea id="outputDouble" readonly style="height: 50px; border: 1px solid #3498db; color: #3498db; resize: none; width: 100%; box-sizing: border-box;"></textarea>
+                                <label style="color: #3498db; font-size: 10.2px; margin-bottom: 4px; display: block;">Angka Double</label>
+                                <textarea id="outputDouble" readonly style="height: 43px; border: 1px solid #3498db; color: #3498db; resize: none; width: 100%; box-sizing: border-box;"></textarea>
                             </div>
 
-                            <div id="pesanCocok" style="display: none; color: #2ecc71; font-weight: bold; text-align: center; margin-top: 10px; font-size: 14px;">
+                            <div id="pesanCocok" style="display: none; color: #2ecc71; font-weight: bold; text-align: center; margin-top: 10px; font-size: 12px;">
                                 ✔ Semua Terverifikasi
                             </div>
 
                             <div id="gridPerbedaan" class="side-by-side-results" style="display: none;">
                                 <div style="display: flex; flex-direction: column;">
-                                    <label style="color: #e74c3c; font-size: 11px; margin-bottom: 5px;">❌ DARI HASIL ATAS ❌</label>
-                                    <textarea id="outputTidakCocok" readonly style="height: 90px; border: 1px solid #e74c3c; color: #e74c3c; resize: none; width: 100%; box-sizing: border-box;"></textarea>
+                                    <label style="color: #e74c3c; font-size: 9.4px; margin-bottom: 4px;">❌ DARI HASIL ATAS ❌</label>
+                                    <textarea id="outputTidakCocok" readonly style="height: 77px; border: 1px solid #e74c3c; color: #e74c3c; resize: none; width: 100%; box-sizing: border-box;"></textarea>
                                 </div>
 
                                 <div style="display: flex; flex-direction: column;">
-                                    <label style="color: #f39c12; font-size: 11px; margin-bottom: 5px;">❌ DARI PEMBANDING ❌</label>
-                                    <textarea id="outputBerlebih" readonly style="height: 90px; border: 1px solid #f39c12; color: #f39c12; resize: none; width: 100%; box-sizing: border-box;"></textarea>
+                                    <label style="color: #f39c12; font-size: 9.4px; margin-bottom: 4px;">❌ DARI PEMBANDING ❌</label>
+                                    <textarea id="outputBerlebih" readonly style="height: 77px; border: 1px solid #f39c12; color: #f39c12; resize: none; width: 100%; box-sizing: border-box;"></textarea>
                                 </div>
                             </div>
 
@@ -767,6 +792,10 @@
                 <tr><td class="data-history-empty" colspan="5">Memuat data...</td></tr>
             </tbody>
         </table>
+    </div>
+    <div class="data-history-more-wrap">
+        <button type="button" id="dataHistorySeeMore" class="data-history-more"
+            onclick="toggleDashboardHistory()" aria-expanded="false" hidden>SEE MORE</button>
     </div>
     <span id="dataHistoryStatus" role="status" aria-live="polite">Menghubungkan ke database...</span>
 </section>
@@ -1548,6 +1577,7 @@ function refreshIframe() {
 const DASHBOARD_DATA_API_URL = 'https://type-shoot-sheet-test.vails.workers.dev';
 const DASHBOARD_DATA_CATEGORIES = ['CAM', 'CHN', 'JPN', 'TWN'];
 let selectedDataDate = '';
+let showAllDashboardData = false;
 let dashboardDataRequestInProgress = false;
 
 function setDashboardDataStatus(message, isError = false) {
@@ -1683,12 +1713,17 @@ function renderDashboardData(records) {
         row.appendChild(cell);
         tbody.appendChild(row);
         selectedDataDate = '';
+        showAllDashboardData = false;
+        updateDashboardHistoryMoreButton(0);
         return;
     }
 
-    records.forEach(record => {
+    if (records.length <= 15) showAllDashboardData = false;
+
+    records.forEach((record, index) => {
         const row = document.createElement('tr');
         row.className = 'data-row';
+        if (!showAllDashboardData && index >= 15) row.classList.add('is-hidden-by-limit');
         row.dataset.date = String(record.date || '');
 
         if (selectedDataDate && selectedDataDate === row.dataset.date) {
@@ -1737,6 +1772,30 @@ function renderDashboardData(records) {
 
         tbody.appendChild(row);
     });
+
+    updateDashboardHistoryMoreButton(records.length);
+}
+
+function updateDashboardHistoryMoreButton(totalRows) {
+    const button = document.getElementById('dataHistorySeeMore');
+    if (!button) return;
+
+    const canExpand = totalRows > 15;
+    button.hidden = !canExpand;
+    button.setAttribute('aria-expanded', showAllDashboardData ? 'true' : 'false');
+    button.textContent = showAllDashboardData ? 'SEE LESS' : 'SEE MORE';
+}
+
+function toggleDashboardHistory() {
+    const rows = Array.from(document.querySelectorAll('#dataHistoryBody .data-row'));
+    if (rows.length <= 15) return;
+
+    showAllDashboardData = !showAllDashboardData;
+    rows.forEach((row, index) => {
+        row.classList.toggle('is-hidden-by-limit', !showAllDashboardData && index >= 15);
+    });
+
+    updateDashboardHistoryMoreButton(rows.length);
 }
 
 function selectDataColumn(category) {
