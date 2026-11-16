@@ -15,19 +15,33 @@
 const APPS_SCRIPT_URL =
   'https://script.google.com/macros/s/AKfycbxGqXjuaowVZcFIklcMP8in1Gh3rTjUMW8FusRH1Y_XMCHLF-8j4gqiw7q9nwPzmDTnIg/exec';
 
-const ALLOWED_ORIGIN = 'https://vi-ils.github.io';
+const ALLOWED_ORIGINS = new Set([
+  'https://vi-ils.github.io',
+  'https://type-shooter.vails.workers.dev'
+]);
 
-function jsonResponse(data, status = 200) {
+function corsHeaders(origin) {
+  const headers = {
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Max-Age': '86400',
+    'Cache-Control': 'no-store',
+    'Vary': 'Origin'
+  };
+
+  if (ALLOWED_ORIGINS.has(origin)) {
+    headers['Access-Control-Allow-Origin'] = origin;
+  }
+
+  return headers;
+}
+
+function jsonResponse(data, status = 200, origin = '') {
   return new Response(JSON.stringify(data), {
     status,
     headers: {
       'Content-Type': 'application/json; charset=utf-8',
-      'Access-Control-Allow-Origin': ALLOWED_ORIGIN,
-      'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
-      'Access-Control-Max-Age': '86400',
-      'Cache-Control': 'no-store',
-      'Vary': 'Origin'
+      ...corsHeaders(origin)
     }
   });
 }
@@ -36,22 +50,18 @@ export default {
   async fetch(request, env) {
     const origin = request.headers.get('Origin') || '';
 
-    if (origin && origin !== ALLOWED_ORIGIN) {
+    if (origin && !ALLOWED_ORIGINS.has(origin)) {
       return jsonResponse({
         ok: false,
         error: 'Origin tidak diizinkan.'
-      }, 403);
+      }, 403, origin);
     }
 
     if (request.method === 'OPTIONS') {
       return new Response(null, {
         status: 204,
         headers: {
-          'Access-Control-Allow-Origin': ALLOWED_ORIGIN,
-          'Access-Control-Allow-Methods': 'POST, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type',
-          'Access-Control-Max-Age': '86400',
-          'Vary': 'Origin'
+          ...corsHeaders(origin)
         }
       });
     }
@@ -60,14 +70,14 @@ export default {
       return jsonResponse({
         ok: false,
         error: 'Gunakan metode POST.'
-      }, 405);
+      }, 405, origin);
     }
 
     if (!env.APPS_SCRIPT_TOKEN) {
       return jsonResponse({
         ok: false,
         error: 'Secret APPS_SCRIPT_TOKEN belum dipasang.'
-      }, 500);
+      }, 500, origin);
     }
 
     let payload;
@@ -78,7 +88,7 @@ export default {
       return jsonResponse({
         ok: false,
         error: 'Format JSON tidak valid.'
-      }, 400);
+      }, 400, origin);
     }
 
     const action = String(payload.action || '').trim();
@@ -96,7 +106,7 @@ export default {
         return jsonResponse({
           ok: false,
           error: 'PIN tidak sesuai.'
-        }, 403);
+        }, 403, origin);
       }
 
       if (typeof payload.input !== 'string' || !payload.input.trim()) {
@@ -136,15 +146,15 @@ export default {
         return jsonResponse({
           ok: false,
           error: result.error || 'Permintaan ke Google Sheets gagal.'
-        }, upstream.status >= 400 ? upstream.status : 400);
+        }, upstream.status >= 400 ? upstream.status : 400, origin);
       }
 
-      return jsonResponse(result, 200);
+      return jsonResponse(result, 200, origin);
     } catch (error) {
       return jsonResponse({
         ok: false,
         error: error.message || 'Tidak dapat menghubungi Google Sheets.'
-      }, 502);
+      }, 502, origin);
     }
   }
 };
