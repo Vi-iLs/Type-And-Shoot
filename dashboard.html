@@ -577,37 +577,31 @@
 
     <section class="web-url-panel" id="webUrlPanel" aria-labelledby="webUrlPanelTitle">
         <div class="web-url-panel-content" id="webUrlPanelContent" hidden>
-            <div class="web-url-panel-heading">
-                <div>
-                    <h2 id="webUrlPanelTitle">PENGATURAN WEBSITE</h2>
-                    <p>Masukkan hingga 5 link website. Link tersimpan di browser ini setelah diterapkan.</p>
-                </div>
-            </div>
             <div class="web-url-grid">
                 <div class="web-url-field">
                     <label for="webUrl1">SD/SG/HK</label>
-                    <input type="url" id="webUrl1" inputmode="url" placeholder="https://website-pertama.com">
+                    <input type="url" id="webUrl1" inputmode="url">
                 </div>
                 <div class="web-url-field">
                     <label for="webUrl2">CAM</label>
-                    <input type="url" id="webUrl2" inputmode="url" placeholder="https://website-kedua.com">
+                    <input type="url" id="webUrl2" inputmode="url">
                 </div>
                 <div class="web-url-field">
                     <label for="webUrl3">CHN</label>
-                    <input type="url" id="webUrl3" inputmode="url" placeholder="https://website-ketiga.com">
+                    <input type="url" id="webUrl3" inputmode="url">
                 </div>
                 <div class="web-url-field">
                     <label for="webUrl4">JPN</label>
-                    <input type="url" id="webUrl4" inputmode="url" placeholder="https://website-keempat.com">
+                    <input type="url" id="webUrl4" inputmode="url">
                 </div>
                 <div class="web-url-field">
                     <label for="webUrl5">TWN</label>
-                    <input type="url" id="webUrl5" inputmode="url" placeholder="https://website-kelima.com">
+                    <input type="url" id="webUrl5" inputmode="url">
                 </div>
             </div>
             <div class="web-url-actions">
                 <button type="button" class="web-url-action" onclick="applyWebsiteUrls()">TERAPKAN LINK</button>
-                <span id="webUrlStatus" role="status" aria-live="polite">Pengaturan website siap diterapkan.</span>
+                <span id="webUrlStatus" role="status" aria-live="polite" hidden></span>
             </div>
         </div>
     </section>
