@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DJ-Shooting: Far And Beyond</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="IMG_6628.jpeg">
+    <link rel="icon" type="image/png" sizes="32x32" href="IMG_6628.jpeg">
+
+    <link rel="stylesheet" href="assets/css/game.css?v=1.00.21">
+</head>
+<body>
+
+    <div class="scanlines"></div>
+
+    <input type="text" id="hiddenInput" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false">
+
+    <button id="pauseBtn" class="pause-btn hidden" type="button" onclick="pauseGame()" aria-label="Pause game" title="Pause game">
+        <svg class="pause-glyph" viewBox="0 0 36 36" aria-hidden="true" focusable="false">
+          <defs><linearGradient id="pauseChrome" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e5fbff"/><stop offset=".48" stop-color="#7ce7ff"/><stop offset="1" stop-color="#2798d6"/></linearGradient></defs>
+          <path d="M10 2.5H26L33.5 10V26L26 33.5H10L2.5 26V10Z" fill="rgba(3,18,36,.75)" stroke="#42d8ff" stroke-width="1.25"/>
+          <path d="M11.5 9.5H15.5V26.5H11.5Z M20.5 9.5H24.5V26.5H20.5Z" fill="url(#pauseChrome)"/>
+          <path d="M11.5 9.5H15.5 M20.5 9.5H24.5" stroke="#fff" stroke-opacity=".8" stroke-width=".7"/>
+        </svg>
+    </button>
+
+    <canvas id="gameCanvas"></canvas>
+    <section id="gameKeyboard" class="game-keyboard hidden" aria-label="Keyboard khusus DJ-Shooting">
+      <div class="game-keyboard-rows" role="group" aria-label="Huruf untuk mengetik kata musuh">
+        <div class="game-key-row"><button type="button" class="game-key" data-key="Q">Q</button><button type="button" class="game-key" data-key="W">W</button><button type="button" class="game-key" data-key="E">E</button><button type="button" class="game-key" data-key="R">R</button><button type="button" class="game-key" data-key="T">T</button><button type="button" class="game-key" data-key="Y">Y</button><button type="button" class="game-key" data-key="U">U</button><button type="button" class="game-key" data-key="I">I</button><button type="button" class="game-key" data-key="O">O</button><button type="button" class="game-key" data-key="P">P</button></div>
+        <div class="game-key-row game-key-row-middle"><button type="button" class="game-key" data-key="A">A</button><button type="button" class="game-key" data-key="S">S</button><button type="button" class="game-key" data-key="D">D</button><button type="button" class="game-key" data-key="F">F</button><button type="button" class="game-key" data-key="G">G</button><button type="button" class="game-key" data-key="H">H</button><button type="button" class="game-key" data-key="J">J</button><button type="button" class="game-key" data-key="K">K</button><button type="button" class="game-key" data-key="L">L</button></div>
+        <div class="game-key-row game-key-row-short">
+          <button type="button" class="game-special-key game-number-key" data-keyboard-mode="number" aria-label="Buka keyboard angka">123</button>
+          <button type="button" class="game-key" data-key="Z">Z</button><button type="button" class="game-key" data-key="X">X</button><button type="button" class="game-key" data-key="C">C</button><button type="button" class="game-key" data-key="V">V</button><button type="button" class="game-key" data-key="B">B</button><button type="button" class="game-key" data-key="N">N</button><button type="button" class="game-key" data-key="M">M</button>
+          <button type="button" class="game-special-key game-backspace-key" data-keyboard-action="clear" aria-label="Gunakan Clear">CLEAR</button>
+        </div>
+        <div class="game-key-row game-key-row-bottom game-key-row-space">
+          <button type="button" class="game-special-key game-space-key" data-keyboard-action="shield" aria-label="Gunakan Shield">SHIELD <b id="skillCountShieldSpace">0</b></button>
+        </div>
+      </div>
+    </section>
+    <button id="floatingBombBtn" class="floating-bomb-button hidden" type="button" aria-label="Gunakan Bomb" title="Ledakkan musuh yang terlihat" disabled>
+      <span>BOMB</span><b id="skillCountBombFloating">0</b>
+    </button>
+
+    <div id="mainMenu" class="ui-layer">
+        <div class="menu-box">
+            <h1 id="ui-title">DJ-SHOOTING</h1>
+            <p id="ui-subtitle" style="color: #38bdf8; font-size: 15px; margin-bottom: 2px; font-weight: bold; letter-spacing: 3px;">FAR AND BEYOND</p>
+            <p id="ui-credits" style="color: #64748b; font-size: 11px; margin-top: 0; margin-bottom: 25px; font-style: italic;">Made With Love</p>
+            
+            <button id="btn-play" onclick="openShipSelection()">PLAY GAME</button>
+            <button id="btn-settings" onclick="openSettings()" style="background: #475569;">SETTINGS</button>
+            <button id="btn-scoreboard" onclick="showScoreboard()" style="background: #10b981;">SCOREBOARD</button>
+            <button id="btn-hub-return" onclick="window.location.href='https://lipinazzz-sudo.github.io/Mahjong/'" class="hub-return-btn">DJ GAME HUB</button>
+            <p id="ui-mobile-hint" class="mobile-hint">Sentuh layar saat bermain untuk memunculkan keyboard virtual.</p>
+        </div>
+    </div>
+
+    <div id="shipSelectMenu" class="ui-layer hidden ship-select-overlay">
+        <section class="ship-select-shell" aria-labelledby="ship-select-title">
+            <div class="ship-select-header"><div>
+                <p class="ship-select-eyebrow">DJ-SHOOTING / FLEET HANGAR</p>
+                <h2 id="ship-select-title">PILIH PESAWAT</h2>
+                <p id="ship-select-subtitle" class="ship-select-subtitle">Pilih kapal tempur sebelum memulai misi.</p>
+            </div></div>
+            <div id="difficultyPicker" class="difficulty-picker" aria-labelledby="difficultyLabel">
+                <div class="difficulty-picker-heading">
+                    <span id="difficultyLabel">TINGKAT KESULITAN</span>
+                </div>
+                <div class="difficulty-options" role="group" aria-label="Pilih tingkat kesulitan">
+                    <button type="button" class="difficulty-option" data-difficulty="easy" onclick="setDifficulty('easy')" aria-pressed="false"><strong id="difficultyEasyName">MUDAH</strong></button>
+                    <button type="button" class="difficulty-option" data-difficulty="medium" onclick="setDifficulty('medium')" aria-pressed="false"><strong id="difficultyMediumName">SEDANG</strong></button>
+                    <button type="button" class="difficulty-option" data-difficulty="hard" onclick="setDifficulty('hard')" aria-pressed="false"><strong id="difficultyHardName">SULIT</strong></button>
+                </div>
+            </div>
+            <div id="shipGrid" class="ship-grid" role="group" aria-label="Pilih pesawat"></div>
+            <div class="ship-detail-panel">
+                <div class="ship-detail-art"><img id="shipPreviewImage" src="assets/ships/aurora.png" alt="Preview kapal terpilih"></div>
+                <div class="ship-detail-copy"><p id="ship-detail-kicker" class="ship-detail-kicker">KAPAL TERPILIH</p>
+                    <h3 id="shipDetailName">AURORA</h3>
+                    <p id="shipDetailDescription">Fighter serbaguna dengan pelindung putih, detail cyan, dan mesin bercahaya.</p>
+                    <span id="ship-cosmetic-note" class="ship-cosmetic-note">Pilihan visual saja — aturan dan kemampuan game tetap sama.</span>
+                </div><div class="ship-select-actions">
+                    <button id="btn-ship-back" type="button" onclick="closeShipSelection()">KEMBALI</button>
+                    <button id="btn-ship-start" type="button" onclick="confirmShipSelection()">MULAI GAME</button>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <div id="settingsMenu" class="ui-layer hidden">
+        <div class="menu-box">
+            <h2 id="ui-settings-title">SETTINGS</h2>
+            <div class="setting-row">
+                <label id="lbl-bgm">Volume Musik (BGM)</label>
+                <input type="range" id="bgmSlider" min="0" max="1" step="0.1" value="0.5" oninput="updateVolume()">
+            </div>
+            <div class="setting-row">
+                <label id="lbl-sfx">Volume Efek (SFX)</label>
+                <input type="range" id="sfxSlider" min="0" max="1" step="0.1" value="0.5" oninput="updateVolume()">
+            </div>
+            <div class="setting-row">
+                <label id="lbl-lang">Bahasa</label>
+                <select id="langSelect" onchange="saveOptions()">
+                    <option value="id">Indonesia</option>
+                    <option value="en">English</option>
+                </select>
+            </div>
+            <button id="btn-settings-back" onclick="closeSettings()" style="background: #475569; margin-top: 10px;">KEMBALI</button>
+        </div>
+    </div>
+
+    <div id="pauseMenu" class="ui-layer hidden">
+        <div class="menu-box">
+            <h2 id="ui-pause-title" style="color: #38bdf8; text-shadow: 0 0 10px rgba(56, 189, 248, 0.3);">GAME PAUSED</h2>
+            
+            <div class="setting-row" style="margin-top: 20px;">
+                <label id="lbl-pause-bgm">Volume Musik (BGM)</label>
+                <input type="range" id="pauseBgmSlider" min="0" max="1" step="0.1" oninput="updateVolume()">
+            </div>
+            <div class="setting-row">
+                <label id="lbl-pause-sfx">Volume Efek (SFX)</label>
+                <input type="range" id="pauseSfxSlider" min="0" max="1" step="0.1" oninput="updateVolume()">
+            </div>
+            <div class="setting-row">
+                <label id="lbl-pause-lang">Bahasa</label>
+                <select id="pauseLangSelect" onchange="syncOptions('pause')">
+                    <option value="id">Indonesia</option>
+                    <option value="en">English</option>
+                </select>
+            </div>
+
+            <button id="btn-resume" onclick="resumeGame()" style="background: #0ea5e9; margin-top: 15px;">RESUME</button>
+            <button id="btn-pause-menu" onclick="exitToMenu()" style="background: #ef4444;">MENU UTAMA</button>
+            <button id="btn-pause-hub" onclick="window.location.href='https://lipinazzz-sudo.github.io/Mahjong/'" style="background: #082f49; border: 1px solid #38bdf8; color: #bae6fd;">KEMBALI KE DJ GAME HUB</button>
+        </div>
+    </div>
+
+    <div id="scoreboardMenu" class="ui-layer hidden">
+        <div class="menu-box" style="width: 380px;">
+            <h2 id="ui-score-title">TOP 5 HIGH SCORES</h2>
+            <div id="scoreboardContent"></div>
+            <button id="btn-score-back" onclick="closeScoreboard()" style="background: #475569; margin-top: 10px;">KEMBALI</button>
+        </div>
+    </div>
+
+    <div id="gameOverMenu" class="ui-layer hidden">
+        <div class="menu-box">
+            <h1 id="ui-gameover-title" style="color: #ef4444; text-shadow: 0 0 10px rgba(239, 68, 68, 0.5);">GAME OVER</h1>
+            <h2 id="finalScoreText" style="margin-bottom: 5px;">Score: 0</h2>
+            <p id="finalWaveText" style="color: #94a3b8; font-size: 14px; margin-top: 0; margin-bottom: 20px;">Reached: Wave 1</p>
+            <section id="gameOverStats" class="game-over-stats" aria-label="Statistik permainan">
+                <div class="game-over-stat"><span id="statAccuracyLabel">AKURASI</span><strong id="statAccuracyValue">0%</strong></div>
+                <div class="game-over-stat"><span id="statDestroyedLabel">MUSUH DIHANCURKAN</span><strong id="statDestroyedValue">0</strong></div>
+                <div class="game-over-stat"><span id="statBestComboLabel">COMBO TERBAIK</span><strong id="statBestComboValue">0</strong></div>
+                <div class="game-over-stat"><span id="statDurationLabel">DURASI AKTIF</span><strong id="statDurationValue">0:00</strong></div>
+            </section>
+            
+            <button id="btn-retry" onclick="startGame()">TRY AGAIN</button>
+            <button id="btn-go-scoreboard" onclick="showScoreboard()" style="background: #10b981;">SCOREBOARD</button>
+            <button id="btn-go-menu" onclick="openMenuUtama()" style="background: #475569;">MENU UTAMA</button>
+            <button id="btn-gameover-hub" onclick="window.location.href='https://lipinazzz-sudo.github.io/Mahjong/'" style="background: #082f49; border: 1px solid #38bdf8; color: #bae6fd;">KEMBALI KE DJ GAME HUB</button>
+        </div>
+    </div>
+
+
+    <section id="inputDiagnosticsPanel" class="input-diagnostics-panel hidden" aria-label="Diagnostik input keyboard">
+      <div class="input-diagnostics-header">
+        <strong>INPUT DIAGNOSTICS · V 1.00.21</strong>
+        <div>
+          <button id="inputDiagnosticsReset" type="button">RESET</button>
+          <button id="inputDiagnosticsClose" type="button">SEMBUNYIKAN</button>
+          <button id="inputDiagnosticsStop" type="button">STOP TEST</button>
+        </div>
+      </div>
+      <pre id="inputDiagnosticsOutput">Mulai game, buka panel ini dengan mengetuk label versi, lalu ketik beberapa kata.</pre>
+      <p>RESET → SEMBUNYIKAN → ketik saat layar tidak tertutup panel → ketuk label versi untuk membaca hasil. STOP TEST mengakhiri pengukuran.</p>
+    </section>
+    <div id="buildVersion" aria-label="Versi aplikasi">V 1.00.21</div>
+    <script src="assets/js/game.js?v=1.00.21"></script>
+</body>
+</html>

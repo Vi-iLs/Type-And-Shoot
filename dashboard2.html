@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- Meta tag untuk PWA -->
+    <meta name="theme-color" content="#0b0f19">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Splitter Pro">
+    <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iIzBiMGYxOSIvPjx0ZXh0IHg9IjUwIiB5PSI2NCIgZm9udC1zaXplPSI0NCIgZmlsbD0iIzNiODJmNiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+U1A8L3RleHQ+PC9zdmc+">
+    
+    <title>Splitter Pro - Premium Edition</title>
+    <style>
+        :root {
+            --bg-main: #0b0f19;       
+            --bg-container: #151f32; 
+            --text-color: #f8fafc;     
+            --text-muted: #94a3b8;     
+            --border-color: #24324d;   
+            --input-bg: #1d293e;       
+            --button-color: #3b82f6;   
+            --button-hover: #2563eb;
+            --accent-green: #34d399;   
+            --danger-color: #ef4444;   
+            --warning-color: #fbbf24;
+            --wa-color: #25D366;       
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-color);
+            margin: 0;
+            padding: 15px;
+            min-height: 100vh;
+        }
+
+        .layout-wrapper {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 25px;
+            max-width: 1400px;
+            margin: 0 auto;
+            align-items: start;
+        }
+
+        .sidebar-left {
+            background-color: var(--bg-container);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-color);
+            position: sticky;
+            top: 15px;
+            max-height: calc(100vh - 30px);
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .main-content {
+            background-color: transparent;
+            min-height: 500px;
+        }
+
+        .app-title-row {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 0 25px;
+            padding: 0 0 15px;
+            border-bottom: 1px solid var(--border-color);
+            min-height: 27px;
+        }
+        .app-title-row h1 {
+            color: var(--text-color);
+            text-align: center;
+            border: 0;
+            padding: 0;
+            margin: 0;
+            width: 100%;
+            font-size: 22px;
+            font-weight: 600;
+        }
+        .app-title-row h1 span { color: var(--button-color); }
+
+        .force-reset-btn {
+            position: absolute;
+            right: 0;
+            top: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+            padding: 5px 7px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background: transparent;
+            color: var(--text-muted);
+            font-size: 10px;
+            font-weight: 500;
+            line-height: 1;
+            cursor: pointer;
+            opacity: 0.72;
+            transition: opacity 0.2s, border-color 0.2s, color 0.2s;
+        }
+        .force-reset-btn:hover,
+        .force-reset-btn:focus-visible {
+            opacity: 1;
+            color: var(--text-color);
+            border-color: var(--text-muted);
+            outline: none;
+        }
+        .force-reset-btn:disabled {
+            cursor: wait;
+            opacity: 0.7;
+        }
+
+        .form-group { margin-bottom: 15px; }
+        
+        label {
+            font-weight: 500;
+            display: block;
+            margin-top: 5px;
+            margin-bottom: 5px;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+        
+        textarea, input, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;        
+            box-sizing: border-box;
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 16px; 
+            background-color: var(--input-bg);
+            color: var(--text-color);
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        textarea { height: 160px; resize: vertical; line-height: 1.5; }
+
+        textarea:focus, input:focus, select:focus {
+            outline: none;
+            border-color: var(--button-color);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+
+        .grid-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .people-config-container {
+            background-color: var(--input-bg);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px dashed var(--border-color);
+            margin-bottom: 20px;
+        }
+        .config-header {
+            display: flex; justify-content: center; margin-bottom: 15px; padding-bottom: 8px; border-bottom: 1px solid var(--border-color);
+            font-weight: 600; color: var(--text-muted); font-size: 13px; text-transform: uppercase;
+        }
+        
+        .layout-bds { display: grid; grid-template-columns: 1fr; gap: 10px; }
+
+        .person-row {
+            display: flex; gap: 8px; align-items: center; padding: 10px; 
+            background: var(--bg-container); border-radius: 6px; border: 1px solid var(--border-color);
+        }
+        
+        .person-name-input {
+            width: 85px; 
+            padding: 8px 5px; 
+            font-weight: bold; 
+            color: var(--button-color); 
+            background-color: var(--bg-main); 
+            text-align: center;
+        }
+
+        button.btn-execute {
+            background-color: var(--button-color);
+            color: white;
+            border: none;
+            padding: 14px 20px;
+            font-size: 15px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        button.btn-execute:hover { background-color: var(--button-hover); transform: translateY(-1px); }
+        button.btn-execute:active { transform: translateY(1px); }
+
+        .btn-wa {
+            background-color: var(--wa-color);
+            color: white;
+            border: none;
+            padding: 16px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 20px;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3);
+        }
+        .btn-wa:hover { background-color: #128C7E; transform: translateY(-2px); box-shadow: 0 6px 15px rgba(37, 211, 102, 0.4); }
+
+        .layout-results { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 15px; }
+
+        .person-section {
+            background-color: var(--bg-container);
+            border-top: 3px solid var(--button-color);
+            padding: 18px;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-color);
+        }
+        .leftover-section { border-top: 3px solid var(--danger-color); }
+        
+        .header-result { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; }
+        .title-box { display: flex; flex-direction: column; }
+        .person-title { font-weight: 600; color: var(--text-color); font-size: 16px; margin-bottom: 5px; }
+        .total-box { font-size: 12px; background: var(--input-bg); padding: 5px 10px; border-radius: 4px; border: 1px solid var(--border-color); color: var(--text-muted); }
+        .total-box span { color: var(--accent-green); font-weight: bold; }
+        .total-box span.danger { color: var(--danger-color); }
+        
+        button.btn-paste {
+            background-color: transparent; border: 1px solid var(--button-color); color: var(--button-color);
+            padding: 4px 10px; font-size: 12px; border-radius: 6px; cursor: pointer; font-weight: 600;
+        }
+        button.btn-paste:hover { background-color: var(--button-color); color: #fff; }
+
+        .group-block {
+            background-color: var(--input-bg); padding: 10px; margin-bottom: 8px; 
+            border-radius: 6px; border-left: 2px solid var(--border-color); 
+        }
+        .group-text { 
+            font-family: 'JetBrains Mono', 'Fira Code', monospace; color: var(--text-color); line-height: 1.6; font-size: 14px;
+            word-break: break-all;
+        }
+        .multiplier-text { color: var(--accent-green); font-weight: bold; margin-left: 4px; display: inline-block;}
+        .multiplier-danger { color: var(--danger-color); font-weight: bold; margin-left: 4px; display: inline-block;}
+
+        .status-bar {
+            padding: 14px; text-align: center; font-weight: 600; font-size: 14px; border-radius: 8px;
+            margin-bottom: 15px; text-transform: uppercase; letter-spacing: 0.5px; width: 100%; box-sizing: border-box;
+        }
+        .status-success { background-color: rgba(52, 211, 153, 0.1); color: var(--accent-green); border: 1px solid var(--accent-green); }
+        .status-error { background-color: rgba(239, 68, 68, 0.1); color: var(--danger-color); border: 1px solid var(--danger-color); }
+        
+        .tips-box {
+            background-color: rgba(251, 191, 36, 0.1);
+            border: 1px solid var(--warning-color);
+            color: var(--warning-color);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        .tips-box h3 { margin: 0 0 10px 0; font-size: 15px; display: flex; align-items: center; gap: 5px; color: var(--warning-color); }
+        .tips-box ul { margin: 0; padding-left: 20px; font-weight: 500; }
+        .tips-box li { margin-bottom: 6px; }
+        .tips-box li strong { color: #fff; }
+
+        .floating-nav {
+            position: fixed; bottom: 20px; right: 20px; display: flex; flex-direction: column; gap: 12px; z-index: 9999;
+        }
+        .nav-btn {
+            background-color: #1e293b; color: var(--button-color); border: 2px solid var(--border-color);
+            border-radius: 50%; width: 45px; height: 45px; font-size: 20px;
+            display: flex; justify-content: center; align-items: center; cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5); transition: all 0.2s; opacity: 0.8;
+        }
+        .nav-btn:hover, .nav-btn:active {
+            opacity: 1; background-color: var(--button-color); color: white; transform: scale(1.05);
+        }
+
+        @media (max-width: 850px) { 
+            .layout-wrapper { grid-template-columns: 1fr; }
+            .sidebar-left { position: relative; top: 0; max-height: none; overflow-y: visible; margin-bottom: 20px; }
+        }
+        @media (min-width: 851px) {
+            .floating-nav { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="layout-wrapper">
+    <div class="sidebar-left">
+        <div class="app-title-row">
+            <h1>Splitter <span>Pro</span></h1>
+            <button type="button" id="forceResetBtn" class="force-reset-btn"
+                onclick="forceResetApp()" title="Bersihkan cache aplikasi dan muat kode terbaru"
+                aria-label="Force Reset">↻ Force Reset</button>
+        </div>
+        
+        <div class="form-group">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                <label for="rawInput" style="margin: 0;">DATA ANGKA</label>
+                <button onclick="pasteText()" class="btn-paste">📋 PASTE</button>
+            </div>
+            <textarea id="rawInput" placeholder="Tempel angka di sini..."></textarea>
+        </div>
+
+        <div class="grid-inputs">
+            <div class="form-group">
+                <label for="targetMultiplier">Total X</label>
+                <input type="number" id="targetMultiplier" placeholder="Misal: 100" min="1">
+            </div>
+            <div class="form-group">
+                <label for="minXPerSplit">Min X</label>
+                <input type="number" id="minXPerSplit" placeholder="Misal: 10" min="1" value="10">
+            </div>
+            <div class="form-group">
+                <label for="mathRule">Aturan</label>
+                <select id="mathRule">
+                    <option value="1">Acak Bebas</option>
+                    <option value="5">Berakhiran 5/0</option>
+                    <option value="10" selected>Hanya Belakang 0</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="personCount">Jumlah BD</label>
+                <select id="personCount" onchange="generatePeopleConfig()">
+                    <option value="2">2 BD</option>
+                    <option value="3">3 BD</option>
+                    <option value="4">4 BD</option>
+                    <option value="5">5 BD</option>
+                    <option value="6" selected>6 BD</option>
+                    <option value="7">7 BD</option>
+                    <option value="8">8 BD</option>
+                    <option value="9">9 BD</option>
+                    <option value="10">10 BD</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="people-config-container">
+            <div class="config-header">KAPASITAS & NAMA BD</div>
+            <div id="peopleConfigList" class="layout-bds"></div>
+        </div>
+
+        <button class="btn-execute" onclick="processAndSplit()">Proses & Distribusi</button>
+    </div>
+
+    <div class="main-content">
+        <div id="statusContainer"></div>
+        <button id="btnSendWA" class="btn-wa" style="display: none;" onclick="kirimSemuaKeWA()">📱 KIRIM SEMUA VIA WHATSAPP</button>
+        <div id="results" class="layout-results"></div>
+    </div>
+</div>
+
+<div class="floating-nav">
+    <button class="nav-btn" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" title="Ke Atas">▲</button>
+    <button class="nav-btn" onclick="window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'})" title="Ke Bawah">▼</button>
+</div>
+
+<script>
+    let globalWaText = "";
+
+    // Hapus parameter cache-buster setelah halaman terbaru berhasil dimuat.
+    (function cleanForceResetQuery() {
+        const currentUrl = new URL(window.location.href);
+        if (currentUrl.searchParams.has('_forceReset')) {
+            currentUrl.searchParams.delete('_forceReset');
+            const cleanUrl = currentUrl.pathname + currentUrl.search + currentUrl.hash;
+            window.history.replaceState(null, document.title, cleanUrl);
+        }
+    })();
+
+    async function forceResetApp() {
+        const confirmed = window.confirm(
+            'Force Reset akan membersihkan cache Splitter Pro dan memuat ulang kode terbaru. Data angka yang sedang diisi akan hilang. Lanjutkan?'
+        );
+        if (!confirmed) return;
+
+        const button = document.getElementById('forceResetBtn');
+        if (button) {
+            button.disabled = true;
+            button.textContent = '↻ Memuat...';
+        }
+
+        try {
+            if ('caches' in window) {
+                const cacheNames = await caches.keys();
+                const appCaches = cacheNames.filter(name =>
+                    name === 'splitter-pro-v2' || name.startsWith('splitter-pro-')
+                );
+                await Promise.all(appCaches.map(name => caches.delete(name)));
+            }
+        } catch (error) {
+            // Tetap lanjutkan reload dengan URL unik jika cache tidak dapat diakses.
+            console.warn('Cache aplikasi tidak dapat dibersihkan sepenuhnya:', error);
+        }
+
+        const refreshUrl = new URL(window.location.href);
+        refreshUrl.searchParams.set('_forceReset', String(Date.now()));
+        window.location.replace(refreshUrl.toString());
+    }
+
+    async function pasteText() {
+        try {
+            const text = await navigator.clipboard.readText();
+            document.getElementById('rawInput').value = text;
+        } catch (err) {
+            alert('Akses Paste diblokir browser. Silakan klik kotak teks lalu tekan Ctrl+V (PC) atau Tahan & Tempel (HP).');
+        }
+    }
+
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
+
+    function generatePeopleConfig() {
+        var count = parseInt(document.getElementById('personCount').value);
+        var container = document.getElementById('peopleConfigList');
+        container.innerHTML = '';
+        for (var i = 1; i <= count; i++) {
+            var row = document.createElement('div');
+            row.className = 'person-row';
+            row.innerHTML = 
+                '<input type="text" id="bdName_' + i + '" class="person-name-input" value="BD ' + i + '" title="Edit Nama BD">' +
+                '<input type="number" id="maxBlocks_' + i + '" value="20" placeholder="Max Line" min="1">' +
+                '<input type="number" id="maxMultiplier_' + i + '" value="50" placeholder="Max X" min="1">'; 
+            container.appendChild(row);
+        }
+    }
+
+    function kirimSemuaKeWA() {
+        if(!globalWaText) return;
+        let waUrl = `https://wa.me/?text=${encodeURIComponent(globalWaText)}`;
+        window.open(waUrl, '_blank');
+    }
+
+    function getCombinations(chars, k) {
+        let result = [];
+        function backtrack(start, current) {
+            if (current.length === k) {
+                result.push([...current]); return;
+            }
+            for (let i = start; i < chars.length; i++) {
+                current.push(chars[i]);
+                backtrack(i + 1, current);
+                current.pop();
+            }
+        }
+        backtrack(0, []);
+        return result;
+    }
+
+    function runSimulation(chunks, bdsTemplate, targetX, targetMinX, mathRule) {
+        let bds = bdsTemplate.map(bd => ({
+            id: bd.id, name: bd.name, maxP: bd.maxP, maxX: bd.maxX, currentPairs: 0, currentCost: 0, blocks: [],
+            xCounts: {}, 
+            bbCount: 0 
+        }));
+        
+        let leftovers = [];
+        let missingTotal = 0;
+        
+        let step = 1;
+        if (mathRule === 10) step = 10;
+        else if (mathRule === 5) step = 5;
+
+        for (let c = 0; c < chunks.length; c++) {
+            let chunk = chunks[c];
+            let reqX = targetX;
+            let eligibleBDs = bds.filter(bd => (bd.currentPairs + chunk.pairsArray.length) <= bd.maxP);
+
+            if (eligibleBDs.length > 0) {
+                let shuffledBDs = [...eligibleBDs];
+
+                // Acak urutan awal BD untuk memutus bias urutan ID/daftar.
+                // Kriteria keseimbangan tetap menjadi prioritas; pengacakan memecah nilai yang sama.
+                for (let i = shuffledBDs.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [shuffledBDs[i], shuffledBDs[j]] = [shuffledBDs[j], shuffledBDs[i]];
+                }
+                const randomRank = new Map(shuffledBDs.map((bd, index) => [bd.id, index]));
+
+                if (chunk.type === 'bb') {
+                    shuffledBDs.sort((a,b) => {
+                        if (a.bbCount !== b.bbCount) return a.bbCount - b.bbCount;
+                        if (a.currentCost !== b.currentCost) return a.currentCost - b.currentCost;
+                        if (a.currentPairs !== b.currentPairs) return a.currentPairs - b.currentPairs;
+                        return randomRank.get(a.id) - randomRank.get(b.id);
+                    });
+                } else {
+                    shuffledBDs.sort((a,b) => {
+                        if (a.currentCost !== b.currentCost) return a.currentCost - b.currentCost;
+                        if (a.currentPairs !== b.currentPairs) return a.currentPairs - b.currentPairs;
+                        return randomRank.get(a.id) - randomRank.get(b.id);
+                    });
+                }
+
+                let allocation = new Map();
+                
+                let remaining = reqX;
+                let minTake = Math.max(step, targetMinX);
+                minTake = Math.ceil(minTake / step) * step;
+
+                for (let i = 0; i < shuffledBDs.length; i++) {
+                    let bd = shuffledBDs[i];
+                    if (remaining <= 0) break;
+
+                    let spaceLeft = bd.maxX; 
+                    let maxTake = Math.min(remaining, spaceLeft);
+                    maxTake = Math.floor(maxTake / step) * step;
+
+                    if (maxTake < minTake) continue; 
+
+                    let possibleTakes = [];
+                    for (let t = minTake; t <= maxTake; t += step) {
+                        let rem = remaining - t;
+                        if (rem === 0 || rem >= minTake) {
+                            let curCount = bd.xCounts[t] || 0;
+                            // ATURAN 3 (Batas maksimal 6) TETAP DIPERTAHANKAN
+                            if (bd.maxX !== 999 && curCount > 0 && curCount + chunk.pairsArray.length > 6) continue;
+                            possibleTakes.push(t);
+                        }
+                    }
+
+                    if (possibleTakes.length > 0) {
+                        let takeX;
+                        if (Math.random() > 0.3) {
+                            takeX = possibleTakes[possibleTakes.length - 1]; 
+                        } else {
+                            let halfIndex = Math.floor(possibleTakes.length / 2);
+                            let upperHalf = possibleTakes.slice(halfIndex); 
+                            takeX = upperHalf[Math.floor(Math.random() * upperHalf.length)];
+                        }
+                        allocation.set(bd.id, takeX);
+                        remaining -= takeX;
+                    } else if (remaining === maxTake) {
+                        let validMaxTake = true;
+                        let curMax = bd.xCounts[maxTake] || 0;
+                        if (bd.maxX !== 999 && curMax > 0 && curMax + chunk.pairsArray.length > 6) validMaxTake = false;
+                        
+                        if (validMaxTake) {
+                            allocation.set(bd.id, maxTake);
+                            remaining -= maxTake;
+                        }
+                    }
+                }
+
+                if (remaining >= step) {
+                    for (let i = 0; i < shuffledBDs.length; i++) {
+                        let bd = shuffledBDs[i];
+                        if (remaining < step) break;
+                        let currentAlloc = allocation.get(bd.id) || 0;
+                        let spaceLeft = bd.maxX - currentAlloc;
+                        let maxTake = Math.min(remaining, spaceLeft);
+                        maxTake = Math.floor(maxTake / step) * step;
+
+                        if (maxTake >= step) {
+                            let proposedX = currentAlloc + maxTake;
+                            let foundValid = false;
+                            for (let subT = maxTake; subT >= step; subT -= step) {
+                                let testProposed = currentAlloc + subT;
+                                let curTest = bd.xCounts[testProposed] || 0;
+                                if (bd.maxX === 999 || !(curTest > 0 && curTest + chunk.pairsArray.length > 6)) {
+                                    maxTake = subT;
+                                    proposedX = testProposed;
+                                    foundValid = true;
+                                    break;
+                                }
+                            }
+                            if (!foundValid) continue;
+                            
+                            allocation.set(bd.id, proposedX);
+                            remaining -= maxTake;
+                        }
+                    }
+                }
+
+                // PERBAIKAN SARAN 4: Sapu bersih/Fallback. Paksa masukan berapapun sisa angka yang ada.
+                if (remaining > 0) {
+                    let sweepBDs = [...shuffledBDs].sort((a,b) => {
+                        let aAlloc = allocation.get(a.id) || 0;
+                        let bAlloc = allocation.get(b.id) || 0;
+                        return (b.maxX - bAlloc) - (a.maxX - aAlloc);
+                    });
+
+                    for (let i = 0; i < sweepBDs.length; i++) {
+                        let bd = sweepBDs[i];
+                        if (remaining <= 0) break;
+
+                        let currentAlloc = allocation.get(bd.id) || 0;
+                        let spaceLeft = bd.maxX - currentAlloc;
+
+                        if (spaceLeft > 0) {
+                            let take = Math.min(remaining, spaceLeft);
+                            let proposedX = currentAlloc + take;
+                            
+                            // Aturan limit 6 tetap dipertahankan
+                            let curTest = bd.xCounts[proposedX] || 0;
+                            if (bd.maxX === 999 || !(curTest > 0 && curTest + chunk.pairsArray.length > 6)) {
+                                allocation.set(bd.id, proposedX);
+                                remaining -= take;
+                            }
+                        }
+                    }
+                }
+
+                // Proses memasukkan hasil alokasi ke block
+                for (let i = 0; i < eligibleBDs.length; i++) {
+                    let bd = eligibleBDs[i];
+                    let allocX = allocation.get(bd.id) || 0;
+                    if (allocX > 0) {
+                        bd.blocks.push({ chunkData: chunk, xVal: allocX });
+                        bd.currentPairs += chunk.pairsArray.length;
+                        bd.currentCost += (chunk.pairsArray.length * allocX); 
+                        
+                        bd.xCounts[allocX] = (bd.xCounts[allocX] || 0) + chunk.pairsArray.length;
+                        
+                        if (chunk.type === 'bb') {
+                            bd.bbCount += 1;
+                        }
+                    }
+                }
+                
+                if (remaining > 0) {
+                    leftovers.push({ chunkData: chunk, missing: remaining });
+                    missingTotal += remaining;
+                }
+
+            } else {
+                leftovers.push({ chunkData: chunk, missing: reqX });
+                missingTotal += reqX;
+            }
+        }
+        return { bds, leftovers, missingTotal };
+    }
+
+    function processAndSplit() {
+        var rawText = document.getElementById('rawInput').value;
+        if (!rawText || rawText.trim() === '') { alert('Kolom Daftar Angka masih kosong!'); return; }
+
+        var targetX = parseInt(document.getElementById('targetMultiplier').value);
+        if (isNaN(targetX) || targetX <= 0) { alert('Isi Total X terlebih dahulu!'); return; }
+        
+        var minXInput = parseInt(document.getElementById('minXPerSplit').value);
+        var targetMinX = isNaN(minXInput) || minXInput < 1 ? 1 : minXInput;
+
+        var personCount = parseInt(document.getElementById('personCount').value);
+        var mathRule = parseInt(document.getElementById('mathRule').value);
+        var resultsDiv = document.getElementById('results');
+        var statusDiv = document.getElementById('statusContainer');
+        var btnWa = document.getElementById('btnSendWA');
+
+        var bdsTemplate = [];
+        for (var i = 1; i <= personCount; i++) {
+            var maxP = parseInt(document.getElementById('maxBlocks_' + i).value);
+            var maxX = parseInt(document.getElementById('maxMultiplier_' + i).value);
+            var bdNameInput = document.getElementById('bdName_' + i).value || ('BD ' + i);
+            
+            var cleanMaxP = isNaN(maxP) || maxP < 1 ? 999999 : maxP;
+            var cleanMaxX = isNaN(maxX) || maxX < 1 ? 999999 : maxX;
+            
+            bdsTemplate.push({
+                id: i, name: bdNameInput, maxP: cleanMaxP, maxX: cleanMaxX
+            });
+        }
+
+        var allPairsRaw = rawText.replace(/[\n\r\s,]+/g, '.').split('.').map(p => p.trim()).filter(p => p.length === 2 && !isNaN(p));
+        allPairsRaw = shuffleArray(allPairsRaw); 
+
+        var pairSet = new Set(allPairsRaw);
+        var chunks = []; 
+
+        let digits = ['0','1','2','3','4','5','6','7','8','9'];
+        
+        function extractBBLimited(k, limit) {
+            let combos = getCombinations(digits, k);
+            combos = shuffleArray(combos); 
+            let extractedCount = 0;
+            
+            for(let c of combos) {
+                if (limit && extractedCount >= limit) break;
+                let perms = [];
+                for(let i=0; i<k; i++) {
+                    for(let j=0; j<k; j++) {
+                        if(i!==j) perms.push(c[i]+c[j]);
+                    }
+                }
+                if(perms.length > 0 && perms.every(p => pairSet.has(p))) {
+                    chunks.push({ type: 'bb', digits: c.join(''), pairsArray: perms });
+                    perms.forEach(p => pairSet.delete(p)); 
+                    extractedCount++;
+                }
+            }
+        }
+        
+        extractBBLimited(4, 2); 
+        extractBBLimited(3, 999); 
+
+        var remainingPairs = Array.from(pairSet);
+        var visited = new Set();
+        var normalChunks = [];
+        
+        for (var p of remainingPairs) {
+            if (visited.has(p)) continue;
+            var reverse = p[1] + p[0];
+            if (p !== reverse && pairSet.has(reverse)) {
+                normalChunks.push({ type: 'normal', pairsArray: [p, reverse] });
+                visited.add(p); visited.add(reverse);
+            } else {
+                normalChunks.push({ type: 'normal', pairsArray: [p] }); 
+                visited.add(p);
+            }
+        }
+
+        chunks = chunks.concat(normalChunks);
+        chunks.sort((a, b) => b.pairsArray.length - a.pairsArray.length);
+
+        let bestResult = null;
+        let lowestScore = Infinity;
+
+        for (let sim = 0; sim < 5000; sim++) {
+            let currentRun = runSimulation(chunks, bdsTemplate, targetX, targetMinX, mathRule);
+            
+            let activeBDs = currentRun.bds.filter(b => b.currentCost > 0);
+            let variance = 0;
+            let costVariance = 0; // Tambahan variabel untuk Saran 1
+            let badSplitsPenalty = 0;
+            let noBDPenalty = 0;
+            
+            if (activeBDs.length > 0) {
+                let maxPairs = Math.max(...activeBDs.map(b => b.currentPairs));
+                let minPairs = Math.min(...activeBDs.map(b => b.currentPairs));
+                
+                // PERBAIKAN SARAN 1: Hitung juga selisih nominal/omset antar BD
+                let maxCost = Math.max(...activeBDs.map(b => b.currentCost));
+                let minCost = Math.min(...activeBDs.map(b => b.currentCost));
+                
+                variance = (maxPairs - minPairs) * 100; // Naikkan bobot keseimbangan line
+                costVariance = (maxCost - minCost);     // Hitung gap nominal
+            }
+
+            activeBDs.forEach(bd => {
+                if (bd.bbCount === 0 && bd.maxX !== 999) {
+                    noBDPenalty += 500000;
+                }
+                bd.blocks.forEach(bl => {
+                    if (bl.xVal < targetMinX && targetX >= targetMinX) {
+                        badSplitsPenalty += (targetMinX - bl.xVal) * 10000; 
+                    }
+                });
+            });
+
+            // PERBAIKAN SARAN 1: Masukkan costVariance ke dalam penilaian akhir simulasi terbaik
+            let score = (currentRun.missingTotal * 1000000) + noBDPenalty + badSplitsPenalty + variance + costVariance;
+
+            if (score < lowestScore) {
+                lowestScore = score;
+                bestResult = currentRun;
+            }
+            if (score === 0 || (currentRun.missingTotal === 0 && noBDPenalty === 0 && badSplitsPenalty === 0 && variance === 0 && costVariance <= 50)) break; 
+        }
+
+        let bds = bestResult.bds;
+        let leftovers = bestResult.leftovers;
+        let hasError = bestResult.missingTotal > 0;
+
+        resultsDiv.innerHTML = '';
+        statusDiv.innerHTML = '';
+        globalWaText = "";
+
+        if (hasError) {
+            let activeBDList = [];
+            for(let i=1; i<=personCount; i++) activeBDList.push(i);
+            let strActiveBD = activeBDList.join('/');
+            
+            let nextBDs = [];
+            for(let i = personCount + 1; i <= 10; i++) nextBDs.push(i);
+            let suggestTambahBD = nextBDs.length > 0 
+                ? `Tambah BD jadi <strong>${nextBDs.join('/')}</strong>`
+                : `Tambah jumlah BD (saat ini sudah maksimal 10 BD)`;
+
+            let tipsHTML = `
+            <div class="tips-box">
+                <h3>💡 Solusi Mengatasi Sisa Angka:</h3>
+                <ul>
+                    <li>Naikkan <strong>Max X</strong> (atau Max Line) pada BD ${strActiveBD}</li>
+                    <li>Kecilkan <strong>Min X</strong></li>
+                    <li>${suggestTambahBD}</li>
+                </ul>
+            </div>`;
+            
+            statusDiv.innerHTML = `<div class="status-bar status-error">⚠️ Terdapat sisa angka (Batas kapasitas penuh)</div>` + tipsHTML;
+        } else {
+            statusDiv.innerHTML = `<div class="status-bar status-success">✅ Distribusi Selesai dan Sempurna</div>`;
+        }
+        
+        btnWa.style.display = "flex";
+
+        bds.forEach(bd => {
+            if (bd.blocks.length > 0) {
+                var normalGroups = []; 
+                var bbLines = [];
+                
+                bd.blocks.forEach(bl => {
+                    if (bl.chunkData.type === 'bb') {
+                        bbLines.push({ type: 'bb', text: bl.chunkData.digits + ' bb x' + bl.xVal });
+                    } else {
+                        let added = false;
+                        for (let i = 0; i < normalGroups.length; i++) {
+                            if (normalGroups[i].xVal === bl.xVal && (normalGroups[i].pairs.length + bl.chunkData.pairsArray.length) <= 6) {
+                                normalGroups[i].pairs.push(...bl.chunkData.pairsArray);
+                                added = true;
+                                break;
+                            }
+                        }
+                        if (!added) {
+                            normalGroups.push({ xVal: bl.xVal, pairs: [...bl.chunkData.pairsArray] });
+                        }
+                    }
+                });
+
+                normalGroups = shuffleArray(normalGroups);
+
+                var totalCostDiskon = bd.currentCost * 0.71; 
+                var bdText = `*${bd.name}* (${bd.currentPairs} Line)\n`;
+                
+                bbLines.forEach(item => {
+                    bdText += `${item.text}\n`;
+                });
+                
+                normalGroups.forEach(g => {
+                    bdText += `${g.pairs.join('.')} x${g.xVal}\n`;
+                });
+                
+                bdText += `*Total : ${totalCostDiskon.toFixed(2)}*\n\n`;
+                globalWaText += bdText;
+
+                var html = `
+                    <div class="person-section">
+                        <div class="header-result">
+                            <div class="title-box" style="width:100%;">
+                                <div class="person-title">${bd.name} <span style="font-size:13px; font-weight:normal; color:var(--text-muted);">(${bd.currentPairs} Line)</span></div>
+                                <div class="total-box">Total: ${bd.currentCost} | -29%: <span>${totalCostDiskon.toFixed(2)}</span></div>
+                            </div>
+                        </div>`;
+                
+                bbLines.forEach(item => {
+                    var parts = item.text.split('x'); 
+                    html += `
+                        <div class="group-block">
+                            <div class="group-text">${parts[0].trim()} <span class="multiplier-text">x${parts[1]}</span></div>
+                        </div>`;
+                });
+
+                normalGroups.forEach(g => {
+                    let lineString = g.pairs.join('.');
+                    html += `
+                        <div class="group-block">
+                            <div class="group-text">${lineString} <span class="multiplier-text">x${g.xVal}</span></div>
+                        </div>`;
+                });
+
+                html += `</div>`;
+                resultsDiv.innerHTML += html;
+            }
+        });
+
+        if (leftovers.length > 0) {
+            var leftoverNormalGroups = [];
+            var leftoverBbLines = [];
+            var totalLeftover = 0;
+            var leftoverPairsCount = 0;
+            
+            leftovers.forEach(l => {
+                totalLeftover += (l.chunkData.pairsArray.length * l.missing);
+                leftoverPairsCount += l.chunkData.pairsArray.length;
+
+                if (l.chunkData.type === 'bb') {
+                    leftoverBbLines.push({ type: 'bb', text: l.chunkData.digits + ' bb x' + l.missing });
+                } else {
+                    let added = false;
+                    for (let i = 0; i < leftoverNormalGroups.length; i++) {
+                        if (leftoverNormalGroups[i].xVal === l.missing && (leftoverNormalGroups[i].pairs.length + l.chunkData.pairsArray.length) <= 6) {
+                            leftoverNormalGroups[i].pairs.push(...l.chunkData.pairsArray);
+                            added = true;
+                            break;
+                        }
+                    }
+                    if (!added) {
+                        leftoverNormalGroups.push({ xVal: l.missing, pairs: [...l.chunkData.pairsArray] });
+                    }
+                }
+            });
+
+            leftoverNormalGroups = shuffleArray(leftoverNormalGroups);
+            var totalLeftoverDiskon = totalLeftover * 0.71;
+
+            var sisaWaText = `*SISA ANGKA* (${leftoverPairsCount} Line)\n`;
+
+            var leftoverHtml = `
+                <div class="person-section leftover-section" style="grid-column: 1 / -1;">
+                    <div class="header-result">
+                        <div class="title-box">
+                            <div class="person-title" style="color:var(--danger-color);">⚠️ SISA ANGKA <span style="font-size:13px; font-weight:normal; color:var(--text-muted);">(${leftoverPairsCount} Line)</span></div>
+                            <div class="total-box" style="border-color:var(--border-color);">Total: ${totalLeftover} | -29%: <span class="danger">${totalLeftoverDiskon.toFixed(2)}</span></div>
+                        </div>
+                    </div>`;
+
+            leftoverBbLines.forEach(item => {
+                sisaWaText += `${item.text}\n`;
+                var parts = item.text.split('x'); 
+                leftoverHtml += `
+                    <div class="group-block" style="border-left-color: var(--danger-color);">
+                        <div class="group-text">${parts[0].trim()} <span class="multiplier-danger">x${parts[1]}</span></div>
+                    </div>`;
+            });
+
+            leftoverNormalGroups.forEach(g => {
+                let lineStr = g.pairs.join('.');
+                sisaWaText += `${lineStr} x${g.xVal}\n`;
+                leftoverHtml += `
+                    <div class="group-block" style="border-left-color: var(--danger-color);">
+                        <div class="group-text">${lineStr} <span class="multiplier-danger">x${g.xVal}</span></div>
+                    </div>`;
+            });
+
+            sisaWaText += `*Total : ${totalLeftoverDiskon.toFixed(2)}*\n\n`;
+            globalWaText += sisaWaText;
+
+            leftoverHtml += `</div>`;
+            resultsDiv.innerHTML += leftoverHtml;
+        }
+    }
+
+    window.onload = function() {
+        document.getElementById('rawInput').value = '';
+        generatePeopleConfig();
+    };
+
+ if ('serviceWorker' in navigator) {
+        // Mendapatkan URL file saat ini secara dinamis untuk di-cache
+        const pageUrl = window.location.href.split('?')[0]; 
+        
+        const swCode = `
+            const CACHE_NAME = 'splitter-pro-v2';
+            const APP_URL = '${pageUrl}';
+            
+            // FASE INSTALL: Simpan file HTML ke dalam cache HP/PC
+            self.addEventListener('install', (e) => { 
+                self.skipWaiting();
+                e.waitUntil(
+                    caches.open(CACHE_NAME).then((cache) => {
+                        return cache.add(APP_URL); 
+                    }).catch(err => console.log('Gagal cache:', err))
+                );
+            });
+
+            // FASE ACTIVATE: Bersihkan sisa cache versi lama jika ada pembaruan
+            self.addEventListener('activate', (e) => { 
+                self.clients.claim(); 
+                e.waitUntil(
+                    caches.keys().then((cacheNames) => {
+                        return Promise.all(
+                            cacheNames.map((cache) => {
+                                if (cache !== CACHE_NAME) {
+                                    return caches.delete(cache);
+                                }
+                            })
+                        );
+                    })
+                );
+            });
+
+            // FASE FETCH (STRATEGI NETWORK-FIRST): 
+            self.addEventListener('fetch', (e) => {
+                e.respondWith(
+                    fetch(e.request)
+                    .then((response) => {
+                        // 1. Jika HP sedang Online: Ambil dari internet & perbarui Cache agar selalu up-to-date
+                        if (response && response.status === 200 && response.type === 'basic') {
+                            const responseToCache = response.clone();
+                            caches.open(CACHE_NAME).then((cache) => {
+                                cache.put(e.request, responseToCache);
+                            });
+                        }
+                        return response;
+                    })
+                    .catch(() => {
+                        // 2. Jika HP sedang Offline: Panggil file aplikasi dari dalam Cache!
+                        return caches.match(e.request).then((cachedResponse) => {
+                            if (cachedResponse) return cachedResponse;
+                            
+                            // Fallback jika user melakukan Refresh (Reload) saat sedang offline
+                            if (e.request.mode === 'navigate') {
+                                return caches.match(APP_URL);
+                            }
+                        });
+                    })
+                );
+            });
+        `;
+        const swBlob = new Blob([swCode], {type: 'application/javascript'});
+        navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(console.error);
+    }
+
+    const manifest = {
+        "name": "Splitter Pro",
+        "short_name": "Splitter",
+        "start_url": window.location.href,
+        "display": "standalone",
+        "background_color": "#0b0f19",
+        "theme_color": "#0b0f19",
+        "icons": [{
+            "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iIzBiMGYxOSIvPjx0ZXh0IHg9IjUwIiB5PSI2NCIgZm9udC1zaXplPSI0NCIgZmlsbD0iIzNiODJmNiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+U1A8L3RleHQ+PC9zdmc+",
+            "sizes": "512x512",
+            "type": "image/svg+xml",
+            "purpose": "any maskable"
+        }]
+    };
+    const manifestBlob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
+    const link = document.createElement('link');
+    link.rel = 'manifest';
+    link.href = URL.createObjectURL(manifestBlob);
+    document.head.appendChild(link);
+</script>
+
+</body>
+</html>

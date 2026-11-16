@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Kalkulator Invest</title>
+    <style>
+        :root {
+            --bg-main: #0b0f19;       /* Dark slate biru premium */
+            --bg-container: #151f32;  /* Kontainer sedikit lebih terang */
+            --text-color: #f8fafc;     /* Putih pudar agar nyaman di mata */
+            --border-color: #24324d;   /* Border tipis kebiruan */
+            --input-bg: #1d293e;       /* Background input yang kontras */
+            --button-color: #3b82f6;   /* Biru modern */
+            --button-hover: #2563eb;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-color);
+            max-width: 950px;
+            margin: 0 auto;
+            padding: 15px;
+        }
+
+        .container {
+            background-color: var(--bg-container);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-color);
+            margin-bottom: 30px; 
+        }
+
+        .dashboard-title-row {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 0 25px;
+            padding: 0 0 15px;
+            border-bottom: 1px solid var(--border-color);
+            min-height: 27px;
+        }
+
+        .dashboard-title-row h1 {
+            color: var(--text-color);
+            text-align: center;
+            border: 0;
+            padding: 0;
+            margin: 0;
+            width: 100%;
+            font-size: 22px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .force-reset-btn {
+            position: absolute;
+            right: 0;
+            top: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+            padding: 5px 7px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background: transparent;
+            color: #94a3b8;
+            font-size: 10px;
+            font-weight: 500;
+            line-height: 1;
+            cursor: pointer;
+            opacity: 0.72;
+            transition: opacity 0.2s, border-color 0.2s, color 0.2s;
+        }
+
+        .force-reset-btn:hover,
+        .force-reset-btn:focus-visible {
+            opacity: 1;
+            color: var(--text-color);
+            border-color: #64748b;
+            outline: none;
+        }
+
+        .force-reset-btn:disabled {
+            cursor: wait;
+            opacity: 0.7;
+        }
+
+        .main-layout {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        label {
+            font-weight: 500;
+            display: block;
+            margin-top: 10px;
+            margin-bottom: 5px;
+            color: #94a3b8;
+            font-size: 14px;
+        }
+
+        textarea, input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;       
+            box-sizing: border-box;
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 16px; /* Update anti-zoom di iOS */
+            background-color: var(--input-bg);
+            color: var(--text-color);
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        textarea:focus, input[type="text"]:focus {
+            outline: none;
+            border-color: var(--button-color);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+
+        #inputData {
+            background-color: transparent;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            resize: vertical;
+            height: 180px;
+            padding: 10px;
+            font-size: 16px; 
+            letter-spacing: 0.5px;
+            line-height: 1.5;
+            overflow-y: auto;
+        }
+
+        .grid-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr 2fr;
+            gap: 15px;
+        }
+
+        button.btn-execute {
+            background-color: var(--button-color);
+            color: white;
+            border: none;
+            padding: 14px 20px;
+            font-size: 15px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        button.btn-execute:hover {
+            background-color: var(--button-hover);
+            transform: translateY(-1px);
+        }
+
+        button.btn-execute:active {
+            transform: translateY(1px);
+        }
+
+        .bottom-layout {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .output-container {
+            position: relative;
+            width: 100%;
+        }
+
+        #outputData {
+            background-color: transparent;
+            border: 1px solid var(--border-color);
+            color: #34d399;
+            font-weight: bold;
+            padding-right: 80px;
+            resize: vertical;
+            height: 200px;
+            font-size: 16px;
+            line-height: 1.6;
+            overflow-y: auto;
+        }
+
+        button.btn-copy {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #1e293b;
+            color: white;
+            border: 1px solid var(--border-color);
+            padding: 6px 12px;
+            font-size: 12px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        button.btn-copy:hover {
+            background-color: #334155;
+        }
+
+        .match-box {
+            background-color: #0f172a;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            box-sizing: border-box;
+            min-height: 320px;
+        }
+
+        .match-layout {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .side-by-side-results {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        /* GAYA UNTUK TOMBOL NAVIGASI MELAYANG (FLOATING BUTTONS) */
+        .floating-nav {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 9999;
+        }
+
+        .nav-btn {
+            background-color: #1e293b;
+            color: #3b82f6;
+            border: 2px solid #24324d;
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            font-size: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            transition: all 0.2s;
+            opacity: 0.8;
+        }
+
+        .nav-btn:hover, .nav-btn:active {
+            opacity: 1;
+            background-color: #3b82f6;
+            color: white;
+            transform: scale(1.05);
+        }
+
+        @media (min-width: 768px) {
+            .main-layout {
+                display: grid;
+                grid-template-columns: 1fr 1.2fr;
+                gap: 25px;
+            }
+            .bottom-layout {
+                display: grid;
+                grid-template-columns: 1fr 1.3fr;
+                gap: 25px;
+            }
+            #inputData { height: 340px; }
+            #outputData { height: 340px; }
+            
+            .match-layout {
+                display: grid;
+                grid-template-columns: 1fr 1.2fr;
+            }
+            
+            /* Sembunyikan tombol navigasi jika di layar besar/PC */
+            .floating-nav { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="dashboard-title-row">
+        <h1>Kalkulator</h1>
+        <button type="button" id="forceResetBtn" class="force-reset-btn"
+            onclick="forceResetDashboard()" title="Bersihkan cache aplikasi dan muat kode terbaru"
+            aria-label="Force Reset">↻ Force Reset</button>
+    </div>
+
+    <div>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; margin-bottom: 5px;">
+        <label for="inputData" style="margin: 0;">Angka Asli:</label>
+        <button id="btnToggleInput" onclick="toggleInputData()" style="background-color: #24324d; color: #94a3b8; border: 1px solid #334155; padding: 4px 10px; font-size: 11px; font-weight: bold; border-radius: 4px; cursor: pointer; transition: all 0.2s;">
+            👁️ Unhide
+        </button>
+    </div>
+    
+    <textarea id="inputData" rows="15" readonly style="display: none;">45.54.68.86.73.37
+60.06.23.32.12.21
+48.84.26.62.43.34
+56.65.04.40.19.91
+59.95.07.70.46.64
+09.90.15.51.24.42
+30.03.57.75.69.96
+29.92.13.31.79.97
+36.63.08.80.17.71
+89.98.38.83.10.01
+05.50.74.47.25.52
+14.41.49.94.28.82
+18.81.58.85.67.76
+16.61.78.87.39.93
+27.72.35.53.20.02</textarea>
+</div>
+        
+        <div>
+            <div class="grid-inputs">
+                <div>
+                    <label for="hapusAwalan">Awalan</label>
+                    <input type="text" id="hapusAwalan">
+                </div>
+                <div>
+                    <label for="hapusAkhiran">Akhiran</label>
+                    <input type="text" id="hapusAkhiran">
+                </div>
+                <div>
+                    <label for="hapusSpesifik">Spesifik</label>
+                    <input type="text" id="hapusSpesifik">
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 8px; margin-top: 20px; flex-wrap: wrap;">
+                <button class="btn-execute" onclick="prosesAngka()" style="flex: 1; min-width: 100px;">Prosses</button>
+                <button class="btn-execute" onclick="ringkasBB(4)" style="background-color: #9b59b6; padding: 14px 10px; flex: 1; min-width: 60px;">BB 4</button>
+                <button class="btn-execute" onclick="ringkasBB(5)" style="background-color: #8e44ad; padding: 14px 10px; flex: 1; min-width: 60px;">BB 5</button>
+                <button class="btn-execute" onclick="ringkasBB(6)" style="background-color: #2980b9; padding: 14px 10px; flex: 1; min-width: 60px;">BB 6</button>
+                <button class="btn-execute" onclick="clearAllFields()" style="background-color: #64748b; padding: 14px 10px; flex: 1; min-width: 90px;">🗑️ Clear</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="bottom-layout">
+        <div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <label style="margin: 0; font-size: 16px;">Hasil Akhir / Manual</label>
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <button type="button" onclick="bagiHasilAkhirDuaBagian()" title="Bagi BB 4 angka dan BB 3 angka menjadi 2 bagian"
+                        style="background-color: #1e293b; color: #94a3b8; border: 1px solid #334155; padding: 4px 7px; font-size: 10px; font-weight: 600; border-radius: 4px; cursor: pointer; white-space: nowrap;">
+                        BAGI 2
+                    </button>
+                    <button onclick="pasteHasilManual()" style="background-color: #1e293b; color: #3b82f6; border: 1px solid #24324d; padding: 4px 10px; font-size: 11px; font-weight: bold; border-radius: 4px; cursor: pointer;">
+                        PASTE
+                    </button>
+                </div>
+            </div>
+            
+            <div class="output-container">
+                <!-- Atribut "readonly" telah dihapus di sini agar bisa diisi manual -->
+                <textarea id="outputData"></textarea>
+                <button class="btn-copy" onclick="copyHasil()" id="btnCopyText">Copy</button>
+            </div>
+        </div>
+
+        <div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <label style="margin: 0; font-size: 16px;">Angka Pembanding</label>
+                <button onclick="pastePembanding()" style="background-color: #1e293b; color: #3b82f6; border: 1px solid #24324d; padding: 4px 10px; font-size: 11px; font-weight: bold; border-radius: 4px; cursor: pointer;">
+                    PASTE
+                </button>
+            </div>
+            <div class="match-box">
+                
+                <div class="match-layout">
+                    <div class="match-input-side">
+                        <textarea id="inputPembanding" style="height: 200px; resize: none;"></textarea>
+                        
+                        <button class="btn-execute" onclick="cocokkanData()" style="margin-top: 10px; background-color: #2ecc71; font-size: 14px; padding: 12px; letter-spacing: 0;">Cocokkan</button>
+                    </div>
+
+                    <div class="match-result-side">
+                        
+                        <div id="wrapperHasilCocok" style="display: none; flex-direction: column; gap: 15px;">
+                            
+                            <div id="boxDouble" style="display: none;">
+                                <label style="color: #3498db; font-size: 12px; margin-bottom: 5px; display: block;">Angka Double</label>
+                                <textarea id="outputDouble" readonly style="height: 50px; border: 1px solid #3498db; color: #3498db; resize: none; width: 100%; box-sizing: border-box;"></textarea>
+                            </div>
+
+                            <div id="pesanCocok" style="display: none; color: #2ecc71; font-weight: bold; text-align: center; margin-top: 10px; font-size: 14px;">
+                                ✔ Semua Terverifikasi
+                            </div>
+
+                            <div id="gridPerbedaan" class="side-by-side-results" style="display: none;">
+                                <div style="display: flex; flex-direction: column;">
+                                    <label style="color: #e74c3c; font-size: 11px; margin-bottom: 5px;">❌ DARI HASIL ATAS ❌</label>
+                                    <textarea id="outputTidakCocok" readonly style="height: 90px; border: 1px solid #e74c3c; color: #e74c3c; resize: none; width: 100%; box-sizing: border-box;"></textarea>
+                                </div>
+
+                                <div style="display: flex; flex-direction: column;">
+                                    <label style="color: #f39c12; font-size: 11px; margin-bottom: 5px;">❌ DARI PEMBANDING ❌</label>
+                                    <textarea id="outputBerlebih" readonly style="height: 90px; border: 1px solid #f39c12; color: #f39c12; resize: none; width: 100%; box-sizing: border-box;"></textarea>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container" style="padding: 10px; border: 2px solid #333;">
+    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 10px;">
+        <h2 style="margin: 0; color: #fff; font-size: 18px;">KELUARAN</h2>
+        <button onclick="refreshIframe()" style="background-color: #1e293b; color: white; border: none; padding: 6px 14px; font-size: 13px; font-weight: bold; border-radius: 4px; cursor: pointer; transition: background-color 0.2s;">
+            🔄 Refresh
+        </button>
+    </div>
+    
+    <div style="width: 100%; height: 400px; overflow-y: auto; overflow-x: hidden; position: relative; border-radius: 5px; background: white;">
+        <iframe 
+            id="webIframe"
+            src="https://toto.sdy2024.com" 
+            style="width: 100%; height: 1000px; border: none;">
+        </iframe>
+    </div>
+</div>
+
+<div class="floating-nav">
+    <button class="nav-btn" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" title="Ke Atas">⬆️</button>
+    <button class="nav-btn" onclick="window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'})" title="Ke Bawah">⬇️</button>
+</div>
+
+<script>
+    // Bersihkan parameter cache-buster setelah versi terbaru selesai dimuat.
+    (function cleanForceResetQuery() {
+        const currentUrl = new URL(window.location.href);
+        if (currentUrl.searchParams.has('_forceReset')) {
+            currentUrl.searchParams.delete('_forceReset');
+            const cleanUrl = currentUrl.pathname + currentUrl.search + currentUrl.hash;
+            window.history.replaceState(null, document.title, cleanUrl);
+        }
+    })();
+
+    async function forceResetDashboard() {
+        const confirmed = window.confirm(
+            'Force Reset akan membersihkan cache aplikasi dan memuat ulang kode terbaru. Semua input serta hasil sementara di halaman ini akan hilang. Lanjutkan?'
+        );
+        if (!confirmed) return;
+
+        const button = document.getElementById('forceResetBtn');
+        if (button) {
+            button.disabled = true;
+            button.textContent = '↻ Memuat...';
+        }
+
+        try {
+            if ('caches' in window) {
+                const cacheNames = await caches.keys();
+                const appCaches = cacheNames.filter(name =>
+                    name === 'splitter-pro-v2' || name.startsWith('splitter-pro-')
+                );
+                await Promise.all(appCaches.map(name => caches.delete(name)));
+            }
+        } catch (error) {
+            // Lanjutkan dengan URL unik jika Cache Storage tidak tersedia.
+            console.warn('Cache aplikasi tidak dapat dibersihkan sepenuhnya:', error);
+        }
+
+        const refreshUrl = new URL(window.location.href);
+        refreshUrl.searchParams.set('_forceReset', String(Date.now()));
+        window.location.replace(refreshUrl.toString());
+    }
+
+    // FILTER DATA ASLI
+    function bersihkanInput(str) {
+        if (!str) return [];
+        return str.split('.').map(item => item.trim()).filter(item => item !== '');
+    }
+
+    function prosesAngka() {
+        const inputStr = document.getElementById('inputData').value;
+        const awalanArr = bersihkanInput(document.getElementById('hapusAwalan').value);
+        const akhiranArr = bersihkanInput(document.getElementById('hapusAkhiran').value);
+        const spesifikArr = bersihkanInput(document.getElementById('hapusSpesifik').value);
+
+        let rawArray = inputStr.replace(/\n/g, '.').split('.');
+        let numArray = rawArray.map(n => n.trim()).filter(n => n !== '');
+
+        if (numArray.length === 0) {
+            document.getElementById('outputData').value = "";
+            return;
+        }
+
+        let hasil = [];
+
+        for (let angka of numArray) {
+            let harusDihapus = false;
+            for (let awalan of awalanArr) {
+                if (angka.startsWith(awalan)) { harusDihapus = true; break; }
+            }
+            if (!harusDihapus) {
+                for (let akhiran of akhiranArr) {
+                    if (angka.endsWith(akhiran)) { harusDihapus = true; break; }
+                }
+            }
+            if (!harusDihapus) {
+                if (spesifikArr.includes(angka)) { harusDihapus = true; }
+            }
+            if (!harusDihapus) { hasil.push(angka); }
+        }
+
+        let barisHasil = [];
+        for (let i = 0; i < hasil.length; i += 6) {
+            barisHasil.push(hasil.slice(i, i + 6).join('.'));
+        }
+
+        document.getElementById('outputData').value = barisHasil.join('\n');
+        document.getElementById('btnCopyText').innerText = "Copy";
+    }
+
+    // FUNGSI UNTUK MEMECAH FORMAT "123 bb 2a X" KEMBALI JADI ANGKA SATUAN
+    function parseAndExpand(str) {
+        let result = [];
+        let regexBB = /(\d+)\s+bb\s+(2d|2a\s*x)/gi;
+        let match;
+        let processedStr = str;
+        
+        while ((match = regexBB.exec(str)) !== null) {
+            let d = match[1];
+            for(let i=0; i<d.length; i++) {
+                for(let j=0; j<d.length; j++) {
+                    if(i !== j) result.push(d[i]+d[j]);
+                }
+            }
+            processedStr = processedStr.replace(match[0], ' ');
+        }
+        
+        let nums = processedStr.replace(/[\n\s,.]+/g, ' ').split(' ').filter(Boolean);
+        result.push(...nums);
+        return result;
+    }
+
+  function ringkasBB(bbLength = 4) {
+    const outputTextArea = document.getElementById('outputData');
+    let val = outputTextArea.value;
+    if (!val) {
+        alert("Kolom Hasil Akhir masih kosong. Silakan proses dulu atau isi manual.");
+        return;
+    }
+
+    let angka2D = parseAndExpand(val); 
+    angka2D = [...new Set(angka2D)].filter(n => /^\d{2}$/.test(n));
+
+    let digits = '0123456789';
+    let subsets = [];
+    let f = function(prefix, str) {
+        for (let i = 0; i < str.length; i++) {
+            subsets.push(prefix + str[i]);
+            f(prefix + str[i], str.slice(i + 1));
+        }
+    };
+    f('', digits);
+    
+    subsets = subsets.filter(s => s.length === bbLength);
+
+    let validSubsets = subsets.filter(subset => {
+        let perms = [];
+        for(let i=0; i<bbLength; i++) {
+            for(let j=0; j<bbLength; j++) {
+                if(i !== j) perms.push(subset[i]+subset[j]);
+            }
+        }
+        return perms.every(p => angka2D.includes(p));
+    });
+
+    for (let i = validSubsets.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [validSubsets[i], validSubsets[j]] = [validSubsets[j], validSubsets[i]];
+    }
+
+    let bbGroups = [];
+    let usedPerms = new Set();
+    
+    for (let subset of validSubsets) {
+        let perms = [];
+        for(let i=0; i<bbLength; i++) {
+            for(let j=0; j<bbLength; j++) {
+                if(i !== j) perms.push(subset[i]+subset[j]);
+            }
+        }
+        
+        let isOverlap = perms.some(p => usedPerms.has(p));
+        
+        if (!isOverlap) {
+            bbGroups.push(subset + " bb 2a X");
+            perms.forEach(p => usedPerms.add(p));
+            if (bbGroups.length === 2) break; 
+        }
+    }
+    
+    angka2D = angka2D.filter(a => !usedPerms.has(a));
+    
+    let pairs = [];
+    let singles = [];
+    let processed = new Set();
+    
+    for (let i = 0; i < angka2D.length; i++) {
+        let num = angka2D[i];
+        if (processed.has(num)) continue;
+        
+        let rev = num[1] + num[0];
+        
+        if (num === rev) {
+            singles.push(num);
+            processed.add(num);
+            continue;
+        }
+        
+        let hasReverse = angka2D.includes(rev) && !processed.has(rev);
+        if (hasReverse) {
+            pairs.push([num, rev]);
+            processed.add(num);
+            processed.add(rev);
+        } else {
+            singles.push(num);
+            processed.add(num);
+        }
+    }
+
+    let blocks = [];
+    for (let p of pairs) {
+        if (Math.random() > 0.5) p = [p[1], p[0]];
+        blocks.push({ type: 'pair', data: p });
+    }
+    for (let s of singles) {
+        blocks.push({ type: 'single', data: [s] });
+    }
+    
+    for (let i = blocks.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [blocks[i], blocks[j]] = [blocks[j], blocks[i]];
+    }
+    
+    let finalRows = [];
+    let currentRow = [];
+    
+    for (let i = 0; i < blocks.length; i++) {
+        let b = blocks[i];
+        let spaceLeft = 6 - currentRow.length;
+        
+        if (b.type === 'pair') {
+            if (spaceLeft >= 2) {
+                currentRow.push(...b.data);
+            } else {
+                let foundSingleIdx = -1;
+                for (let j = i + 1; j < blocks.length; j++) {
+                    if (blocks[j].type === 'single') {
+                        foundSingleIdx = j;
+                        break;
+                    }
+                }
+                
+                if (foundSingleIdx !== -1) {
+                    let singleBlock = blocks.splice(foundSingleIdx, 1)[0];
+                    currentRow.push(...singleBlock.data);
+                    finalRows.push(currentRow);
+                    currentRow = [];
+                    i--; 
+                } else {
+                    currentRow.push(b.data[0]);
+                    finalRows.push(currentRow);
+                    currentRow = [b.data[1]];
+                }
+            }
+        } else {
+            currentRow.push(...b.data);
+        }
+        
+        if (currentRow.length === 6) {
+            finalRows.push(currentRow);
+            currentRow = [];
+        }
+    }
+    if (currentRow.length > 0) {
+        finalRows.push(currentRow);
+    }
+
+    let finalOutput = [];
+    let barisAngka = [];
+    for (let row of finalRows) {
+        barisAngka.push(row.join('.'));
+    }
+
+    if (barisAngka.length > 0) {
+        finalOutput.push(barisAngka.join('\n'));
+    }
+
+    if (bbGroups.length > 0) {
+        if (finalOutput.length > 0) finalOutput.push('---');
+        finalOutput.push(bbGroups.join('\n'));
+    }
+
+    outputTextArea.value = finalOutput.join('\n');
+}
+
+    function copyHasil() {
+        const outputTextArea = document.getElementById('outputData');
+        if (!outputTextArea.value) return;
+
+        outputTextArea.select();
+        outputTextArea.setSelectionRange(0, 99999);
+
+        navigator.clipboard.writeText(outputTextArea.value).then(() => {
+            const btnCopy = document.getElementById('btnCopyText');
+            btnCopy.innerText = "Copied!";
+            setTimeout(() => {
+                btnCopy.innerText = "Copy";
+            }, 2000);
+        });
+    }
+
+    // FUNGSI PENCOCOK DATA
+    function cocokkanData() {
+        const hasilProsesStr = document.getElementById('outputData').value;
+        const pembandingStr = document.getElementById('inputPembanding').value;
+        
+        const wrapper = document.getElementById('wrapperHasilCocok');
+        const boxDouble = document.getElementById('boxDouble');
+        const outputDouble = document.getElementById('outputDouble');
+        const pesanCocok = document.getElementById('pesanCocok');
+        const gridPerbedaan = document.getElementById('gridPerbedaan');
+        const outputTidakCocok = document.getElementById('outputTidakCocok');
+        const outputBerlebih = document.getElementById('outputBerlebih');
+
+        wrapper.style.display = 'flex';
+        boxDouble.style.display = 'none';
+        pesanCocok.style.display = 'none';
+        gridPerbedaan.style.display = 'none';
+        outputDouble.value = '';
+        outputTidakCocok.value = '';
+        outputBerlebih.value = '';
+
+        if (!hasilProsesStr || !pembandingStr) {
+            alert("Mohon isi kolom 'Hasil Akhir / Manual' dan kolom 'Angka Pembanding' sebelum menekan Cocokkan.");
+            wrapper.style.display = 'none';
+            return;
+        }
+
+        let rawPembandingArr = parseAndExpand(pembandingStr);
+        
+        let cekSet = new Set();
+        let doubleSet = new Set();
+
+        for (let num of rawPembandingArr) {
+            if (cekSet.has(num)) {
+                doubleSet.add(num);
+            } else {
+                cekSet.add(num);
+            }
+        }
+
+        let arrDouble = Array.from(doubleSet);
+        if (arrDouble.length > 0) {
+            boxDouble.style.display = 'block';
+            outputDouble.value = arrDouble.join(' ');
+        }
+
+        let hasilArr = parseAndExpand(hasilProsesStr);
+        let pembandingUnikArr = Array.from(cekSet); 
+
+        let tidakDitemukan = hasilArr.filter(angka => !pembandingUnikArr.includes(angka));
+        let angkaBerlebih = pembandingUnikArr.filter(angka => !hasilArr.includes(angka));
+
+        if (tidakDitemukan.length === 0 && angkaBerlebih.length === 0) {
+            pesanCocok.style.display = 'block';
+        } else {
+            gridPerbedaan.style.display = 'grid'; 
+            
+            if (tidakDitemukan.length > 0) {
+                outputTidakCocok.value = tidakDitemukan.join(' ');
+            } else {
+                outputTidakCocok.value = "-";
+            }
+
+            if (angkaBerlebih.length > 0) {
+                outputBerlebih.value = angkaBerlebih.join(' ');
+            } else {
+                outputBerlebih.value = "-";
+            }
+        }
+    }
+    
+// FUNGSI REFRESH IFRAME + ANTI CACHE
+function refreshIframe() {
+    const iframe = document.getElementById('webIframe');
+    let urlDasar = iframe.src.split('?')[0];
+    iframe.src = urlDasar + '?t=' + new Date().getTime();
+}
+
+// FUNGSI TOGGLE HIDE/UNHIDE ANGKA ASLI
+function toggleInputData() {
+    const inputArea = document.getElementById('inputData');
+    const btnToggle = document.getElementById('btnToggleInput');
+    
+    if (inputArea.style.display === 'none') {
+        inputArea.style.display = 'block';
+        btnToggle.innerHTML = '🙈 Hide';
+        btnToggle.style.backgroundColor = '#3b82f6'; 
+        btnToggle.style.color = '#fff';
+    } else {
+        inputArea.style.display = 'none';
+        btnToggle.innerHTML = '👁️ Unhide';
+        btnToggle.style.backgroundColor = '#24324d'; 
+        btnToggle.style.color = '#94a3b8';
+    }
+}
+
+// FUNGSI CLEAR ALL FIELDS
+function clearAllFields() {
+    document.getElementById('hapusAwalan').value = '';
+    document.getElementById('hapusAkhiran').value = '';
+    document.getElementById('hapusSpesifik').value = '';
+    document.getElementById('inputPembanding').value = '';
+    document.getElementById('outputData').value = '';
+    document.getElementById('wrapperHasilCocok').style.display = 'none';
+    document.getElementById('btnCopyText').innerText = "Copy";
+}
+
+// FUNGSI PASTE PEMBANDING
+function pastePembanding() {
+    navigator.clipboard.readText()
+    .then(text => {
+        document.getElementById('inputPembanding').value = text;
+    })
+    .catch(err => {
+        alert('Gagal membaca clipboard. Pastikan browser diizinkan.');
+    });
+}
+
+// BAGI HASIL AKHIR MENJADI 2 BAGIAN TANPA MEMBUAT ANGKA BARU
+function bagiHasilAkhirDuaBagian() {
+    const outputTextArea = document.getElementById('outputData');
+    const originalText = outputTextArea.value;
+
+    if (!originalText.trim()) {
+        alert('Kolom Hasil Akhir masih kosong.');
+        return;
+    }
+
+    const lines = originalText.split(/\r?\n/);
+    const bb4Lines = [];
+    const bb3Lines = [];
+    const otherBBDigits = [];
+    const ordinaryNumbers = [];
+
+    for (const rawLine of lines) {
+        const line = rawLine.trim();
+        if (!line || /^[-—]+$/.test(line)) continue;
+
+        const bbMatch = line.match(/^(\d+)\s*bb\b/i);
+        if (bbMatch) {
+            const digitLength = bbMatch[1].length;
+            if (digitLength === 4) {
+                bb4Lines.push(line);
+            } else if (digitLength === 3) {
+                bb3Lines.push(line);
+            } else {
+                otherBBDigits.push(digitLength);
+            }
+            continue;
+        }
+
+        // Baca hanya angka 2D yang sudah ada; jangan membuat angka baru.
+        const foundNumbers = line.split(/[\s.,]+/).filter(token => /^\d{2}$/.test(token));
+        ordinaryNumbers.push(...foundNumbers);
+    }
+
+    if (otherBBDigits.length > 0) {
+        alert('Ditemukan BB selain 4 angka dan 3 angka. Hasil tidak diubah agar data lain tidak hilang.');
+        return;
+    }
+
+    if (bb4Lines.length !== 2) {
+        alert(
+            'Tombol BAGI 2 membutuhkan tepat 2 BB 4 angka. ' +
+            'Saat ini ditemukan ' + bb4Lines.length + '. Hasil tidak diubah.'
+        );
+        return;
+    }
+
+    // Izinkan tombol ditekan kembali setelah hasil terbagi: gunakan BB3 yang sudah terbentuk.
+    let selectedBB3Lines = [];
+    let numbersAfterBB3 = [];
+
+    if (bb3Lines.length === 2 && ordinaryNumbers.length === 33) {
+        selectedBB3Lines = bb3Lines.slice();
+        numbersAfterBB3 = ordinaryNumbers.slice();
+    } else if (bb3Lines.length === 0 && ordinaryNumbers.length === 45) {
+        if (new Set(ordinaryNumbers).size !== ordinaryNumbers.length) {
+            alert('Ada angka biasa yang duplikat. Hasil tidak diubah agar jumlah angka tetap akurat.');
+            return;
+        }
+
+        const ordinarySet = new Set(ordinaryNumbers);
+        const digitSets = [];
+        const digits = '0123456789';
+
+        // Cari semua kombinasi 3 digit yang keenam pasangan bolak-baliknya
+        // benar-benar tersedia di antara 45 angka biasa yang tersisa.
+        function buildDigitSets(prefix, remainingDigits) {
+            if (prefix.length === 3) {
+                digitSets.push(prefix);
+                return;
+            }
+            for (let i = 0; i < remainingDigits.length; i++) {
+                buildDigitSets(prefix + remainingDigits[i], remainingDigits.slice(i + 1));
+            }
+        }
+        buildDigitSets('', digits);
+
+        const validBB3 = digitSets.map(digitSet => {
+            const pairs = [];
+            for (let i = 0; i < digitSet.length; i++) {
+                for (let j = 0; j < digitSet.length; j++) {
+                    if (i !== j) pairs.push(digitSet[i] + digitSet[j]);
+                }
+            }
+            return { digitSet, pairs };
+        }).filter(candidate => candidate.pairs.every(pair => ordinarySet.has(pair)));
+
+        // Acak pilihan seperti fungsi BB yang sudah ada, lalu cari dua grup
+        // yang tidak memakai pasangan 2D yang sama.
+        for (let i = validBB3.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [validBB3[i], validBB3[j]] = [validBB3[j], validBB3[i]];
+        }
+
+        let selectedCandidates = null;
+        for (let i = 0; i < validBB3.length && !selectedCandidates; i++) {
+            const firstPairs = new Set(validBB3[i].pairs);
+            for (let j = i + 1; j < validBB3.length; j++) {
+                if (validBB3[j].pairs.every(pair => !firstPairs.has(pair))) {
+                    selectedCandidates = [validBB3[i], validBB3[j]];
+                    break;
+                }
+            }
+        }
+
+        if (!selectedCandidates) {
+            alert('Tidak ditemukan 2 kombinasi BB 3 angka yang valid dan tidak saling bertumpuk dari 45 angka tersisa. Hasil tidak diubah.');
+            return;
+        }
+
+        const bb3CoveredPairs = new Set();
+        selectedCandidates.forEach(candidate => {
+            candidate.pairs.forEach(pair => bb3CoveredPairs.add(pair));
+            selectedBB3Lines.push(candidate.digitSet + ' bb 2a X');
+        });
+
+        // Enam pasangan untuk setiap BB3 dipindahkan dari angka biasa ke notasi BB3.
+        numbersAfterBB3 = ordinaryNumbers.filter(number => !bb3CoveredPairs.has(number));
+
+        if (numbersAfterBB3.length !== 33 || bb3CoveredPairs.size !== 12) {
+            alert('Pemeriksaan jumlah angka tidak cocok. Hasil tidak diubah agar tidak ada data yang hilang.');
+            return;
+        }
+    } else {
+        alert(
+            'Format sumber belum sesuai. Gunakan BB 4 terlebih dahulu, sehingga hasil berisi ' +
+            '2 BB 4 angka dan 45 angka biasa. Jika sudah pernah dibagi, hasil harus berisi ' +
+            '2 BB 4 angka, 2 BB 3 angka, dan 33 angka biasa. ' +
+            'Saat ini ditemukan BB 4: ' + bb4Lines.length +
+            ', BB 3: ' + bb3Lines.length +
+            ', angka biasa: ' + ordinaryNumbers.length + '.'
+        );
+        return;
+    }
+
+    if (numbersAfterBB3.length !== 33 || selectedBB3Lines.length !== 2) {
+        alert('Jumlah akhir tidak sesuai target 69 angka. Hasil tidak diubah.');
+        return;
+    }
+
+    function groupIntoSix(numbers) {
+        const rows = [];
+        for (let i = 0; i < numbers.length; i += 6) {
+            rows.push(numbers.slice(i, i + 6).join('.'));
+        }
+        return rows;
+    }
+
+    // 33 angka biasa dibagi menjadi 23 di bagian pertama dan 10 di bagian kedua.
+    const firstPartNumbers = numbersAfterBB3.slice(0, 23);
+    const secondPartNumbers = numbersAfterBB3.slice(23);
+
+    const firstPart = [
+        ...groupIntoSix(firstPartNumbers), // 6, 6, 6, 5 angka
+        bb4Lines[0],
+        selectedBB3Lines[0]
+    ];
+    const secondPart = [
+        bb4Lines[1],
+        selectedBB3Lines[1],
+        ...groupIntoSix(secondPartNumbers) // 6, 4 angka
+    ];
+
+    outputTextArea.value = firstPart.join('\n') + '\n---\n' + secondPart.join('\n');
+    document.getElementById('btnCopyText').innerText = 'Copy';
+}
+
+// FUNGSI PASTE HASIL AKHIR MANUAL
+function pasteHasilManual() {
+    navigator.clipboard.readText()
+    .then(text => {
+        document.getElementById('outputData').value = text;
+    })
+    .catch(err => {
+        alert('Gagal membaca clipboard. Pastikan browser diizinkan.');
+    });
+}
+</script>
+
+</body>
+</html>
