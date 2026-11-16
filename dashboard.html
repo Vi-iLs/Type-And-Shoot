@@ -348,24 +348,6 @@
         .web-url-panel.is-open .web-url-panel-content {
             display: block;
         }
-        .web-url-panel-heading {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 8px;
-        }
-        .web-url-panel-heading h2 {
-            margin: 0;
-            color: var(--text-color);
-            font-size: 12px;
-            letter-spacing: .2px;
-        }
-        .web-url-panel-heading p {
-            margin: 2px 0 0;
-            color: #94a3b8;
-            font-size: 10px;
-            line-height: 1.35;
-        }
         .web-url-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
@@ -601,7 +583,6 @@
             </div>
             <div class="web-url-actions">
                 <button type="button" class="web-url-action" onclick="applyWebsiteUrls()">TERAPKAN LINK</button>
-                <span id="webUrlStatus" role="status" aria-live="polite" hidden></span>
             </div>
         </div>
     </section>
