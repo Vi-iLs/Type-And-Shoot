@@ -295,61 +295,90 @@
             .floating-nav { display: none; }
         }
     
-        /* Multi-Web Viewer: pengaturan URL di bagian atas dashboard */
+        /* Pengaturan URL website: ringkas dan tertutup secara default */
         .web-url-panel {
-            margin: 0 0 24px;
-            padding: 16px;
+            margin: 0 0 14px;
+            padding: 0;
+            border: 0;
+            background: transparent;
+        }
+        .web-url-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
             border: 1px solid var(--border-color);
-            border-radius: 10px;
+            border-radius: 6px;
+            padding: 6px 9px;
+            color: #94a3b8;
             background: #101827;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .web-url-toggle:hover,
+        .web-url-toggle[aria-expanded="true"] {
+            color: var(--text-color);
+            border-color: #3b82f6;
+        }
+        .web-url-panel-content {
+            display: none;
+            max-width: 100%;
+            margin-top: 8px;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: #101827;
+        }
+        .web-url-panel.is-open .web-url-panel-content {
+            display: block;
         }
         .web-url-panel-heading {
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-            margin-bottom: 12px;
+            gap: 8px;
+            margin-bottom: 8px;
         }
         .web-url-panel-heading h2 {
             margin: 0;
             color: var(--text-color);
-            font-size: 15px;
-            letter-spacing: .4px;
+            font-size: 12px;
+            letter-spacing: .2px;
         }
         .web-url-panel-heading p {
-            margin: 4px 0 0;
+            margin: 2px 0 0;
             color: #94a3b8;
-            font-size: 12px;
-            line-height: 1.4;
+            font-size: 10px;
+            line-height: 1.35;
         }
         .web-url-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-            gap: 10px;
+            grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
+            gap: 7px;
         }
         .web-url-field label {
-            margin-top: 0;
-            font-size: 12px;
+            margin: 0 0 3px;
+            font-size: 10px;
         }
         .web-url-field input {
             min-width: 0;
-            font-size: 13px;
-            padding: 10px;
+            font-size: 12px;
+            padding: 7px 8px;
+            border-radius: 6px;
         }
         .web-url-actions {
             display: flex;
             align-items: center;
             flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 12px;
+            gap: 6px;
+            margin-top: 8px;
         }
         .web-url-action {
             border: 1px solid #3b82f6;
-            border-radius: 7px;
-            padding: 10px 14px;
+            border-radius: 6px;
+            padding: 7px 10px;
             color: #fff;
             background: #2563eb;
-            font-size: 12px;
+            font-size: 10px;
             font-weight: 700;
             cursor: pointer;
         }
@@ -360,7 +389,7 @@
         }
         #webUrlStatus {
             color: #94a3b8;
-            font-size: 12px;
+            font-size: 10px;
         }
 
         /* Multi-Web Viewer */
@@ -501,39 +530,45 @@
             aria-label="Force Reset">↻ Force Reset</button>
     </div>
 
-    <section class="web-url-panel" aria-labelledby="webUrlPanelTitle">
-        <div class="web-url-panel-heading">
-            <div>
-                <h2 id="webUrlPanelTitle">PENGATURAN WEBSITE</h2>
-                <p>Masukkan hingga 5 link website di sini. Link tersimpan di browser ini setelah diterapkan.</p>
+    <section class="web-url-panel" id="webUrlPanel" aria-labelledby="webUrlPanelTitle">
+        <button type="button" class="web-url-toggle" id="webUrlToggle"
+            onclick="toggleWebsiteSettings()" aria-expanded="false" aria-controls="webUrlPanelContent">
+            <span aria-hidden="true">⚙</span> PENGATURAN WEBSITE <span id="webUrlToggleIcon" aria-hidden="true">＋</span>
+        </button>
+        <div class="web-url-panel-content" id="webUrlPanelContent" hidden>
+            <div class="web-url-panel-heading">
+                <div>
+                    <h2 id="webUrlPanelTitle">PENGATURAN WEBSITE</h2>
+                    <p>Masukkan hingga 5 link website. Link tersimpan di browser ini setelah diterapkan.</p>
+                </div>
             </div>
-        </div>
-        <div class="web-url-grid">
-            <div class="web-url-field">
-                <label for="webUrl1">WEB 1</label>
-                <input type="url" id="webUrl1" inputmode="url" placeholder="https://website-pertama.com">
+            <div class="web-url-grid">
+                <div class="web-url-field">
+                    <label for="webUrl1">WEB 1</label>
+                    <input type="url" id="webUrl1" inputmode="url" placeholder="https://website-pertama.com">
+                </div>
+                <div class="web-url-field">
+                    <label for="webUrl2">WEB 2</label>
+                    <input type="url" id="webUrl2" inputmode="url" placeholder="https://website-kedua.com">
+                </div>
+                <div class="web-url-field">
+                    <label for="webUrl3">WEB 3</label>
+                    <input type="url" id="webUrl3" inputmode="url" placeholder="https://website-ketiga.com">
+                </div>
+                <div class="web-url-field">
+                    <label for="webUrl4">WEB 4</label>
+                    <input type="url" id="webUrl4" inputmode="url" placeholder="https://website-keempat.com">
+                </div>
+                <div class="web-url-field">
+                    <label for="webUrl5">WEB 5</label>
+                    <input type="url" id="webUrl5" inputmode="url" placeholder="https://website-kelima.com">
+                </div>
             </div>
-            <div class="web-url-field">
-                <label for="webUrl2">WEB 2</label>
-                <input type="url" id="webUrl2" inputmode="url" placeholder="https://website-kedua.com">
+            <div class="web-url-actions">
+                <button type="button" class="web-url-action" onclick="applyWebsiteUrls()">TERAPKAN LINK</button>
+                <button type="button" class="web-url-action secondary" onclick="resetWebsiteUrls()">RESET LINK</button>
+                <span id="webUrlStatus" role="status" aria-live="polite">WEB 1 awal: https://toto.sdy2024.com</span>
             </div>
-            <div class="web-url-field">
-                <label for="webUrl3">WEB 3</label>
-                <input type="url" id="webUrl3" inputmode="url" placeholder="https://website-ketiga.com">
-            </div>
-            <div class="web-url-field">
-                <label for="webUrl4">WEB 4</label>
-                <input type="url" id="webUrl4" inputmode="url" placeholder="https://website-keempat.com">
-            </div>
-            <div class="web-url-field">
-                <label for="webUrl5">WEB 5</label>
-                <input type="url" id="webUrl5" inputmode="url" placeholder="https://website-kelima.com">
-            </div>
-        </div>
-        <div class="web-url-actions">
-            <button type="button" class="web-url-action" onclick="applyWebsiteUrls()">TERAPKAN LINK</button>
-            <button type="button" class="web-url-action secondary" onclick="resetWebsiteUrls()">RESET LINK</button>
-            <span id="webUrlStatus" role="status" aria-live="polite">WEB 1 awal: https://toto.sdy2024.com</span>
         </div>
     </section>
 
@@ -1270,6 +1305,21 @@ function pasteHasilManual() {
 }
 
     
+// Buka/tutup pengaturan URL website (selalu tertutup saat halaman pertama kali dibuka).
+function toggleWebsiteSettings() {
+    const panel = document.getElementById('webUrlPanel');
+    const content = document.getElementById('webUrlPanelContent');
+    const button = document.getElementById('webUrlToggle');
+    const icon = document.getElementById('webUrlToggleIcon');
+    if (!panel || !content || !button) return;
+
+    const isOpen = !panel.classList.contains('is-open');
+    panel.classList.toggle('is-open', isOpen);
+    content.hidden = !isOpen;
+    button.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    if (icon) icon.textContent = isOpen ? '−' : '＋';
+}
+
 // MULTI-WEB VIEWER
 const DASHBOARD_WEB_URLS_KEY = 'dashboard1_web_urls_v1';
 const DEFAULT_DASHBOARD_WEB_URLS = ['https://toto.sdy2024.com', '', '', '', ''];
