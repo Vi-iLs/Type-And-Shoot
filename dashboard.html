@@ -69,6 +69,9 @@
         }
 
         .web-url-toggle {
+            position: absolute;
+            top: 0;
+            left: 0;
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -561,14 +564,14 @@
 <div class="container">
     <div class="dashboard-title-row">
         <h1>Kalkulator</h1>
+        <button type="button" class="web-url-toggle" id="webUrlToggle"
+            onclick="toggleWebsiteSettings()" title="Pengaturan website"
+            aria-label="Pengaturan website" aria-expanded="false"
+            aria-controls="webUrlPanelContent">⚙</button>
         <div class="dashboard-title-actions">
             <button type="button" id="forceResetBtn" class="force-reset-btn"
                 onclick="forceResetDashboard()" title="Bersihkan cache aplikasi dan muat kode terbaru"
                 aria-label="Force Reset">↻ Force Reset</button>
-            <button type="button" class="web-url-toggle" id="webUrlToggle"
-                onclick="toggleWebsiteSettings()" title="Pengaturan website"
-                aria-label="Pengaturan website" aria-expanded="false"
-                aria-controls="webUrlPanelContent">⚙</button>
         </div>
     </div>
 
@@ -582,23 +585,23 @@
             </div>
             <div class="web-url-grid">
                 <div class="web-url-field">
-                    <label for="webUrl1">WEB 1 SD/SG/HK</label>
+                    <label for="webUrl1">1 SD/SG/HK</label>
                     <input type="url" id="webUrl1" inputmode="url" placeholder="https://website-pertama.com">
                 </div>
                 <div class="web-url-field">
-                    <label for="webUrl2">WEB 2 CAM</label>
+                    <label for="webUrl2">2 CAM</label>
                     <input type="url" id="webUrl2" inputmode="url" placeholder="https://website-kedua.com">
                 </div>
                 <div class="web-url-field">
-                    <label for="webUrl3">WEB 3 CHN</label>
+                    <label for="webUrl3">3 CHN</label>
                     <input type="url" id="webUrl3" inputmode="url" placeholder="https://website-ketiga.com">
                 </div>
                 <div class="web-url-field">
-                    <label for="webUrl4">WEB 4 JPN</label>
+                    <label for="webUrl4">4 JPN</label>
                     <input type="url" id="webUrl4" inputmode="url" placeholder="https://website-keempat.com">
                 </div>
                 <div class="web-url-field">
-                    <label for="webUrl5">WEB 5 TWN</label>
+                    <label for="webUrl5">5 TWN</label>
                     <input type="url" id="webUrl5" inputmode="url" placeholder="https://website-kelima.com">
                 </div>
             </div>
@@ -1347,7 +1350,7 @@ function pasteHasilManual() {
 
     
 // PIN pengaturan website. Ubah nilai ini untuk mengganti PIN akses panel.
-const DASHBOARD_WEBSITE_SETTINGS_PIN = '48271936';
+const DASHBOARD_WEBSITE_SETTINGS_PIN = '654321';
 let websiteSettingsUnlocked = false;
 
 // Buka/tutup panel pengaturan. PIN diminta setiap kali panel dibuka.
@@ -1385,11 +1388,11 @@ function toggleWebsiteSettings() {
 const DASHBOARD_WEB_URLS_KEY = 'dashboard1_web_urls_v1';
 const DEFAULT_DASHBOARD_WEB_URLS = ['https://toto.sdy2024.com', '', '', '', ''];
 const DASHBOARD_WEB_LABELS = [
-    'WEB 1 SD/SG/HK',
-    'WEB 2 CAM',
-    'WEB 3 CHN',
-    'WEB 4 JPN',
-    'WEB 5 TWN'
+    '1 SD/SG/HK',
+    '2 CAM',
+    '3 CHN',
+    '4 JPN',
+    '5 TWN'
 ];
 let selectedDashboardWebIndex = 0;
 
