@@ -493,17 +493,49 @@
         .data-date-button[aria-pressed="true"] { border-color: #94a3b8; background: rgba(148, 163, 184, .16); color: #fff; }
         .data-history-table td.is-empty { color: #64748b; font-weight: 400; }
 
-        /* Fokus kategori hanya menyalakan dua digit terakhir, bukan seluruh sel. */
-        .data-history-table[data-focus-column="CAM"] tbody td[data-category="CAM"] .data-value-suffix { color: #fecaca; text-shadow: 0 0 4px rgba(239, 68, 68, .85), 0 0 9px rgba(239, 68, 68, .65); }
-        .data-history-table[data-focus-column="CHN"] tbody td[data-category="CHN"] .data-value-suffix { color: #bfdbfe; text-shadow: 0 0 4px rgba(59, 130, 246, .9), 0 0 9px rgba(59, 130, 246, .7); }
-        .data-history-table[data-focus-column="JPN"] tbody td[data-category="JPN"] .data-value-suffix { color: #fef08a; text-shadow: 0 0 4px rgba(234, 179, 8, .9), 0 0 9px rgba(234, 179, 8, .7); }
-        .data-history-table[data-focus-column="TWN"] tbody td[data-category="TWN"] .data-value-suffix { color: #e9d5ff; text-shadow: 0 0 4px rgba(168, 85, 247, .9), 0 0 9px rgba(168, 85, 247, .7); }
+        /* Fokus kategori: border dan glow kuat hanya pada dua digit terakhir. */
+        .data-history-table[data-focus-column="CAM"] tbody td[data-category="CAM"] .data-value-suffix {
+            color: #fff1f2; background: rgba(239, 68, 68, .20); border-color: #fb7185;
+            box-shadow: 0 0 4px #ef4444, 0 0 9px rgba(239, 68, 68, .95), 0 0 17px rgba(239, 68, 68, .8);
+            text-shadow: 0 0 4px #fff, 0 0 9px #fb7185, 0 0 14px #ef4444;
+        }
+        .data-history-table[data-focus-column="CHN"] tbody td[data-category="CHN"] .data-value-suffix {
+            color: #eff6ff; background: rgba(59, 130, 246, .22); border-color: #60a5fa;
+            box-shadow: 0 0 4px #3b82f6, 0 0 9px rgba(59, 130, 246, .95), 0 0 17px rgba(59, 130, 246, .8);
+            text-shadow: 0 0 4px #fff, 0 0 9px #60a5fa, 0 0 14px #3b82f6;
+        }
+        .data-history-table[data-focus-column="JPN"] tbody td[data-category="JPN"] .data-value-suffix {
+            color: #fefce8; background: rgba(234, 179, 8, .22); border-color: #facc15;
+            box-shadow: 0 0 4px #eab308, 0 0 9px rgba(234, 179, 8, .95), 0 0 17px rgba(234, 179, 8, .8);
+            text-shadow: 0 0 4px #fff, 0 0 9px #facc15, 0 0 14px #eab308;
+        }
+        .data-history-table[data-focus-column="TWN"] tbody td[data-category="TWN"] .data-value-suffix {
+            color: #faf5ff; background: rgba(168, 85, 247, .22); border-color: #c084fc;
+            box-shadow: 0 0 4px #a855f7, 0 0 9px rgba(168, 85, 247, .95), 0 0 17px rgba(168, 85, 247, .8);
+            text-shadow: 0 0 4px #fff, 0 0 9px #c084fc, 0 0 14px #a855f7;
+        }
 
-        /* Saat tanggal dipilih, hanya dua digit terakhir di empat kolom diberi border. */
-        .data-history-table .data-row.is-selected td[data-category="CAM"] .data-value-suffix { color: #fecaca; background: rgba(239, 68, 68, .12); border-color: #ef4444; box-shadow: 0 0 6px rgba(239, 68, 68, .55); }
-        .data-history-table .data-row.is-selected td[data-category="CHN"] .data-value-suffix { color: #bfdbfe; background: rgba(59, 130, 246, .12); border-color: #3b82f6; box-shadow: 0 0 6px rgba(59, 130, 246, .55); }
-        .data-history-table .data-row.is-selected td[data-category="JPN"] .data-value-suffix { color: #fef08a; background: rgba(234, 179, 8, .12); border-color: #eab308; box-shadow: 0 0 6px rgba(234, 179, 8, .55); }
-        .data-history-table .data-row.is-selected td[data-category="TWN"] .data-value-suffix { color: #e9d5ff; background: rgba(168, 85, 247, .12); border-color: #a855f7; box-shadow: 0 0 6px rgba(168, 85, 247, .55); }
+        /* Pilihan tanggal: border dan glow lebih tegas pada dua digit terakhir di empat kolom. */
+        .data-history-table .data-row.is-selected td[data-category="CAM"] .data-value-suffix {
+            color: #fff1f2; background: rgba(239, 68, 68, .22); border-color: #fb7185;
+            box-shadow: 0 0 5px #ef4444, 0 0 11px rgba(239, 68, 68, .95), 0 0 18px rgba(239, 68, 68, .8);
+            text-shadow: 0 0 4px #fff, 0 0 9px #fb7185;
+        }
+        .data-history-table .data-row.is-selected td[data-category="CHN"] .data-value-suffix {
+            color: #eff6ff; background: rgba(59, 130, 246, .24); border-color: #60a5fa;
+            box-shadow: 0 0 5px #3b82f6, 0 0 11px rgba(59, 130, 246, .95), 0 0 18px rgba(59, 130, 246, .8);
+            text-shadow: 0 0 4px #fff, 0 0 9px #60a5fa;
+        }
+        .data-history-table .data-row.is-selected td[data-category="JPN"] .data-value-suffix {
+            color: #fefce8; background: rgba(234, 179, 8, .24); border-color: #facc15;
+            box-shadow: 0 0 5px #eab308, 0 0 11px rgba(234, 179, 8, .95), 0 0 18px rgba(234, 179, 8, .8);
+            text-shadow: 0 0 4px #fff, 0 0 9px #facc15;
+        }
+        .data-history-table .data-row.is-selected td[data-category="TWN"] .data-value-suffix {
+            color: #faf5ff; background: rgba(168, 85, 247, .24); border-color: #c084fc;
+            box-shadow: 0 0 5px #a855f7, 0 0 11px rgba(168, 85, 247, .95), 0 0 18px rgba(168, 85, 247, .8);
+            text-shadow: 0 0 4px #fff, 0 0 9px #c084fc;
+        }
         .data-history-empty {
             padding: 22px 10px !important; color: #94a3b8 !important;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
