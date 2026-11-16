@@ -59,10 +59,41 @@
             letter-spacing: 0.5px;
         }
 
-        .force-reset-btn {
+        .dashboard-title-actions {
             position: absolute;
-            right: 0;
             top: 0;
+            right: 0;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .web-url-toggle {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 27px;
+            height: 27px;
+            padding: 0;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background: #101827;
+            color: #94a3b8;
+            font-size: 17px;
+            line-height: 1;
+            cursor: pointer;
+            transition: color 0.2s, border-color 0.2s, background 0.2s;
+        }
+
+        .web-url-toggle:hover,
+        .web-url-toggle:focus-visible {
+            color: var(--text-color);
+            border-color: #3b82f6;
+            outline: none;
+        }
+
+        .force-reset-btn {
+            position: static;
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -302,24 +333,6 @@
             border: 0;
             background: transparent;
         }
-        .web-url-toggle {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            padding: 6px 9px;
-            color: #94a3b8;
-            background: #101827;
-            font-size: 11px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-        .web-url-toggle:hover,
-        .web-url-toggle[aria-expanded="true"] {
-            color: var(--text-color);
-            border-color: #3b82f6;
-        }
         .web-url-panel-content {
             display: none;
             max-width: 100%;
@@ -531,7 +544,7 @@
             .multi-web-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
         }
         @media (max-width: 560px) {
-            .web-url-panel { padding: 12px; }
+            .web-url-panel-content { padding: 9px; }
             .web-url-panel-heading { align-items: flex-start; flex-direction: column; }
             .web-url-actions { align-items: stretch; }
             .web-url-action { flex: 1; }
@@ -548,16 +561,18 @@
 <div class="container">
     <div class="dashboard-title-row">
         <h1>Kalkulator</h1>
-        <button type="button" id="forceResetBtn" class="force-reset-btn"
-            onclick="forceResetDashboard()" title="Bersihkan cache aplikasi dan muat kode terbaru"
-            aria-label="Force Reset">↻ Force Reset</button>
+        <div class="dashboard-title-actions">
+            <button type="button" class="web-url-toggle" id="webUrlToggle"
+                onclick="toggleWebsiteSettings()" title="Pengaturan website"
+                aria-label="Pengaturan website" aria-expanded="false"
+                aria-controls="webUrlPanelContent">⚙</button>
+            <button type="button" id="forceResetBtn" class="force-reset-btn"
+                onclick="forceResetDashboard()" title="Bersihkan cache aplikasi dan muat kode terbaru"
+                aria-label="Force Reset">↻ Force Reset</button>
+        </div>
     </div>
 
     <section class="web-url-panel" id="webUrlPanel" aria-labelledby="webUrlPanelTitle">
-        <button type="button" class="web-url-toggle" id="webUrlToggle"
-            onclick="toggleWebsiteSettings()" aria-expanded="false" aria-controls="webUrlPanelContent">
-            <span aria-hidden="true">⚙</span> PENGATURAN WEBSITE <span id="webUrlToggleIcon" aria-hidden="true">＋</span>
-        </button>
         <div class="web-url-panel-content" id="webUrlPanelContent" hidden>
             <div class="web-url-panel-heading">
                 <div>
@@ -567,29 +582,29 @@
             </div>
             <div class="web-url-grid">
                 <div class="web-url-field">
-                    <label for="webUrl1">WEB 1</label>
+                    <label for="webUrl1">WEB 1 SD/SG/HK</label>
                     <input type="url" id="webUrl1" inputmode="url" placeholder="https://website-pertama.com">
                 </div>
                 <div class="web-url-field">
-                    <label for="webUrl2">WEB 2</label>
+                    <label for="webUrl2">WEB 2 CAM</label>
                     <input type="url" id="webUrl2" inputmode="url" placeholder="https://website-kedua.com">
                 </div>
                 <div class="web-url-field">
-                    <label for="webUrl3">WEB 3</label>
+                    <label for="webUrl3">WEB 3 CHN</label>
                     <input type="url" id="webUrl3" inputmode="url" placeholder="https://website-ketiga.com">
                 </div>
                 <div class="web-url-field">
-                    <label for="webUrl4">WEB 4</label>
+                    <label for="webUrl4">WEB 4 JPN</label>
                     <input type="url" id="webUrl4" inputmode="url" placeholder="https://website-keempat.com">
                 </div>
                 <div class="web-url-field">
-                    <label for="webUrl5">WEB 5</label>
+                    <label for="webUrl5">WEB 5 TWN</label>
                     <input type="url" id="webUrl5" inputmode="url" placeholder="https://website-kelima.com">
                 </div>
             </div>
             <div class="web-url-actions">
                 <button type="button" class="web-url-action" onclick="applyWebsiteUrls()">TERAPKAN LINK</button>
-                <span id="webUrlStatus" role="status" aria-live="polite">WEB 1 awal: https://toto.sdy2024.com</span>
+                <span id="webUrlStatus" role="status" aria-live="polite">Pengaturan website siap diterapkan.</span>
             </div>
         </div>
     </section>
@@ -1331,24 +1346,51 @@ function pasteHasilManual() {
 }
 
     
-// Buka/tutup pengaturan URL website (selalu tertutup saat halaman pertama kali dibuka).
+// PIN pengaturan website. Ubah nilai ini untuk mengganti PIN akses panel.
+const DASHBOARD_WEBSITE_SETTINGS_PIN = '48271936';
+let websiteSettingsUnlocked = false;
+
+// Buka/tutup panel pengaturan. PIN diminta setiap kali panel dibuka.
 function toggleWebsiteSettings() {
     const panel = document.getElementById('webUrlPanel');
     const content = document.getElementById('webUrlPanelContent');
     const button = document.getElementById('webUrlToggle');
-    const icon = document.getElementById('webUrlToggleIcon');
     if (!panel || !content || !button) return;
 
-    const isOpen = !panel.classList.contains('is-open');
-    panel.classList.toggle('is-open', isOpen);
-    content.hidden = !isOpen;
-    button.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-    if (icon) icon.textContent = isOpen ? '−' : '＋';
+    const isOpen = panel.classList.contains('is-open');
+    if (isOpen) {
+        panel.classList.remove('is-open');
+        content.hidden = true;
+        websiteSettingsUnlocked = false;
+        button.setAttribute('aria-expanded', 'false');
+        return;
+    }
+
+    const enteredPin = window.prompt('Masukkan PIN untuk membuka pengaturan website:');
+    if (enteredPin === null) return;
+
+    if (enteredPin !== DASHBOARD_WEBSITE_SETTINGS_PIN) {
+        window.alert('PIN salah. Pengaturan website tetap terkunci.');
+        websiteSettingsUnlocked = false;
+        return;
+    }
+
+    websiteSettingsUnlocked = true;
+    panel.classList.add('is-open');
+    content.hidden = false;
+    button.setAttribute('aria-expanded', 'true');
 }
 
 // MULTI-WEB VIEWER
 const DASHBOARD_WEB_URLS_KEY = 'dashboard1_web_urls_v1';
 const DEFAULT_DASHBOARD_WEB_URLS = ['https://toto.sdy2024.com', '', '', '', ''];
+const DASHBOARD_WEB_LABELS = [
+    'WEB 1 SD/SG/HK',
+    'WEB 2 CAM',
+    'WEB 3 CHN',
+    'WEB 4 JPN',
+    'WEB 5 TWN'
+];
 let selectedDashboardWebIndex = 0;
 
 function normalizeWebsiteUrl(value) {
@@ -1392,6 +1434,11 @@ function loadSavedWebsiteUrls() {
 }
 
 function applyWebsiteUrls() {
+    if (!websiteSettingsUnlocked || !document.getElementById('webUrlPanel')?.classList.contains('is-open')) {
+        window.alert('Masukkan PIN melalui ikon gear sebelum mengubah link website.');
+        return;
+    }
+
     const status = document.getElementById('webUrlStatus');
     const rawUrls = getWebsiteUrlInputs();
     const urls = [];
@@ -1452,16 +1499,11 @@ function renderDashboardWebsites(items) {
         const selectButton = document.createElement('button');
         selectButton.type = 'button';
         selectButton.className = 'web-preview-select';
-        selectButton.textContent = 'WEB ' + (item.index + 1);
+        selectButton.textContent = DASHBOARD_WEB_LABELS[item.index] || ('WEB ' + (item.index + 1));
         selectButton.setAttribute('aria-pressed', item.index === selectedDashboardWebIndex ? 'true' : 'false');
         selectButton.addEventListener('click', () => selectDashboardWebsite(item.index));
 
-        const address = document.createElement('span');
-        address.className = 'web-preview-address';
-        address.textContent = item.url;
-        address.title = item.url;
-
-        header.append(selectButton, address);
+        header.append(selectButton);
 
         const frameWrap = document.createElement('div');
         frameWrap.className = 'web-preview-frame-wrap';
@@ -1503,8 +1545,7 @@ function updateSelectedWebsiteLabel() {
         return;
     }
     const index = Number(card.dataset.webIndex);
-    const address = card.querySelector('.web-preview-address');
-    label.textContent = 'WEB ' + (index + 1) + (address ? ' · ' + address.textContent : '');
+    label.textContent = DASHBOARD_WEB_LABELS[index] || ('WEB ' + (index + 1));
 }
 
 // Tambahkan token pada URL agar browser meminta dokumen website terbaru.
