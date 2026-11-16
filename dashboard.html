@@ -382,11 +382,6 @@
             font-weight: 700;
             cursor: pointer;
         }
-        .web-url-action.secondary {
-            background: #1e293b;
-            border-color: #334155;
-            color: #cbd5e1;
-        }
         #webUrlStatus {
             color: #94a3b8;
             font-size: 10px;
@@ -504,6 +499,34 @@
             text-align: center;
             font-size: 13px;
         }
+        .multi-web-footer {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border-color);
+        }
+        .multi-web-refresh-all {
+            min-width: 190px;
+            border: 1px solid #3b82f6;
+            border-radius: 6px;
+            padding: 8px 16px;
+            color: #fff;
+            background: #1d4ed8;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .multi-web-refresh-all:hover {
+            background: #2563eb;
+        }
+        #webRefreshStatus {
+            color: #94a3b8;
+            font-size: 10px;
+            text-align: center;
+        }
         @media (max-width: 850px) {
             .multi-web-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
         }
@@ -566,7 +589,6 @@
             </div>
             <div class="web-url-actions">
                 <button type="button" class="web-url-action" onclick="applyWebsiteUrls()">TERAPKAN LINK</button>
-                <button type="button" class="web-url-action secondary" onclick="resetWebsiteUrls()">RESET LINK</button>
                 <span id="webUrlStatus" role="status" aria-live="polite">WEB 1 awal: https://toto.sdy2024.com</span>
             </div>
         </div>
@@ -707,6 +729,10 @@
     </div>
     <div id="multiWebGrid" class="multi-web-grid">
         <div class="web-preview-empty">Masukkan link website pada bagian PENGATURAN WEBSITE di atas, lalu tekan TERAPKAN LINK.</div>
+    </div>
+    <div class="multi-web-footer">
+        <button type="button" class="multi-web-refresh-all" onclick="refreshAllWebsites()">↻ REFRESH ALL WEBSITE</button>
+        <span id="webRefreshStatus" role="status" aria-live="polite">Semua website dimuat otomatis saat dashboard dibuka.</span>
     </div>
 </section>
 
@@ -1401,21 +1427,6 @@ function applyWebsiteUrls() {
     status.style.color = '#34d399';
 }
 
-function resetWebsiteUrls() {
-    const confirmed = window.confirm('Kembalikan daftar website ke pengaturan awal?');
-    if (!confirmed) return;
-    try {
-        localStorage.removeItem(DASHBOARD_WEB_URLS_KEY);
-    } catch (error) {
-        console.warn('Pengaturan website tidak dapat dihapus:', error);
-    }
-    DEFAULT_DASHBOARD_WEB_URLS.forEach((url, index) => {
-        const input = document.getElementById('webUrl' + (index + 1));
-        if (input) input.value = url;
-    });
-    selectedDashboardWebIndex = 0;
-    applyWebsiteUrls();
-}
 
 function renderDashboardWebsites(items) {
     const grid = document.getElementById('multiWebGrid');
@@ -1457,9 +1468,10 @@ function renderDashboardWebsites(items) {
 
         const frame = document.createElement('iframe');
         frame.className = 'web-preview-frame';
-        frame.src = item.url;
+        frame.dataset.originalUrl = item.url;
+        frame.src = buildFreshWebsiteUrl(item.url, Date.now() + '-' + item.index);
         frame.title = 'Pratinjau WEB ' + (item.index + 1);
-        frame.loading = 'lazy';
+        frame.loading = 'eager';
         frame.referrerPolicy = 'strict-origin-when-cross-origin';
         frame.setAttribute('allow', 'fullscreen');
         frameWrap.appendChild(frame);
@@ -1495,6 +1507,24 @@ function updateSelectedWebsiteLabel() {
     label.textContent = 'WEB ' + (index + 1) + (address ? ' · ' + address.textContent : '');
 }
 
+// Tambahkan token pada URL agar browser meminta dokumen website terbaru.
+function buildFreshWebsiteUrl(rawUrl, token) {
+    const freshUrl = new URL(rawUrl);
+    freshUrl.searchParams.set('_dashboard_refresh', String(token));
+    return freshUrl.href;
+}
+
+function reloadWebsiteFrame(frame, token) {
+    if (!frame) return;
+    const originalUrl = frame.dataset.originalUrl || frame.src;
+    if (!originalUrl || originalUrl === 'about:blank') return;
+
+    frame.src = 'about:blank';
+    window.setTimeout(() => {
+        frame.src = buildFreshWebsiteUrl(originalUrl, token);
+    }, 30);
+}
+
 function refreshSelectedWebsite() {
     const card = document.querySelector('.web-preview-card.is-selected');
     const frame = card ? card.querySelector('iframe') : null;
@@ -1504,9 +1534,26 @@ function refreshSelectedWebsite() {
         status.style.color = '#fbbf24';
         return;
     }
-    const currentUrl = frame.src;
-    frame.src = 'about:blank';
-    window.setTimeout(() => { frame.src = currentUrl; }, 30);
+    reloadWebsiteFrame(frame, Date.now());
+}
+
+function refreshAllWebsites() {
+    const frames = Array.from(document.querySelectorAll('#multiWebGrid .web-preview-frame'));
+    const status = document.getElementById('webRefreshStatus');
+
+    if (!frames.length) {
+        if (status) status.textContent = 'Belum ada website yang dapat diperbarui.';
+        return;
+    }
+
+    const refreshToken = Date.now();
+    frames.forEach((frame, index) => {
+        reloadWebsiteFrame(frame, refreshToken + '-' + index);
+    });
+
+    if (status) {
+        status.textContent = 'Permintaan refresh dikirim ke ' + frames.length + ' website.';
+    }
 }
 
 (function initializeDashboardWebsites() {
