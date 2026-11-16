@@ -451,6 +451,56 @@
             font-size: 10px;
             text-align: center;
         }
+
+        /* Dashboard data input and 30-day history */
+        .data-entry-panel { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border-color); }
+        .data-entry-title { margin-bottom: 7px; color: #e2e8f0; font-size: 11px; font-weight: 800; letter-spacing: .35px; }
+        .data-entry-form { display: flex; align-items: stretch; gap: 7px; }
+        .data-entry-form input {
+            flex: 1 1 auto; min-width: 0; padding: 9px 10px; border: 1px solid var(--border-color);
+            border-radius: 6px; background: var(--input-bg); color: var(--text-color);
+            font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: 16px; text-transform: uppercase;
+        }
+        .data-entry-form input:focus { outline: none; border-color: var(--button-color); box-shadow: 0 0 0 2px rgba(59, 130, 246, .18); }
+        .data-entry-form button { flex: 0 0 auto; min-width: 94px; }
+        #dataEntryStatus { display: block; min-height: 14px; margin-top: 6px; color: #94a3b8; font-size: 10px; }
+
+        .data-history-shell { margin: 0 0 24px; padding: 12px; border: 1px solid var(--border-color); border-radius: 10px; background: var(--bg-container); }
+        .data-history-heading { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
+        .data-history-heading h2 { margin: 0; color: #fff; font-size: 16px; }
+        .data-history-refresh {
+            flex: 0 0 auto; padding: 7px 10px; border: 1px solid #334155; border-radius: 5px;
+            background: #1e293b; color: #fff; font-size: 11px; font-weight: 700; cursor: pointer;
+        }
+        .data-history-table-wrap { width: 100%; overflow-x: auto; border: 1px solid var(--border-color); border-radius: 7px; -webkit-overflow-scrolling: touch; }
+        .data-history-table { width: 100%; min-width: 540px; border-collapse: separate; border-spacing: 0; table-layout: fixed; font-variant-numeric: tabular-nums; }
+        .data-history-table th, .data-history-table td { padding: 9px 6px; border-right: 1px solid #27364e; border-bottom: 1px solid #27364e; text-align: center; }
+        .data-history-table th:first-child, .data-history-table td:first-child { width: 104px; text-align: left; }
+        .data-history-table th:last-child, .data-history-table td:last-child { border-right: 0; }
+        .data-history-table tbody tr:last-child td { border-bottom: 0; }
+        .data-history-table thead th { position: sticky; top: 0; z-index: 1; background: #101827; font-size: 10px; }
+        .data-category-button { width: 100%; padding: 5px 2px; border: 1px solid transparent; border-radius: 5px; background: transparent; font-size: 11px; font-weight: 900; cursor: pointer; }
+        .data-category-button[data-category="CAM"] { color: #f87171; }
+        .data-category-button[data-category="CHN"] { color: #60a5fa; }
+        .data-category-button[data-category="JPN"] { color: #facc15; }
+        .data-category-button[data-category="TWN"] { color: #c084fc; }
+        .data-category-button[aria-pressed="true"] { border-color: currentColor; background: rgba(148, 163, 184, .10); box-shadow: 0 0 0 1px currentColor; }
+        .data-history-table tbody td { color: #e2e8f0; font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: 14px; font-weight: 700; }
+        .data-history-table tbody td:first-child { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 11px; font-weight: 600; }
+        .data-date-button { padding: 4px 5px; border: 1px solid transparent; border-radius: 4px; background: transparent; color: #94a3b8; font-size: 11px; font-weight: 700; cursor: pointer; }
+        .data-date-button[aria-pressed="true"] { border-color: #94a3b8; background: rgba(148, 163, 184, .16); color: #fff; }
+        .data-history-table td.is-empty { color: #64748b; font-weight: 400; }
+        .data-history-table .data-row.is-selected td { background: rgba(148, 163, 184, .09); }
+        .data-history-table[data-focus-column="CAM"] tbody td[data-category="CAM"] { background: rgba(239, 68, 68, .13); box-shadow: inset 0 0 0 2px #ef4444; color: #fecaca; }
+        .data-history-table[data-focus-column="CHN"] tbody td[data-category="CHN"] { background: rgba(59, 130, 246, .14); box-shadow: inset 0 0 0 2px #3b82f6; color: #bfdbfe; }
+        .data-history-table[data-focus-column="JPN"] tbody td[data-category="JPN"] { background: rgba(234, 179, 8, .13); box-shadow: inset 0 0 0 2px #eab308; color: #fef08a; }
+        .data-history-table[data-focus-column="TWN"] tbody td[data-category="TWN"] { background: rgba(168, 85, 247, .14); box-shadow: inset 0 0 0 2px #a855f7; color: #e9d5ff; }
+        .data-history-empty {
+            padding: 22px 10px !important; color: #94a3b8 !important;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+            font-size: 12px !important; font-weight: 500 !important; text-align: center !important;
+        }
+        #dataHistoryStatus { display: block; min-height: 14px; margin-top: 8px; color: #94a3b8; font-size: 10px; text-align: center; }
         @media (max-width: 560px) {
             .web-url-panel-content { padding: 9px; }
             .web-url-panel-heading { align-items: flex-start; flex-direction: column; }
@@ -490,6 +540,17 @@
             <div class="web-url-actions">
                 <button type="button" class="web-url-action" onclick="applyWebsiteUrls()">TERAPKAN LINK</button>
                 <span id="webUrlStatus" role="status" aria-live="polite" hidden></span>
+            </div>
+
+            <div class="data-entry-panel">
+                <div class="data-entry-title">INPUT DATA OTOMATIS</div>
+                <form class="data-entry-form" onsubmit="submitDashboardData(event)">
+                    <input id="dataEntryInput" type="text" inputmode="text"
+                        autocomplete="off" autocapitalize="characters" spellcheck="false"
+                        placeholder="CAM 1234" aria-label="Masukkan kategori dan angka">
+                    <button type="submit" id="dataEntrySubmit" class="web-url-action">SIMPAN DATA</button>
+                </form>
+                <span id="dataEntryStatus" role="status" aria-live="polite"></span>
             </div>
         </div>
     </section>
@@ -633,6 +694,30 @@
     <div class="web-viewer-footer">
         <span id="webRefreshStatus" role="status" aria-live="polite">Website dimuat otomatis saat dashboard dibuka.</span>
     </div>
+</section>
+
+<section class="data-history-shell" aria-labelledby="dataHistoryTitle">
+    <div class="data-history-heading">
+        <h2 id="dataHistoryTitle">DATA 30 HARI TERAKHIR</h2>
+        <button type="button" class="data-history-refresh" onclick="loadDashboardData()">↻ REFRESH DATA</button>
+    </div>
+    <div class="data-history-table-wrap">
+        <table id="dataHistoryTable" class="data-history-table">
+            <thead>
+                <tr>
+                    <th scope="col">TANGGAL</th>
+                    <th scope="col"><button type="button" class="data-category-button" data-category="CAM" aria-pressed="false" onclick="selectDataColumn('CAM')">CAM</button></th>
+                    <th scope="col"><button type="button" class="data-category-button" data-category="CHN" aria-pressed="false" onclick="selectDataColumn('CHN')">CHN</button></th>
+                    <th scope="col"><button type="button" class="data-category-button" data-category="JPN" aria-pressed="false" onclick="selectDataColumn('JPN')">JPN</button></th>
+                    <th scope="col"><button type="button" class="data-category-button" data-category="TWN" aria-pressed="false" onclick="selectDataColumn('TWN')">TWN</button></th>
+                </tr>
+            </thead>
+            <tbody id="dataHistoryBody">
+                <tr><td class="data-history-empty" colspan="5">Memuat data...</td></tr>
+            </tbody>
+        </table>
+    </div>
+    <span id="dataHistoryStatus" role="status" aria-live="polite">Menghubungkan ke database...</span>
 </section>
 
 <div class="floating-nav">
@@ -1407,6 +1492,224 @@ function refreshIframe() {
         renderDashboardWebsite('');
     }
 })();
+
+// GOOGLE SHEETS DASHBOARD API
+const DASHBOARD_DATA_API_URL = 'https://type-shoot-sheet-test.vails.workers.dev';
+const DASHBOARD_DATA_CATEGORIES = ['CAM', 'CHN', 'JPN', 'TWN'];
+let selectedDataDate = '';
+let dashboardDataRequestInProgress = false;
+
+function setDashboardDataStatus(message, isError = false) {
+    const status = document.getElementById('dataHistoryStatus');
+    if (status) {
+        status.textContent = message;
+        status.style.color = isError ? '#f87171' : '#94a3b8';
+    }
+}
+
+function setDataEntryStatus(message, isError = false, isSuccess = false) {
+    const status = document.getElementById('dataEntryStatus');
+    if (!status) return;
+    status.textContent = message;
+    status.style.color = isError ? '#f87171' : (isSuccess ? '#34d399' : '#94a3b8');
+}
+
+async function callDashboardDataApi(payload) {
+    const response = await fetch(DASHBOARD_DATA_API_URL, {
+        method: 'POST',
+        mode: 'cors',
+        credentials: 'omit',
+        cache: 'no-store',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    });
+
+    let result;
+    try {
+        result = await response.json();
+    } catch (error) {
+        throw new Error('Respons backend tidak dapat dibaca.');
+    }
+
+    if (!response.ok || !result || result.ok !== true) {
+        throw new Error(result && result.error ? result.error : 'Permintaan database gagal.');
+    }
+
+    return result;
+}
+
+async function submitDashboardData(event) {
+    if (event) event.preventDefault();
+
+    const panel = document.getElementById('webUrlPanel');
+    if (!websiteSettingsUnlocked || !panel || !panel.classList.contains('is-open')) {
+        setDataEntryStatus('Buka pengaturan dengan PIN terlebih dahulu.', true);
+        return;
+    }
+
+    if (dashboardDataRequestInProgress) return;
+
+    const input = document.getElementById('dataEntryInput');
+    const button = document.getElementById('dataEntrySubmit');
+    const rawValue = input ? input.value.trim() : '';
+    const parsed = rawValue.match(/^(CAM|CHN|JPN|TWN)\s*[-:=]?\s*(\d+)$/i);
+
+    if (!parsed) {
+        setDataEntryStatus('Format: CAM 1234, CHN 1234, JPN 1234, atau TWN 1234.', true);
+        if (input) input.focus();
+        return;
+    }
+
+    dashboardDataRequestInProgress = true;
+    if (button) {
+        button.disabled = true;
+        button.textContent = 'MENYIMPAN...';
+    }
+    setDataEntryStatus('Mengirim data ke Google Sheets...');
+
+    try {
+        const result = await callDashboardDataApi({
+            action: 'save',
+            pin: DASHBOARD_WEBSITE_SETTINGS_PIN,
+            input: rawValue
+        });
+
+        setDataEntryStatus(
+            result.category + ' ' + result.value + ' — ' +
+            (result.displayDate || result.date) + '. ' + result.message,
+            false,
+            true
+        );
+
+        if (input) {
+            input.value = '';
+            input.focus();
+        }
+
+        await loadDashboardData();
+    } catch (error) {
+        setDataEntryStatus(error.message || 'Gagal menyimpan data.', true);
+    } finally {
+        dashboardDataRequestInProgress = false;
+        if (button) {
+            button.disabled = false;
+            button.textContent = 'SIMPAN DATA';
+        }
+    }
+}
+
+async function loadDashboardData() {
+    setDashboardDataStatus('Memuat data 30 hari terakhir...');
+
+    try {
+        const result = await callDashboardDataApi({ action: 'list' });
+        const records = Array.isArray(result.records) ? result.records : [];
+        renderDashboardData(records);
+        setDashboardDataStatus(
+            records.length + ' tanggal berhasil dimuat dari Google Sheets.'
+        );
+    } catch (error) {
+        renderDashboardData([]);
+        setDashboardDataStatus(
+            'Belum dapat memuat database: ' + (error.message || 'Koneksi gagal.'),
+            true
+        );
+    }
+}
+
+function renderDashboardData(records) {
+    const tbody = document.getElementById('dataHistoryBody');
+    if (!tbody) return;
+
+    tbody.replaceChildren();
+
+    if (!records.length) {
+        const row = document.createElement('tr');
+        const cell = document.createElement('td');
+        cell.colSpan = 5;
+        cell.className = 'data-history-empty';
+        cell.textContent = 'Belum ada data untuk ditampilkan.';
+        row.appendChild(cell);
+        tbody.appendChild(row);
+        selectedDataDate = '';
+        return;
+    }
+
+    records.forEach(record => {
+        const row = document.createElement('tr');
+        row.className = 'data-row';
+        row.dataset.date = String(record.date || '');
+
+        if (selectedDataDate && selectedDataDate === row.dataset.date) {
+            row.classList.add('is-selected');
+        }
+
+        const dateCell = document.createElement('td');
+        const dateButton = document.createElement('button');
+        dateButton.type = 'button';
+        dateButton.className = 'data-date-button';
+        dateButton.textContent = String(record.displayDate || record.date || '');
+        dateButton.setAttribute('aria-pressed', row.classList.contains('is-selected') ? 'true' : 'false');
+        dateButton.addEventListener('click', () => selectDataRow(row.dataset.date));
+        dateCell.appendChild(dateButton);
+        row.appendChild(dateCell);
+
+        DASHBOARD_DATA_CATEGORIES.forEach(category => {
+            const cell = document.createElement('td');
+            cell.dataset.category = category;
+            const value = record[category] === null || record[category] === undefined
+                ? ''
+                : String(record[category]).trim();
+
+            if (value) {
+                cell.textContent = value;
+            } else {
+                cell.textContent = '—';
+                cell.classList.add('is-empty');
+            }
+
+            row.appendChild(cell);
+        });
+
+        tbody.appendChild(row);
+    });
+}
+
+function selectDataColumn(category) {
+    if (!DASHBOARD_DATA_CATEGORIES.includes(category)) return;
+
+    const table = document.getElementById('dataHistoryTable');
+    if (!table) return;
+
+    const current = table.dataset.focusColumn || '';
+    const next = current === category ? '' : category;
+
+    if (next) {
+        table.dataset.focusColumn = next;
+    } else {
+        delete table.dataset.focusColumn;
+    }
+
+    document.querySelectorAll('.data-category-button').forEach(button => {
+        button.setAttribute('aria-pressed',
+            button.dataset.category === next ? 'true' : 'false');
+    });
+}
+
+function selectDataRow(date) {
+    selectedDataDate = selectedDataDate === date ? '' : date;
+
+    document.querySelectorAll('#dataHistoryBody .data-row').forEach(row => {
+        const selected = row.dataset.date === selectedDataDate;
+        row.classList.toggle('is-selected', selected);
+        const button = row.querySelector('.data-date-button');
+        if (button) button.setAttribute('aria-pressed', selected ? 'true' : 'false');
+    });
+}
+
+// Ambil data saat dashboard selesai memuat.
+loadDashboardData();
+
 </script>
 
 </body>
