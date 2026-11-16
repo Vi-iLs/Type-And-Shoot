@@ -464,35 +464,6 @@
         .web-preview-card.is-selected .web-preview-select {
             color: #60a5fa;
         }
-        .web-preview-select {
-            flex: 1 1 auto;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-        .web-preview-open {
-            flex: 0 0 auto;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 5px 7px;
-            border: 1px solid #334155;
-            border-radius: 5px;
-            background: #0f172a;
-            color: #93c5fd;
-            font-size: 9px;
-            font-weight: 800;
-            line-height: 1;
-            text-decoration: none;
-            white-space: nowrap;
-        }
-        .web-preview-open:hover,
-        .web-preview-open:focus-visible {
-            border-color: #3b82f6;
-            background: #1e3a5f;
-            color: #fff;
-            outline: none;
-        }
         .web-preview-address {
             min-width: 0;
             overflow: hidden;
@@ -1511,16 +1482,7 @@ function renderDashboardWebsites(items) {
         selectButton.setAttribute('aria-pressed', item.index === selectedDashboardWebIndex ? 'true' : 'false');
         selectButton.addEventListener('click', () => selectDashboardWebsite(item.index));
 
-        const openLink = document.createElement('a');
-        openLink.className = 'web-preview-open';
-        openLink.href = item.url;
-        openLink.target = '_blank';
-        openLink.rel = 'noopener noreferrer';
-        openLink.textContent = '↗ BUKA';
-        openLink.title = 'Buka ' + (DASHBOARD_WEB_LABELS[item.index] || 'website') + ' di tab baru';
-        openLink.setAttribute('aria-label', 'Buka ' + (DASHBOARD_WEB_LABELS[item.index] || 'website') + ' di tab baru');
-
-        header.append(selectButton, openLink);
+        header.append(selectButton);
 
         const frameWrap = document.createElement('div');
         frameWrap.className = 'web-preview-frame-wrap';
