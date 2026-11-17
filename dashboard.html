@@ -398,23 +398,6 @@
         .data-entry-form input:focus { outline: none; border-color: var(--button-color); box-shadow: 0 0 0 2px rgba(59, 130, 246, .18); }
         .data-entry-form button { flex: 0 0 auto; min-width: 94px; }
         #dataEntryStatus { display: block; min-height: 14px; margin-top: 6px; color: #94a3b8; font-size: 10px; }
-        .source-diagnostic-panel { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border-color); }
-        .source-diagnostic-heading { margin-bottom: 7px; color: #e2e8f0; font-size: 10px; font-weight: 800; letter-spacing: .3px; }
-        .source-diagnostic-controls { display: flex; align-items: center; gap: 7px; }
-        .source-diagnostic-controls input { flex: 1 1 auto; min-width: 0; padding: 7px 8px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--input-bg); color: var(--text-color); font-size: 13px; }
-        .source-diagnostic-controls button { flex: 0 0 auto; }
-        #sourceTestStatus { display: block; min-height: 14px; margin-top: 6px; color: #94a3b8; font-size: 10px; }
-        .source-test-results { display: grid; gap: 5px; margin-top: 8px; }
-        .source-test-row { padding: 7px 8px; border: 1px solid var(--border-color); border-radius: 6px; background: #0f172a; }
-        .source-test-row-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 3px; }
-        .source-test-category { color: #e2e8f0; font-size: 10px; font-weight: 900; }
-        .source-test-state { font-size: 9px; font-weight: 900; letter-spacing: .25px; }
-        .source-test-state.match { color: #34d399; }
-        .source-test-state.mismatch, .source-test-state.source-error { color: #f87171; }
-        .source-test-state.date-pending { color: #fbbf24; }
-        .source-test-state.no-result { color: #94a3b8; }
-        .source-test-values { color: #cbd5e1; font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: 9.5px; line-height: 1.5; overflow-wrap: anywhere; }
-        .source-test-error { margin-top: 3px; color: #fca5a5; font-size: 9px; line-height: 1.4; }
 
         .data-history-shell { margin: 0 0 24px; padding: 12px; border: 1px solid var(--border-color); border-radius: 10px; background: var(--bg-container); }
         .data-history-heading { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
@@ -476,6 +459,27 @@
         .data-date-button { padding: 3px 1px; border: 1px solid transparent; border-radius: 4px; background: transparent; color: #94a3b8; font-size: 8.5px; font-weight: 700; letter-spacing: -.2px; white-space: nowrap; cursor: pointer; }
         .data-date-button[aria-pressed="true"] { border-color: #94a3b8; background: rgba(148, 163, 184, .16); color: #fff; }
         .data-history-table td.is-empty { color: #64748b; font-weight: 400; }
+        .data-history-table td.is-source-mismatch {
+            background: rgba(127, 29, 29, .12);
+        }
+        .source-status-marker {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 13px;
+            height: 13px;
+            margin-left: 3px;
+            border: 1px solid #f87171;
+            border-radius: 50%;
+            color: #fecaca;
+            background: rgba(127, 29, 29, .45);
+            font-family: Arial, sans-serif;
+            font-size: 9px;
+            font-weight: 900;
+            line-height: 1;
+            vertical-align: 1px;
+            cursor: help;
+        }
 
         /* Fokus kategori: border dan glow kuat hanya pada dua digit terakhir. */
         .data-history-table[data-focus-column="CAM"] tbody td[data-category="CAM"] .data-value-suffix {
@@ -600,7 +604,7 @@
     <div class="dashboard-title-row">
         <h1>Kalkulator</h1>
         <button type="button" class="data-settings-toggle" id="dataSettingsToggle"
-            onclick="toggleWebsiteSettings()" title="Pengaturan data"
+            onclick="toggleDataSettings()" title="Pengaturan data"
             aria-label="Pengaturan data" aria-expanded="false"
             aria-controls="dataSettingsPanelContent">⚙</button>
         <div class="dashboard-title-actions">
@@ -623,15 +627,6 @@
                 <span id="dataEntryStatus" role="status" aria-live="polite"></span>
             </div>
 
-            <div class="source-diagnostic-panel">
-                <div class="source-diagnostic-heading">UJI 2 SUMBER OTOMATIS — TIDAK MENYIMPAN DATA</div>
-                <div class="source-diagnostic-controls">
-                    <input type="date" id="sourceTestDate" aria-label="Tanggal yang diuji">
-                    <button type="button" class="data-settings-action" id="sourceTestButton" onclick="testDashboardSources()">UJI SUMBER</button>
-                </div>
-                <span id="sourceTestStatus" role="status" aria-live="polite">Pilih tanggal lalu uji pembacaan Indotogel dan pembanding.</span>
-                <div id="sourceTestResults" class="source-test-results" aria-live="polite"></div>
-            </div>
         </div>
     </section>
 
@@ -1422,7 +1417,7 @@ const DASHBOARD_SETTINGS_PIN = '654321';
 let dataSettingsUnlocked = false;
 
 // Panel input data manual tetap dikunci PIN.
-function toggleWebsiteSettings() {
+function toggleDataSettings() {
     const panel = document.getElementById('dataSettingsPanel');
     const content = document.getElementById('dataSettingsPanelContent');
     const button = document.getElementById('dataSettingsToggle');
@@ -1559,102 +1554,6 @@ async function submitDashboardData(event) {
     }
 }
 
-function getCurrentJakartaDateKey() {
-    const parts = new Intl.DateTimeFormat('en-CA', {
-        timeZone: 'Asia/Jakarta', year: 'numeric', month: '2-digit', day: '2-digit'
-    }).formatToParts(new Date());
-    const values = {};
-    parts.forEach(part => { if (part.type !== 'literal') values[part.type] = part.value; });
-    return values.year + '-' + values.month + '-' + values.day;
-}
-
-function setSourceTestStatus(message, isError = false) {
-    const status = document.getElementById('sourceTestStatus');
-    if (!status) return;
-    status.textContent = message;
-    status.style.color = isError ? '#f87171' : '#94a3b8';
-}
-
-function renderSourceTestResults(results) {
-    const wrapper = document.getElementById('sourceTestResults');
-    if (!wrapper) return;
-    wrapper.replaceChildren();
-
-    (Array.isArray(results) ? results : []).forEach(item => {
-        const row = document.createElement('div');
-        row.className = 'source-test-row';
-
-        const head = document.createElement('div');
-        head.className = 'source-test-row-head';
-        const category = document.createElement('span');
-        category.className = 'source-test-category';
-        category.textContent = String(item.category || '—');
-
-        const state = document.createElement('span');
-        state.className = 'source-test-state ' + String(item.status || 'no_result').toLowerCase().replace(/_/g, '-');
-        const labels = { MATCH: 'MATCH 2/2', MISMATCH: 'MISMATCH', DATE_PENDING: 'TANGGAL BELUM SAMA', NO_RESULT: 'HASIL BELUM ADA', SOURCE_ERROR: 'SUMBER ERROR' };
-        state.textContent = labels[item.status] || String(item.status || 'UNKNOWN');
-        head.append(category, state);
-
-        const values = document.createElement('div');
-        values.className = 'source-test-values';
-        values.textContent = 'INDOTOGEL: ' + (item.primaryValue || '—') + ' (' + (item.primaryDate || '—') + ')  |  PEMBANDING: ' + (item.comparatorValue || '—') + ' (' + (item.comparatorDate || '—') + ')';
-        row.append(head, values);
-
-        if (Array.isArray(item.errors) && item.errors.length) {
-            const error = document.createElement('div');
-            error.className = 'source-test-error';
-            error.textContent = item.errors.join(' · ');
-            row.appendChild(error);
-        }
-        wrapper.appendChild(row);
-    });
-}
-
-async function testDashboardSources() {
-    const panel = document.getElementById('dataSettingsPanel');
-    const button = document.getElementById('sourceTestButton');
-    const dateInput = document.getElementById('sourceTestDate');
-
-    if (!dataSettingsUnlocked || !panel || !panel.classList.contains('is-open')) {
-        setSourceTestStatus('Buka pengaturan dengan PIN terlebih dahulu.', true);
-        return;
-    }
-    if (dashboardDataRequestInProgress) return;
-
-    const date = dateInput ? dateInput.value : '';
-    if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(date)) {
-        setSourceTestStatus('Pilih tanggal yang valid.', true);
-        return;
-    }
-
-    dashboardDataRequestInProgress = true;
-    if (button) { button.disabled = true; button.textContent = 'MENGUJI...'; }
-    setSourceTestStatus('Membaca tujuh pasaran dari dua website. Tidak ada data yang disimpan.');
-    const resultsWrapper = document.getElementById('sourceTestResults');
-    if (resultsWrapper) resultsWrapper.replaceChildren();
-
-    try {
-        const result = await callDashboardDataApi({
-            action: 'diagnose',
-            pin: DASHBOARD_SETTINGS_PIN,
-            date: date
-        });
-        renderSourceTestResults(result.results);
-        const rows = Array.isArray(result.results) ? result.results : [];
-        const matched = rows.filter(item => item.status === 'MATCH').length;
-        const mismatched = rows.filter(item => item.status === 'MISMATCH').length;
-        setSourceTestStatus(
-            matched + '/7 cocok · ' + mismatched + ' berbeda · ' + (rows.length - matched - mismatched) + ' belum siap. Pemeriksaan ini tidak mengubah Google Sheets.'
-        );
-    } catch (error) {
-        setSourceTestStatus(error.message || 'Gagal menguji sumber.', true);
-    } finally {
-        dashboardDataRequestInProgress = false;
-        if (button) { button.disabled = false; button.textContent = 'UJI SUMBER'; }
-    }
-}
-
 async function loadDashboardData() {
     setDashboardDataStatus('Memuat data 30 hari terakhir...');
 
@@ -1662,8 +1561,14 @@ async function loadDashboardData() {
         const result = await callDashboardDataApi({ action: 'list' });
         const records = Array.isArray(result.records) ? result.records : [];
         renderDashboardData(records);
+        const mismatchCount = records.reduce((total, record) => {
+            return total + DASHBOARD_DATA_CATEGORIES.filter(category =>
+                String(record[category + '_STATUS'] || '').toUpperCase() === 'MISMATCH'
+            ).length;
+        }, 0);
         setDashboardDataStatus(
-            records.length + ' tanggal berhasil dimuat dari Google Sheets.'
+            records.length + ' tanggal dimuat · ' + mismatchCount +
+            ' perbedaan Indotogel ditandai (!). Nilai tabel mengikuti Indotogel.'
         );
     } catch (error) {
         renderDashboardData([]);
@@ -1748,6 +1653,26 @@ function renderDashboardData(records) {
             } else {
                 cell.textContent = '—';
                 cell.classList.add('is-empty');
+            }
+
+            const sourceStatus = String(record[category + '_STATUS'] || '').toUpperCase();
+            const previousSourceValue = String(record[category + '_PREVIOUS'] || '').trim();
+
+            if (sourceStatus === 'MISMATCH') {
+                cell.classList.add('is-source-mismatch');
+                const marker = document.createElement('span');
+                marker.className = 'source-status-marker';
+                marker.textContent = '!';
+                marker.setAttribute('aria-label', 'Perbedaan hasil');
+                marker.title = 'Perbedaan tercatat. Nilai sebelumnya: ' +
+                    (previousSourceValue || 'kosong') +
+                    '. Nilai Indotogel yang digunakan: ' + (value || '—') +
+                    '. Lihat tab SOURCE_AUDIT untuk riwayat lengkap.';
+                cell.appendChild(marker);
+            } else if (sourceStatus === 'SAVED') {
+                cell.title = 'Diisi otomatis dari Indotogel.';
+            } else if (sourceStatus === 'MATCH') {
+                cell.title = 'Sama dengan nilai yang sudah tersimpan sebelumnya.';
             }
 
             row.appendChild(cell);
@@ -2031,10 +1956,6 @@ function selectDataRow(date) {
         if (button) button.setAttribute('aria-pressed', selected ? 'true' : 'false');
     });
 }
-
-// Isi tanggal uji dengan tanggal lokal Asia/Jakarta.
-const sourceTestDateInput = document.getElementById('sourceTestDate');
-if (sourceTestDateInput) sourceTestDateInput.value = getCurrentJakartaDateKey();
 
 // Ambil data saat dashboard selesai memuat.
 loadDashboardData();
