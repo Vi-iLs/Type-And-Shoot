@@ -1908,7 +1908,38 @@ function selectDataColumn(category) {
     if (!dashboardNumberFilterActive) updateDashboardFilterUI();
 }
 
-function toggleDashboardNumberFilter() {
+async function copyDashboardFilterResults(value) {
+    const text = String(value || '').trim();
+    if (!text) return false;
+
+    if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+        await navigator.clipboard.writeText(text);
+        return true;
+    }
+
+    // Fallback untuk browser yang tidak menyediakan Clipboard API.
+    const temporaryInput = document.createElement('textarea');
+    temporaryInput.value = text;
+    temporaryInput.setAttribute('readonly', '');
+    temporaryInput.style.position = 'fixed';
+    temporaryInput.style.left = '-9999px';
+    temporaryInput.style.top = '0';
+    document.body.appendChild(temporaryInput);
+    temporaryInput.select();
+    temporaryInput.setSelectionRange(0, temporaryInput.value.length);
+
+    let copied = false;
+    try {
+        copied = document.execCommand('copy');
+    } finally {
+        temporaryInput.remove();
+    }
+
+    if (!copied) throw new Error('Browser menolak akses clipboard.');
+    return true;
+}
+
+async function toggleDashboardNumberFilter() {
     const table = document.getElementById('dataHistoryTable');
     const category = table ? (table.dataset.focusColumn || '') : '';
 
@@ -1918,8 +1949,31 @@ function toggleDashboardNumberFilter() {
     }
 
     dashboardNumberFilterActive = !dashboardNumberFilterActive;
-    applyDashboardNumberFilter();
-    if (!dashboardNumberFilterActive) updateDashboardFilterUI();
+    const selectedPairs = applyDashboardNumberFilter();
+
+    if (!dashboardNumberFilterActive) {
+        updateDashboardFilterUI();
+        return;
+    }
+
+    if (!selectedPairs.length) {
+        updateDashboardFilterUI('Filter aktif, tetapi belum ada pasangan valid untuk disalin.');
+        return;
+    }
+
+    const clipboardText = selectedPairs.join('.');
+    try {
+        await copyDashboardFilterResults(clipboardText);
+        updateDashboardFilterUI(
+            'Filter ' + category + ' aktif. Kandidat ' + selectedPairs.join(' · ') +
+            ' berhasil disalin: ' + clipboardText
+        );
+    } catch (error) {
+        updateDashboardFilterUI(
+            'Filter ' + category + ' aktif. Kandidat ' + selectedPairs.join(' · ') +
+            '. Penyalinan otomatis diblokir browser; salin manual: ' + clipboardText
+        );
+    }
 }
 
 function updateDashboardFilterUI(message) {
@@ -1952,7 +2006,7 @@ function updateDashboardFilterUI(message) {
 function applyDashboardNumberFilter() {
     const table = document.getElementById('dataHistoryTable');
     const tbody = document.getElementById('dataHistoryBody');
-    if (!table || !tbody) return;
+    if (!table || !tbody) return [];
 
     const rows = Array.from(tbody.querySelectorAll('.data-row'));
 
@@ -1966,17 +2020,17 @@ function applyDashboardNumberFilter() {
 
     if (!dashboardNumberFilterActive) {
         updateDashboardHistoryMoreButton(rows.length);
-        return;
+        return [];
     }
 
     const category = table.dataset.focusColumn || '';
     if (!DASHBOARD_DATA_CATEGORIES.includes(category)) {
         dashboardNumberFilterActive = false;
         updateDashboardHistoryMoreButton(rows.length);
-        return;
+        return [];
     }
 
-    // Ambil seluruh hasil 4 digit kategori terpilih, urut terbaru ke terlama.
+    // Ambil hasil 4 digit kategori terpilih, urut terbaru ke terlama.
     const entries = rows.map(row => {
         const cell = row.querySelector('td[data-category="' + category + '"]');
         return {
@@ -1985,16 +2039,16 @@ function applyDashboardNumberFilter() {
             value: cell ? cell.textContent.trim() : '',
             suffix: cell ? cell.querySelector('.data-value-suffix') : null
         };
-    }).filter(entry => /^\d{4}$/.test(entry.value))
+    }).filter(entry => /^\\d{4}$/.test(entry.value))
       .sort((a, b) => b.date.localeCompare(a.date));
 
     if (!entries.length) {
         updateDashboardHistoryMoreButton(rows.length);
         updateDashboardFilterUI('Tidak ada hasil 4 digit untuk kategori ' + category + '.');
-        return;
+        return [];
     }
 
-    // Hasil paling baru menjadi acuan; empat hasil berikutnya adalah jendela historis.
+    // Hasil terbaru menjadi acuan; empat hasil sebelumnya menjadi jendela historis.
     const visibleEntries = entries.slice(0, DASHBOARD_FILTER_PREVIOUS_RESULTS + 1);
     const visibleDates = new Set(visibleEntries.map(entry => entry.date));
     rows.forEach(row => {
@@ -2018,8 +2072,7 @@ function applyDashboardNumberFilter() {
         const isDuplicate = seenPairs.has(pair);
         const isReference = index === 0;
 
-        // Hasil terbaru hanya menjadi acuan. Pasangan kembar, awalan/akhiran terlarang,
-        // duplikasi, dan kandidat setelah tiga pilihan pertama dibuat abu-abu.
+        // Maksimal 3 pasangan unik: selain itu dibuat abu-abu.
         const excluded = isReference || isDouble || hasExcludedPrefix ||
             hasExcludedSuffix || isDuplicate || highlightedPairs.length >= DASHBOARD_FILTER_MAX_HIGHLIGHTS;
 
@@ -2042,6 +2095,8 @@ function applyDashboardNumberFilter() {
         'Filter ' + category + ' aktif. Kandidat: ' + candidateText +
         '. ' + mutedCount + ' pasangan abu-abu; data yang lebih lama disembunyikan.'
     );
+
+    return highlightedPairs;
 }
 
 function selectDataRow(date) {
