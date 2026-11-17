@@ -409,6 +409,7 @@
         .source-test-market { color: #e2e8f0; font-size: 10px; font-weight: 900; }
         .source-test-state { color: #94a3b8; font-size: 8px; font-weight: 900; }
         .source-test-state.found { color: #34d399; }
+        .source-test-state.backup { color: #fbbf24; }
         .source-test-state.error { color: #f87171; }
         .source-test-value { margin-top: 3px; color: #cbd5e1; font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: 11px; font-weight: 800; overflow-wrap: anywhere; }
         .source-test-detail { margin-top: 3px; color: #94a3b8; font-size: 8px; line-height: 1.35; overflow-wrap: anywhere; }
@@ -826,7 +827,7 @@
             onclick="toggleDashboardHistory()" aria-expanded="false" hidden>SEE MORE</button>
     </div>
     <span id="dataHistoryStatus" role="status" aria-live="polite">Menghubungkan ke database...</span>
-    <span class="data-history-filter-status">Tanda ! berarti hasil Indotogel berbeda dari angka sebelumnya. Nilai lama tersimpan di tab SOURCE_AUDIT.</span>
+    <span class="data-history-filter-status">Tanda ! berarti hasil otomatis berbeda dari angka sebelumnya. Nilai lama tersimpan di tab SOURCE_AUDIT.</span>
 </section>
 
 <div class="floating-nav">
@@ -1546,16 +1547,19 @@ function renderIndotogelSourceTest(results) {
         market.className = 'source-test-market';
         market.textContent = String(item.category || '—');
 
+        const isPrimary = item.status === 'FOUND_PRIMARY';
+        const isBackup = item.status === 'FOUND_BACKUP';
+        const isFound = isPrimary || isBackup;
         const state = document.createElement('span');
         state.className = 'source-test-state ' +
-            (item.status === 'FOUND' ? 'found' : (item.status === 'ERROR' ? 'error' : ''));
-        state.textContent = item.status === 'FOUND'
-            ? 'TERBACA'
-            : (item.status === 'ERROR' ? 'ERROR' : 'MENUNGGU');
+            (isPrimary ? 'found' : (isBackup ? 'backup' : (item.status === 'ERROR' ? 'error' : '')));
+        state.textContent = isPrimary
+            ? 'UTAMA'
+            : (isBackup ? 'CADANGAN' : (item.status === 'ERROR' ? 'ERROR' : 'MENUNGGU'));
 
         const value = document.createElement('div');
         value.className = 'source-test-value';
-        value.textContent = item.status === 'FOUND'
+        value.textContent = isFound
             ? (String(item.rawDigits || '') !== String(item.value || '')
                 ? String(item.rawDigits || '') + ' → ' + String(item.value || '')
                 : String(item.value || '—'))
@@ -1564,10 +1568,12 @@ function renderIndotogelSourceTest(results) {
 
         card.append(head, value);
         head.append(market, state);
-        if (item.status === 'ERROR' || item.status === 'NOT_READY') {
+        if (isBackup || item.status === 'ERROR' || item.status === 'NOT_READY') {
             const detail = document.createElement('div');
             detail.className = 'source-test-detail';
-            detail.textContent = String(item.message || 'Tidak ada detail tambahan.');
+            detail.textContent = isBackup
+                ? 'Indotogel tidak tersedia; memakai widget cadangan.'
+                : String(item.message || 'Belum ada hasil untuk tanggal ini.');
             card.appendChild(detail);
         }
         wrapper.appendChild(card);
@@ -1585,7 +1591,7 @@ async function testIndotogelSource() {
 
     dashboardDataRequestInProgress = true;
     if (button) { button.disabled = true; button.textContent = 'MEMERIKSA...'; }
-    setSourceTestStatus('Mengambil tujuh halaman dari Indotogel. Pemeriksaan ini tidak menulis ke Google Sheets.');
+    setSourceTestStatus('Membaca Indotogel terlebih dahulu; widget cadangan hanya diambil jika hasil utama tidak tersedia. Tes ini tidak menyimpan angka.');
     const wrapper = document.getElementById('sourceTestResults');
     if (wrapper) wrapper.replaceChildren();
 
@@ -1596,9 +1602,10 @@ async function testIndotogelSource() {
         });
         renderIndotogelSourceTest(result.results);
         setSourceTestStatus(
-            'Tanggal ' + result.date + ' · ' + result.found + '/7 hasil terbaca · ' +
-            result.notReady + ' belum tersedia · ' + result.errors + ' gagal dibaca. ' +
-            'Tes ini hanya membaca, tidak menyimpan angka.'
+            'Tanggal ' + result.date + ' · utama ' + (result.primary || 0) +
+            ' · cadangan ' + (result.backup || 0) + ' · belum tersedia ' +
+            result.notReady + ' · error ' + result.errors +
+            '. Tes ini hanya membaca, tidak menyimpan angka.'
         );
     } catch (error) {
         setSourceTestStatus(error.message || 'Tes Indotogel gagal.', true);
@@ -1780,13 +1787,15 @@ function renderDashboardData(records) {
                 marker.setAttribute('aria-label', 'Perbedaan hasil');
                 marker.title = 'Perbedaan tercatat. Nilai sebelumnya: ' +
                     (previousSourceValue || 'kosong') +
-                    '. Nilai Indotogel yang digunakan: ' + (value || '—') +
+                    '. Nilai dari ' + (record[category + '_SOURCE'] || 'sumber otomatis') +
+                    ' yang digunakan: ' + (value || '—') +
                     '. Lihat tab SOURCE_AUDIT untuk riwayat lengkap.';
                 cell.appendChild(marker);
             } else if (sourceStatus === 'SAVED') {
-                cell.title = 'Diisi otomatis dari Indotogel.';
+                cell.title = 'Diisi otomatis dari ' + (record[category + '_SOURCE'] || 'sumber utama') + '.';
             } else if (sourceStatus === 'MATCH') {
-                cell.title = 'Sama dengan nilai yang sudah tersimpan sebelumnya.';
+                cell.title = 'Sama dengan nilai yang sudah tersimpan sebelumnya. Sumber: ' +
+                    (record[category + '_SOURCE'] || '—') + '.';
             }
 
             row.appendChild(cell);
