@@ -412,81 +412,6 @@
             font-size: 10px;
         }
 
-        /* Single Website Viewer */
-        .web-viewer-shell {
-            margin-top: 18px;
-            padding: 10px;
-            border: 2px solid #333;
-            border-radius: 10px;
-            background: var(--bg-container);
-            margin-bottom: 24px;
-        }
-        .web-viewer-heading {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 10px;
-            padding: 2px 2px 12px;            border-bottom: 1px solid var(--border-color);
-            margin-bottom: 12px;
-        }
-        .web-viewer-heading h2 {
-            margin: 0;
-            color: #fff;
-            font-size: 14.5px;
-        }
-        .web-viewer-label {
-            margin-top: 4px;
-            color: #94a3b8;
-            font-size: 9.4px;
-        }
-        .web-viewer-heading button {
-            flex: 0 0 auto;
-            background: #1e293b;
-            color: white;
-            border: 1px solid #334155;
-            padding: 6px 9px;
-            font-size: 10.2px;
-            font-weight: 700;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        .web-viewer-frame-wrap {
-            --website-scale: 1;
-            position: relative;
-            width: calc(100% - 12px);
-            height: min(58vh, 527px);
-            min-height: 306px;
-            margin: 0 6px;
-            padding: 0;
-            box-sizing: border-box;
-            overflow: hidden;
-            background: #fff;
-            -webkit-overflow-scrolling: touch;
-            touch-action: pan-y;
-        }
-        .web-viewer-frame {
-            display: block;
-            width: 380px;
-            height: 1500px;
-            max-width: none;
-            border: 0;
-            background: #fff;
-            transform: scale(var(--website-scale));
-            transform-origin: top left;
-        }
-        .web-viewer-footer {
-            display: flex;
-            justify-content: center;
-            margin-top: 10px;
-            padding-top: 9px;
-            border-top: 1px solid var(--border-color);
-        }
-        #webRefreshStatus {
-            color: #94a3b8;
-            font-size: 10px;
-            text-align: center;
-        }
-
         /* Dashboard data input and 30-day history */
         .data-entry-panel { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border-color); }
         .data-entry-title { margin-bottom: 7px; color: #e2e8f0; font-size: 11px; font-weight: 800; letter-spacing: .35px; }
@@ -658,8 +583,8 @@
     <div class="dashboard-title-row">
         <h1>Kalkulator</h1>
         <button type="button" class="web-url-toggle" id="webUrlToggle"
-            onclick="toggleWebsiteSettings()" title="Pengaturan website"
-            aria-label="Pengaturan website" aria-expanded="false"
+            onclick="toggleWebsiteSettings()" title="Pengaturan data"
+            aria-label="Pengaturan data" aria-expanded="false"
             aria-controls="webUrlPanelContent">⚙</button>
         <div class="dashboard-title-actions">
             <button type="button" id="forceResetBtn" class="force-reset-btn"
@@ -670,19 +595,8 @@
 
     <section class="web-url-panel" id="webUrlPanel" aria-labelledby="webUrlPanelTitle">
         <div class="web-url-panel-content" id="webUrlPanelContent" hidden>
-            <div class="web-url-grid">
-                <div class="web-url-field">
-                    <label for="webUrl1">SD/SG/HK</label>
-                    <input type="url" id="webUrl1" inputmode="url">
-                </div>
-            </div>
-            <div class="web-url-actions">
-                <button type="button" class="web-url-action" onclick="applyWebsiteUrls()">TERAPKAN LINK</button>
-                <span id="webUrlStatus" role="status" aria-live="polite" hidden></span>
-            </div>
-
             <div class="data-entry-panel">
-                <div class="data-entry-title">INPUT DATA OTOMATIS</div>
+                <div class="data-entry-title">INPUT DATA MANUAL</div>
                 <form class="data-entry-form" onsubmit="submitDashboardData(event)">
                     <input id="dataEntryInput" type="text" inputmode="text"
                         autocomplete="off" autocapitalize="characters" spellcheck="false"
@@ -829,24 +743,6 @@
     </div>
 </div>
 
-<section class="web-viewer-shell" aria-labelledby="webViewerTitle">
-    <div class="web-viewer-heading">
-        <div>
-            <h2 id="webViewerTitle">LIVE WEBSITE VIEWER</h2>
-            <div class="web-viewer-label">SD/SG/HK</div>
-        </div>
-        <button type="button" onclick="refreshSelectedWebsite()">↻ Refresh</button>
-    </div>
-    <div class="web-viewer-frame-wrap">
-        <iframe id="webIframe" class="web-viewer-frame" title="SD/SG/HK"
-            loading="eager" referrerpolicy="strict-origin-when-cross-origin"
-            allow="fullscreen" src="about:blank"></iframe>
-    </div>
-    <div class="web-viewer-footer">
-        <span id="webRefreshStatus" role="status" aria-live="polite">Website dimuat otomatis saat dashboard dibuka.</span>
-    </div>
-</section>
-
 <section class="data-history-shell" aria-labelledby="dataHistoryTitle">
     <div class="data-history-heading">
         <h2 id="dataHistoryTitle">DATA 30 HARI TERAKHIR</h2>
@@ -896,8 +792,7 @@
     (function cleanForceResetQuery() {
         const currentUrl = new URL(window.location.href);
         if (currentUrl.searchParams.has('_forceReset')) {
-            currentUrl.searchParams.delete('_forceReset');
-            const cleanUrl = currentUrl.pathname + currentUrl.search + currentUrl.hash;
+            currentUrl.searchParams.delete('_forceReset');            const cleanUrl = currentUrl.pathname + currentUrl.search + currentUrl.hash;
             window.history.replaceState(null, document.title, cleanUrl);
         }
     })();
@@ -1275,13 +1170,6 @@
         }
     }
     
-// FUNGSI REFRESH IFRAME + ANTI CACHE
-function refreshIframe() {
-    const iframe = document.getElementById('webIframe');
-    let urlDasar = iframe.src.split('?')[0];
-    iframe.src = urlDasar + '?t=' + new Date().getTime();
-}
-
 // FUNGSI TOGGLE HIDE/UNHIDE ANGKA ASLI
 function toggleInputData() {
     const inputArea = document.getElementById('inputData');
@@ -1446,8 +1334,7 @@ function bagiHasilAkhirDuaBagian() {
         numbersAfterBB3 = ordinaryNumbers.filter(number => !bb3CoveredPairs.has(number));
 
         if (numbersAfterBB3.length !== 33 || bb3CoveredPairs.size !== 12) {
-            alert('Pemeriksaan jumlah angka tidak cocok. Hasil tidak diubah agar tidak ada data yang hilang.');
-            return;
+            alert('Pemeriksaan jumlah angka tidak cocok. Hasil tidak diubah agar tidak ada data yang hilang.');            return;
         }
     } else {
         alert(            'Format sumber belum sesuai. Gunakan BB 4 terlebih dahulu, sehingga hasil berisi ' +
@@ -1504,11 +1391,11 @@ function pasteHasilManual() {
 }
 
     
-// PIN pengaturan website. Ubah nilai ini untuk mengganti PIN akses panel.
+// PIN panel pengaturan data. PIN yang sama dipakai Worker untuk validasi input manual.
 const DASHBOARD_WEBSITE_SETTINGS_PIN = '654321';
 let websiteSettingsUnlocked = false;
 
-// Buka/tutup panel pengaturan. PIN diminta setiap kali panel dibuka.
+// Panel input data manual tetap dikunci PIN.
 function toggleWebsiteSettings() {
     const panel = document.getElementById('webUrlPanel');
     const content = document.getElementById('webUrlPanelContent');
@@ -1524,11 +1411,10 @@ function toggleWebsiteSettings() {
         return;
     }
 
-    const enteredPin = window.prompt('Masukkan PIN untuk membuka pengaturan website:');
+    const enteredPin = window.prompt('Masukkan PIN untuk membuka pengaturan data:');
     if (enteredPin === null) return;
-
     if (enteredPin !== DASHBOARD_WEBSITE_SETTINGS_PIN) {
-        window.alert('PIN salah. Pengaturan website tetap terkunci.');
+        window.alert('PIN salah. Pengaturan data tetap terkunci.');
         websiteSettingsUnlocked = false;
         return;
     }
@@ -1538,179 +1424,6 @@ function toggleWebsiteSettings() {
     content.hidden = false;
     button.setAttribute('aria-expanded', 'true');
 }
-
-// SINGLE WEBSITE VIEWER — hanya satu URL untuk SD/SG/HK.
-const DASHBOARD_WEB_URLS_KEY = 'dashboard1_web_urls_v1';
-const DEFAULT_DASHBOARD_WEB_URL = 'https://toto.sdy2024.com';
-
-function normalizeWebsiteUrl(value) {
-    const raw = String(value || '').trim();
-    if (!raw) return '';
-    const candidate = /^https?:\/\//i.test(raw) ? raw : 'https://' + raw;
-    let parsed;
-    try {
-        parsed = new URL(candidate);
-    } catch (error) {
-        throw new Error('Format URL tidak valid: ' + raw);
-    }
-    if (!['http:', 'https:'].includes(parsed.protocol)) {
-        throw new Error('Link harus menggunakan http:// atau https://');
-    }
-    return parsed.href;
-}
-
-function loadSavedWebsiteUrl() {
-    let url = DEFAULT_DASHBOARD_WEB_URL;
-    try {
-        const saved = JSON.parse(localStorage.getItem(DASHBOARD_WEB_URLS_KEY) || 'null');
-        if (Array.isArray(saved)) {
-            // Migrasi otomatis: ambil hanya slot pertama (SD/SG/HK) dari format lima website lama.
-            url = String(saved[0] || '');
-        } else if (typeof saved === 'string') {
-            url = saved;
-        }
-    } catch (error) {
-        console.warn('Pengaturan URL website tidak dapat dibaca:', error);
-    }
-
-    const input = document.getElementById('webUrl1');
-    if (input) input.value = url;
-    return url;
-}
-
-function applyWebsiteUrls() {
-    if (!websiteSettingsUnlocked || !document.getElementById('webUrlPanel')?.classList.contains('is-open')) {
-        window.alert('Masukkan PIN melalui ikon gear sebelum mengubah link website.');
-        return;
-    }
-
-    const status = document.getElementById('webUrlStatus');
-    const input = document.getElementById('webUrl1');
-    const rawUrl = input ? input.value.trim() : '';
-
-    if (!rawUrl) {
-        status.textContent = 'Masukkan link website.';
-        status.style.color = '#f87171';
-        return;
-    }
-
-    let url;
-    try {
-        url = normalizeWebsiteUrl(rawUrl);
-    } catch (error) {
-        status.textContent = error.message;
-        status.style.color = '#f87171';
-        return;
-    }
-
-    try {
-        // Simpan satu URL saja. Format array lama tetap dibaca saat migrasi.
-        localStorage.setItem(DASHBOARD_WEB_URLS_KEY, JSON.stringify(url));
-    } catch (error) {
-        console.warn('URL tidak dapat disimpan di browser:', error);
-    }
-
-    renderDashboardWebsite(url);
-    status.textContent = 'Link SD/SG/HK diterapkan dan disimpan di browser ini.';
-    status.style.color = '#34d399';
-}
-
-// Tambahkan token agar browser meminta dokumen website terbaru.
-function buildFreshWebsiteUrl(rawUrl, token) {
-    const freshUrl = new URL(rawUrl);
-    freshUrl.searchParams.set('_dashboard_refresh', String(token));
-    return freshUrl.href;
-}
-
-// Render website dalam viewport desktop yang diperkecil agar seluruh lebar halaman terlihat.
-// Tinggi viewport internal mengikuti tinggi panel; scrolling tetap vertikal di dalam iframe.
-function fitWebsiteFrame() {
-    const wrap = document.querySelector('.web-viewer-frame-wrap');
-    const frame = document.getElementById('webIframe');
-    if (!wrap || !frame) return;
-
-    const desktopWidth = 380;
-    const scale = Math.min(1, wrap.clientWidth / desktopWidth);
-    const internalHeight = Math.max(900, Math.ceil(wrap.clientHeight / scale));
-
-    wrap.style.setProperty('--website-scale', String(scale));
-    frame.style.width = desktopWidth + 'px';
-    frame.style.height = internalHeight + 'px';
-}
-
-(function initializeWebsiteFrameSizing() {
-    const wrap = document.querySelector('.web-viewer-frame-wrap');
-    if (!wrap) return;
-
-    if (typeof ResizeObserver !== 'undefined') {
-        const observer = new ResizeObserver(fitWebsiteFrame);
-        observer.observe(wrap);
-    } else {
-        window.addEventListener('resize', fitWebsiteFrame, { passive: true });
-    }
-
-    fitWebsiteFrame();
-})();
-
-function renderDashboardWebsite(url) {
-    const frame = document.getElementById('webIframe');
-    const status = document.getElementById('webRefreshStatus');
-    if (!frame) return;
-
-    if (!url) {
-        frame.src = 'about:blank';
-        frame.dataset.originalUrl = '';
-        if (status) status.textContent = 'Masukkan link website melalui pengaturan.';
-        return;
-    }
-
-    frame.dataset.originalUrl = url;
-    frame.src = buildFreshWebsiteUrl(url, Date.now());
-    if (status) status.textContent = 'Website SD/SG/HK dimuat otomatis.';
-}
-
-function reloadWebsiteFrame(frame, token) {
-    if (!frame) return;
-    const originalUrl = frame.dataset.originalUrl || '';
-    if (!originalUrl) return;
-
-    frame.src = 'about:blank';
-    window.setTimeout(() => {
-        frame.src = buildFreshWebsiteUrl(originalUrl, token);
-    }, 30);
-}
-
-function refreshSelectedWebsite() {
-    const frame = document.getElementById('webIframe');
-    const status = document.getElementById('webRefreshStatus');
-
-    if (!frame || !frame.dataset.originalUrl) {
-        if (status) status.textContent = 'Belum ada link website.';
-        return;
-    }
-
-    reloadWebsiteFrame(frame, Date.now());
-    if (status) status.textContent = 'Permintaan refresh dikirim ke website SD/SG/HK.';
-}
-
-// Kompatibilitas dengan tombol refresh lama bila masih dipanggil bagian lain.
-function refreshIframe() {
-    refreshSelectedWebsite();
-}
-
-(function initializeDashboardWebsite() {
-    const savedUrl = loadSavedWebsiteUrl();
-    if (savedUrl) {
-        try {
-            renderDashboardWebsite(normalizeWebsiteUrl(savedUrl));
-        } catch (error) {
-            const status = document.getElementById('webRefreshStatus');
-            if (status) status.textContent = error.message;
-        }
-    } else {
-        renderDashboardWebsite('');
-    }
-})();
 
 // GOOGLE SHEETS DASHBOARD API
 const DASHBOARD_DATA_API_URL = 'https://type-shoot-sheet-test.vails.workers.dev';
@@ -2096,7 +1809,6 @@ function applyDashboardNumberFilter() {
         updateDashboardHistoryMoreButton(rows.length);
         return [];
     }
-
     const category = table.dataset.focusColumn || '';
     if (!DASHBOARD_DATA_CATEGORIES.includes(category)) {
         dashboardNumberFilterActive = false;
