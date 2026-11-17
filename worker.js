@@ -10,7 +10,7 @@
  *   - Primary: https://indotogel.jp.net (per-channel result page)
  *   - Backup: https://widgets2.livesgp.day/result1.php, fetched only when
  *     the same channel/date cannot be read from Indotogel
- *   - Seven markets: CAM, SDY, CHN, JPN, SGP, TWN, HKP
+ *   - Exactly seven configured markets: CAM, SDY, CHN, JPN, SGP, TWN, HKP
  *   - Exact draw date required from either source; primary also requires
  *     the expected period code. Backup market names are exact-matched.
  *   - 4-digit values are preserved; 6-digit Indotogel values use the last 4.
@@ -44,9 +44,9 @@ const WIDGET_MARKET_NAMES = {
 const MAX_SOURCE_HTML_BYTES = 2_000_000;
 const FETCH_TIMEOUT_MS = 12_000;
 
-// WIB polling windows follow the Indotogel market schedule.
-// The backup widget is queried only inside a channel window after a primary miss.
-// End times are polling cut-offs, not guaranteed result publication times.
+// Poll the seven configured markets from their expected publication time until
+// the end of the Jakarta day. The trigger runs every five minutes. This broad
+// retry window catches delayed source publication without guessing a result.
 const MARKETS = {
   CAM: { slug: 'MC', periods: ['MC'], resultMinute: 11 * 60 + 50, endMinute: 12 * 60 + 35 },
   SDY: { slug: 'SD', periods: ['SD'], resultMinute: 13 * 60 + 50, endMinute: 14 * 60 + 35 },
@@ -131,8 +131,8 @@ export default {
           result.saved = stored.saved;
           result.matched = stored.matched;
           result.mismatched = stored.mismatched;
+          result.alreadySaved = stored.ignoredBackup;
           result.failed = stored.failed;
-          result.alreadySaved = 0;
           result.message = 'Hasil valid telah dikirim ke Google Sheets.';
         }
         return jsonResponse(result, 200, origin);
@@ -203,7 +203,7 @@ function getJakartaClock(date) {
 function getDueCategories(minuteOfDay, weekday) {
   return Object.entries(MARKETS)
     .filter(([, market]) => {
-      if (minuteOfDay < market.resultMinute || minuteOfDay > market.endMinute) return false;
+      if (minuteOfDay < market.resultMinute) return false;
       if (market.drawDays && !market.drawDays.includes(weekday)) return false;
       return true;
     })
@@ -216,7 +216,8 @@ async function runScheduledPoll_(controller, env) {
   const date = `${jakarta.year}-${jakarta.month}-${jakarta.day}`;
   const categories = getDueCategories(jakarta.minuteOfDay, jakarta.weekday);
 
-  // No Apps Script call and no external request outside exact WIB draw windows.
+  // Before a market's expected time, do not poll it. Once its time passes,
+  // continue checking until a primary Indotogel result is confirmed or day ends.
   if (!categories.length) return;
 
   let widgetRowsPromise = null;
@@ -343,7 +344,7 @@ async function testIndotogelSources_(date) {
 
 async function persistSourceTestResults_(env, results) {
   const output = [];
-  let saved = 0, matched = 0, mismatched = 0, failed = 0;
+  let saved = 0, matched = 0, mismatched = 0, ignoredBackup = 0, failed = 0;
   for (const item of (Array.isArray(results) ? results : [])) {
     if (!['FOUND_PRIMARY', 'FOUND_BACKUP'].includes(item.status)) {
       output.push(item);
@@ -363,13 +364,14 @@ async function persistSourceTestResults_(env, results) {
       if (stored.status === 'SAVED') saved++;
       else if (stored.status === 'MATCH') matched++;
       else if (stored.status === 'MISMATCH') mismatched++;
+      else if (stored.status === 'IGNORED_BACKUP') ignoredBackup++;
       output.push({ ...item, saveStatus: stored.status, saveMessage: stored.message, savedValue: stored.value });
     } catch (error) {
       failed++;
       output.push({ ...item, saveStatus: 'SAVE_ERROR', saveMessage: String(error && error.message ? error.message : error) });
     }
   }
-  return { results: output, saved, matched, mismatched, failed };
+  return { results: output, saved, matched, mismatched, ignoredBackup, failed };
 }
 
 async function fetchWidgetResultRows_() {
@@ -427,8 +429,9 @@ function findWidgetMarketResult_(rows, category, targetDate) {
 }
 
 async function pollOneMarket_(category, date, scheduledAt, env, getWidgetRows) {
-  // Recheck on each scheduled run: a primary result published after a backup
-  // must still replace the backup value and create an audit entry.
+  const state = await callAppsScript_(env, { action: 'pollState', category, date });
+  if (state.done) return;
+
 
   let result = null;
   let sourceName = 'INDOTOGEL';
