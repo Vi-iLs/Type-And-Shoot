@@ -398,6 +398,20 @@
         .data-entry-form input:focus { outline: none; border-color: var(--button-color); box-shadow: 0 0 0 2px rgba(59, 130, 246, .18); }
         .data-entry-form button { flex: 0 0 auto; min-width: 94px; }
         #dataEntryStatus { display: block; min-height: 14px; margin-top: 6px; color: #94a3b8; font-size: 10px; }
+        .source-test-panel { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border-color); }
+        .source-test-title { margin-bottom: 7px; color: #e2e8f0; font-size: 10px; font-weight: 800; letter-spacing: .3px; }
+        .source-test-actions { display: flex; align-items: center; gap: 7px; }
+        .source-test-actions button { flex: 0 0 auto; }
+        #sourceTestStatus { display: block; min-height: 14px; margin-top: 6px; color: #94a3b8; font-size: 10px; line-height: 1.4; }
+        .source-test-results { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5px; margin-top: 8px; }
+        .source-test-item { min-width: 0; padding: 7px 8px; border: 1px solid var(--border-color); border-radius: 6px; background: #0f172a; }
+        .source-test-item-head { display: flex; align-items: center; justify-content: space-between; gap: 5px; }
+        .source-test-market { color: #e2e8f0; font-size: 10px; font-weight: 900; }
+        .source-test-state { color: #94a3b8; font-size: 8px; font-weight: 900; }
+        .source-test-state.found { color: #34d399; }
+        .source-test-state.error { color: #f87171; }
+        .source-test-value { margin-top: 3px; color: #cbd5e1; font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: 11px; font-weight: 800; overflow-wrap: anywhere; }
+        @media (max-width: 560px) { .source-test-results { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 
         .data-history-shell { margin: 0 0 24px; padding: 12px; border: 1px solid var(--border-color); border-radius: 10px; background: var(--bg-container); }
         .data-history-heading { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
@@ -627,6 +641,15 @@
                 <span id="dataEntryStatus" role="status" aria-live="polite"></span>
             </div>
 
+            <div class="source-test-panel">
+                <div class="source-test-title">PEMERIKSAAN SUMBER OTOMATIS — INDOTOGEL SAJA</div>
+                <div class="source-test-actions">
+                    <button type="button" class="data-settings-action" id="sourceTestButton" onclick="testIndotogelSource()">UJI 7 CHANNEL</button>
+                </div>
+                <span id="sourceTestStatus" role="status" aria-live="polite">Tes membaca tujuh halaman Indotogel tanpa menyimpan angka.</span>
+                <div id="sourceTestResults" class="source-test-results" aria-live="polite"></div>
+            </div>
+
         </div>
     </section>
 
@@ -802,6 +825,7 @@
             onclick="toggleDashboardHistory()" aria-expanded="false" hidden>SEE MORE</button>
     </div>
     <span id="dataHistoryStatus" role="status" aria-live="polite">Menghubungkan ke database...</span>
+    <span class="data-history-filter-status">Tanda ! berarti hasil Indotogel berbeda dari angka sebelumnya. Nilai lama tersimpan di tab SOURCE_AUDIT.</span>
 </section>
 
 <div class="floating-nav">
@@ -1412,12 +1436,12 @@ function pasteHasilManual() {
 }
 
     
-// PIN panel pengaturan data. PIN yang sama dipakai Worker untuk validasi input manual.
-const DASHBOARD_SETTINGS_PIN = '654321';
+// PIN tidak disimpan di source dashboard. Worker memeriksa nilai ini dengan secret DASHBOARD_PIN.
 let dataSettingsUnlocked = false;
+let dashboardSettingsPin = '';
 
-// Panel input data manual tetap dikunci PIN.
-function toggleDataSettings() {
+// Panel pengaturan dibuka hanya setelah Worker mengonfirmasi PIN.
+async function toggleDataSettings() {
     const panel = document.getElementById('dataSettingsPanel');
     const content = document.getElementById('dataSettingsPanelContent');
     const button = document.getElementById('dataSettingsToggle');
@@ -1428,22 +1452,26 @@ function toggleDataSettings() {
         panel.classList.remove('is-open');
         content.hidden = true;
         dataSettingsUnlocked = false;
+        dashboardSettingsPin = '';
         button.setAttribute('aria-expanded', 'false');
         return;
     }
 
     const enteredPin = window.prompt('Masukkan PIN untuk membuka pengaturan data:');
-    if (enteredPin === null) return;
-    if (enteredPin !== DASHBOARD_SETTINGS_PIN) {
-        window.alert('PIN salah. Pengaturan data tetap terkunci.');
-        dataSettingsUnlocked = false;
-        return;
-    }
+    if (enteredPin === null || !enteredPin.trim()) return;
 
-    dataSettingsUnlocked = true;
-    panel.classList.add('is-open');
-    content.hidden = false;
-    button.setAttribute('aria-expanded', 'true');
+    try {
+        await callDashboardDataApi({ action: 'verifyPin', pin: enteredPin });
+        dashboardSettingsPin = enteredPin;
+        dataSettingsUnlocked = true;
+        panel.classList.add('is-open');
+        content.hidden = false;
+        button.setAttribute('aria-expanded', 'true');
+    } catch (error) {
+        dashboardSettingsPin = '';
+        dataSettingsUnlocked = false;
+        window.alert(error.message || 'PIN tidak sesuai. Pengaturan tetap terkunci.');
+    }
 }
 
 // GOOGLE SHEETS DASHBOARD API
@@ -1494,6 +1522,82 @@ async function callDashboardDataApi(payload) {
     return result;
 }
 
+function setSourceTestStatus(message, isError = false) {
+    const status = document.getElementById('sourceTestStatus');
+    if (!status) return;
+    status.textContent = message;
+    status.style.color = isError ? '#f87171' : '#94a3b8';
+}
+
+function renderIndotogelSourceTest(results) {
+    const wrapper = document.getElementById('sourceTestResults');
+    if (!wrapper) return;
+    wrapper.replaceChildren();
+
+    (Array.isArray(results) ? results : []).forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'source-test-item';
+
+        const head = document.createElement('div');
+        head.className = 'source-test-item-head';
+
+        const market = document.createElement('span');
+        market.className = 'source-test-market';
+        market.textContent = String(item.category || '—');
+
+        const state = document.createElement('span');
+        state.className = 'source-test-state ' +
+            (item.status === 'FOUND' ? 'found' : (item.status === 'ERROR' ? 'error' : ''));
+        state.textContent = item.status === 'FOUND'
+            ? 'TERBACA'
+            : (item.status === 'ERROR' ? 'ERROR' : 'MENUNGGU');
+
+        const value = document.createElement('div');
+        value.className = 'source-test-value';
+        value.textContent = item.status === 'FOUND'
+            ? String(item.value || '—')
+            : '—';
+
+        card.append(head, value);
+        head.append(market, state);
+        wrapper.appendChild(card);
+    });
+}
+
+async function testIndotogelSource() {
+    const panel = document.getElementById('dataSettingsPanel');
+    const button = document.getElementById('sourceTestButton');
+    if (!dataSettingsUnlocked || !dashboardSettingsPin || !panel || !panel.classList.contains('is-open')) {
+        setSourceTestStatus('Buka pengaturan dengan PIN terlebih dahulu.', true);
+        return;
+    }
+    if (dashboardDataRequestInProgress) return;
+
+    dashboardDataRequestInProgress = true;
+    if (button) { button.disabled = true; button.textContent = 'MEMERIKSA...'; }
+    setSourceTestStatus('Mengambil tujuh halaman dari Indotogel. Pemeriksaan ini tidak menulis ke Google Sheets.');
+    const wrapper = document.getElementById('sourceTestResults');
+    if (wrapper) wrapper.replaceChildren();
+
+    try {
+        const result = await callDashboardDataApi({
+            action: 'sourceTest',
+            pin: dashboardSettingsPin
+        });
+        renderIndotogelSourceTest(result.results);
+        setSourceTestStatus(
+            'Tanggal ' + result.date + ' · ' + result.found + '/7 hasil terbaca · ' +
+            result.notReady + ' belum tersedia · ' + result.errors + ' gagal dibaca. ' +
+            'Tes ini hanya membaca, tidak menyimpan angka.'
+        );
+    } catch (error) {
+        setSourceTestStatus(error.message || 'Tes Indotogel gagal.', true);
+    } finally {
+        dashboardDataRequestInProgress = false;
+        if (button) { button.disabled = false; button.textContent = 'UJI 7 CHANNEL'; }
+    }
+}
+
 async function submitDashboardData(event) {
     if (event) event.preventDefault();
 
@@ -1526,7 +1630,7 @@ async function submitDashboardData(event) {
     try {
         const result = await callDashboardDataApi({
             action: 'save',
-            pin: DASHBOARD_SETTINGS_PIN,
+            pin: dashboardSettingsPin,
             input: rawValue
         });
 
