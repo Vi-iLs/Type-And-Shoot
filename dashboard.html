@@ -486,6 +486,32 @@
             flex: 0 0 auto; padding: 7px 10px; border: 1px solid #334155; border-radius: 5px;
             background: #1e293b; color: #fff; font-size: 11px; font-weight: 700; cursor: pointer;
         }
+        .data-history-actions { display: flex; align-items: center; gap: 6px; flex: 0 0 auto; }
+        .data-history-filter {
+            padding: 7px 9px; border: 1px solid #475569; border-radius: 5px;
+            background: #1e293b; color: #cbd5e1; font-size: 10px; font-weight: 800;
+            letter-spacing: .25px; cursor: pointer; white-space: nowrap;
+        }
+        .data-history-filter[aria-pressed="true"] {
+            border-color: #60a5fa; background: #1d4ed8; color: #fff;
+            box-shadow: 0 0 8px rgba(59, 130, 246, .3);
+        }
+        .data-history-filter:disabled { opacity: .42; cursor: not-allowed; }
+        .data-history-filter-status {
+            display: block; min-height: 13px; margin: -3px 0 9px;
+            color: #94a3b8; font-size: 9.5px; line-height: 1.35;
+        }
+        .data-history-table tbody tr.is-filter-hidden { display: none !important; }
+        .data-history-table .data-value-suffix.is-filter-muted {
+            color: #64748b !important; background: rgba(71, 85, 105, .20) !important;
+            border-color: #475569 !important; box-shadow: none !important;
+            text-shadow: none !important; opacity: .72;
+        }
+        .data-history-table .data-value-suffix.is-filter-highlighted {
+            color: #ecfdf5; background: rgba(16, 185, 129, .20);
+            border-color: #34d399; box-shadow: 0 0 6px rgba(16, 185, 129, .55);
+            text-shadow: 0 0 5px rgba(52, 211, 153, .8);
+        }
         .data-history-table-wrap { width: 100%; overflow-x: hidden; border: 1px solid var(--border-color); border-radius: 7px; }
         .data-history-table { width: 100%; min-width: 0; border-collapse: separate; border-spacing: 0; table-layout: fixed; font-variant-numeric: tabular-nums; }
         .data-history-table th, .data-history-table td { padding: 7px 3px; border-right: 1px solid #27364e; border-bottom: 1px solid #27364e; text-align: center; white-space: nowrap; }
@@ -584,6 +610,9 @@
             .data-history-heading { gap: 5px; }
             .data-history-heading h2 { font-size: 13px; }
             .data-history-refresh { padding: 6px 7px; font-size: 9px; }
+            .data-history-actions { gap: 4px; }
+            .data-history-filter { padding: 6px 7px; font-size: 8.5px; }
+            .data-history-filter-status { font-size: 8.5px; }
             .data-history-table th, .data-history-table td { padding: 6px 2px; }
             .data-history-table th:first-child, .data-history-table td:first-child { width: 62px; }
             .data-history-table thead th { font-size: 9px; }
@@ -780,8 +809,16 @@
 <section class="data-history-shell" aria-labelledby="dataHistoryTitle">
     <div class="data-history-heading">
         <h2 id="dataHistoryTitle">DATA 30 HARI TERAKHIR</h2>
-        <button type="button" class="data-history-refresh" onclick="loadDashboardData()">↻ REFRESH DATA</button>
+        <div class="data-history-actions">
+            <button type="button" id="dataHistoryFilterToggle" class="data-history-filter"
+                aria-pressed="false" disabled onclick="toggleDashboardNumberFilter()"
+                title="Pilih kategori CAM, CHN, JPN, atau TWN terlebih dahulu">FILTER 2D</button>
+            <button type="button" class="data-history-refresh" onclick="loadDashboardData()">↻ REFRESH DATA</button>
+        </div>
     </div>
+    <span id="dataHistoryFilterStatus" class="data-history-filter-status" role="status" aria-live="polite">
+        Pilih kolom kategori, lalu aktifkan FILTER 2D.
+    </span>
     <div class="data-history-table-wrap">
         <table id="dataHistoryTable" class="data-history-table">
             <thead>
@@ -1614,6 +1651,10 @@ const DASHBOARD_DATA_CATEGORIES = ['CAM', 'CHN', 'JPN', 'TWN'];
 let selectedDataDate = '';
 let showAllDashboardData = false;
 let dashboardDataRequestInProgress = false;
+let dashboardNumberFilterActive = false;
+let dashboardDataRecords = [];
+const DASHBOARD_FILTER_PREVIOUS_RESULTS = 4;
+const DASHBOARD_FILTER_MAX_HIGHLIGHTS = 3;
 
 function setDashboardDataStatus(message, isError = false) {
     const status = document.getElementById('dataHistoryStatus');
@@ -1734,6 +1775,9 @@ async function loadDashboardData() {
 }
 
 function renderDashboardData(records) {
+    dashboardDataRecords = Array.isArray(records) ? records.slice() : [];
+    records = dashboardDataRecords;
+
     const tbody = document.getElementById('dataHistoryBody');
     if (!tbody) return;
 
@@ -1749,7 +1793,9 @@ function renderDashboardData(records) {
         tbody.appendChild(row);
         selectedDataDate = '';
         showAllDashboardData = false;
+        dashboardNumberFilterActive = false;
         updateDashboardHistoryMoreButton(0);
+        updateDashboardFilterUI();
         return;
     }
 
@@ -1809,19 +1855,22 @@ function renderDashboardData(records) {
     });
 
     updateDashboardHistoryMoreButton(records.length);
+    applyDashboardNumberFilter();
+    updateDashboardFilterUI();
 }
 
 function updateDashboardHistoryMoreButton(totalRows) {
     const button = document.getElementById('dataHistorySeeMore');
     if (!button) return;
 
-    const canExpand = totalRows > 15;
+    const canExpand = totalRows > 15 && !dashboardNumberFilterActive;
     button.hidden = !canExpand;
     button.setAttribute('aria-expanded', showAllDashboardData ? 'true' : 'false');
     button.textContent = showAllDashboardData ? 'SEE LESS' : 'SEE MORE';
 }
 
 function toggleDashboardHistory() {
+    if (dashboardNumberFilterActive) return;
     const rows = Array.from(document.querySelectorAll('#dataHistoryBody .data-row'));
     if (rows.length <= 15) return;
 
@@ -1852,6 +1901,147 @@ function selectDataColumn(category) {
         button.setAttribute('aria-pressed',
             button.dataset.category === next ? 'true' : 'false');
     });
+
+    // Filter mengikuti kategori yang sedang dipilih; melepas pilihan kolom mematikan filter.
+    if (!next) dashboardNumberFilterActive = false;
+    applyDashboardNumberFilter();
+    updateDashboardFilterUI();
+}
+
+function toggleDashboardNumberFilter() {
+    const table = document.getElementById('dataHistoryTable');
+    const category = table ? (table.dataset.focusColumn || '') : '';
+
+    if (!DASHBOARD_DATA_CATEGORIES.includes(category)) {
+        updateDashboardFilterUI('Pilih kolom CAM, CHN, JPN, atau TWN terlebih dahulu.');
+        return;
+    }
+
+    dashboardNumberFilterActive = !dashboardNumberFilterActive;
+    applyDashboardNumberFilter();
+    updateDashboardFilterUI();
+}
+
+function updateDashboardFilterUI(message) {
+    const button = document.getElementById('dataHistoryFilterToggle');
+    const status = document.getElementById('dataHistoryFilterStatus');
+    const table = document.getElementById('dataHistoryTable');
+    if (!button || !status) return;
+
+    const category = table ? (table.dataset.focusColumn || '') : '';
+    const hasCategory = DASHBOARD_DATA_CATEGORIES.includes(category);
+
+    button.disabled = !hasCategory;
+    button.setAttribute('aria-pressed', dashboardNumberFilterActive ? 'true' : 'false');
+    button.textContent = dashboardNumberFilterActive ? 'FILTER 2D: ON' : 'FILTER 2D';
+    button.title = hasCategory
+        ? 'Filter sedang memilih kategori ' + category
+        : 'Pilih kategori CAM, CHN, JPN, atau TWN terlebih dahulu';
+
+    if (message) {
+        status.textContent = message;
+    } else if (dashboardNumberFilterActive) {
+        status.textContent = 'Filter ' + category + ' aktif: 4 hasil sebelumnya diperiksa; maksimal 3 pasangan valid disorot.';
+    } else {
+        status.textContent = hasCategory
+            ? 'Kategori ' + category + ' dipilih. Tekan FILTER 2D untuk menyaring hasil historis.'
+            : 'Pilih kolom kategori, lalu aktifkan FILTER 2D.';
+    }
+}
+
+function applyDashboardNumberFilter() {
+    const table = document.getElementById('dataHistoryTable');
+    const tbody = document.getElementById('dataHistoryBody');
+    if (!table || !tbody) return;
+
+    const rows = Array.from(tbody.querySelectorAll('.data-row'));
+
+    // Bersihkan jejak filter lebih dahulu agar mode OFF selalu kembali normal.
+    rows.forEach(row => {
+        row.classList.remove('is-filter-hidden');
+        row.querySelectorAll('.data-value-suffix').forEach(suffix => {
+            suffix.classList.remove('is-filter-muted', 'is-filter-highlighted');
+        });
+    });
+
+    if (!dashboardNumberFilterActive) {
+        updateDashboardHistoryMoreButton(rows.length);
+        return;
+    }
+
+    const category = table.dataset.focusColumn || '';
+    if (!DASHBOARD_DATA_CATEGORIES.includes(category)) {
+        dashboardNumberFilterActive = false;
+        updateDashboardHistoryMoreButton(rows.length);
+        return;
+    }
+
+    // Ambil seluruh hasil 4 digit kategori terpilih, urut terbaru ke terlama.
+    const entries = rows.map(row => {
+        const cell = row.querySelector('td[data-category="' + category + '"]');
+        return {
+            row,
+            date: row.dataset.date || '',
+            value: cell ? cell.textContent.trim() : '',
+            suffix: cell ? cell.querySelector('.data-value-suffix') : null
+        };
+    }).filter(entry => /^\d{4}$/.test(entry.value))
+      .sort((a, b) => b.date.localeCompare(a.date));
+
+    if (!entries.length) {
+        updateDashboardHistoryMoreButton(rows.length);
+        updateDashboardFilterUI('Tidak ada hasil 4 digit untuk kategori ' + category + '.');
+        return;
+    }
+
+    // Hasil paling baru menjadi acuan; empat hasil berikutnya adalah jendela historis.
+    const visibleEntries = entries.slice(0, DASHBOARD_FILTER_PREVIOUS_RESULTS + 1);
+    const visibleDates = new Set(visibleEntries.map(entry => entry.date));
+    rows.forEach(row => {
+        if (!visibleDates.has(row.dataset.date || '')) {
+            row.classList.add('is-filter-hidden');
+        }
+    });
+
+    const referencePair = visibleEntries[0].value.slice(-2);
+    const excludedPrefix = referencePair.charAt(0);
+    const excludedSuffix = referencePair.charAt(1);
+    const seenPairs = new Set();
+    const highlightedPairs = [];
+    let mutedCount = 0;
+
+    visibleEntries.forEach((entry, index) => {
+        const pair = entry.value.slice(-2);
+        const isDouble = pair.charAt(0) === pair.charAt(1);
+        const hasExcludedPrefix = pair.charAt(0) === excludedPrefix;
+        const hasExcludedSuffix = pair.charAt(1) === excludedSuffix;
+        const isDuplicate = seenPairs.has(pair);
+        const isReference = index === 0;
+
+        // Hasil terbaru hanya menjadi acuan. Pasangan kembar, awalan/akhiran terlarang,
+        // duplikasi, dan kandidat setelah tiga pilihan pertama dibuat abu-abu.
+        const excluded = isReference || isDouble || hasExcludedPrefix ||
+            hasExcludedSuffix || isDuplicate || highlightedPairs.length >= DASHBOARD_FILTER_MAX_HIGHLIGHTS;
+
+        if (entry.suffix) {
+            entry.suffix.classList.add(excluded ? 'is-filter-muted' : 'is-filter-highlighted');
+        }
+
+        if (!excluded) {
+            highlightedPairs.push(pair);
+        } else {
+            mutedCount++;
+        }
+
+        seenPairs.add(pair);
+    });
+
+    updateDashboardHistoryMoreButton(rows.length);
+    const candidateText = highlightedPairs.length ? highlightedPairs.join(' · ') : 'belum ada pasangan valid';
+    updateDashboardFilterUI(
+        'Filter ' + category + ' aktif. Kandidat: ' + candidateText +
+        '. ' + mutedCount + ' pasangan abu-abu; data yang lebih lama disembunyikan.'
+    );
 }
 
 function selectDataRow(date) {
