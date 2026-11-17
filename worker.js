@@ -7,13 +7,15 @@
  *   POST { action: "list" }
  *
  * Automatic polling:
- *   - Indotogel only: https://indotogel.jp.net
+ *   - Primary: https://indotogel.jp.net (per-channel result page)
+ *   - Backup: https://widgets2.livesgp.day/result1.php, fetched only when
+ *     the same channel/date cannot be read from Indotogel
  *   - Seven markets: CAM, SDY, CHN, JPN, SGP, TWN, HKP
- *   - Exact draw date and period code required before ingest
- *   - 4-digit results are stored as-is; 6-digit results use the last 4 digits
- *   - Existing values are compared after fetch. If different, Indotogel is
- *     authoritative, the stored value is updated, and the old value is logged
- *     in SOURCE_AUDIT with status MISMATCH.
+ *   - Exact draw date required from either source; primary also requires
+ *     the expected period code. Backup market names are exact-matched.
+ *   - 4-digit values are preserved; 6-digit Indotogel values use the last 4.
+ *   - If a saved value differs, the new source value becomes current and the
+ *     previous value plus source identity are logged in SOURCE_AUDIT.
  *
  * Required Cloudflare secrets:
  *   APPS_SCRIPT_TOKEN
@@ -29,10 +31,21 @@ const ALLOWED_ORIGINS = new Set([
 ]);
 
 const INDOTOGEL_BASE = 'https://indotogel.jp.net';
+const WIDGET_BACKUP_URL = 'https://widgets2.livesgp.day/result1.php';
+const WIDGET_MARKET_NAMES = {
+  CAM: ['CAMBODIA'],
+  SDY: ['SYDNEY'],
+  CHN: ['CHINA'],
+  JPN: ['JAPAN'],
+  SGP: ['SINGAPORE'],
+  TWN: ['TAIWAN'],
+  HKP: ['HONGKONG', 'HONG KONG']
+};
 const MAX_SOURCE_HTML_BYTES = 2_000_000;
 const FETCH_TIMEOUT_MS = 12_000;
 
-// WIB result windows based on Indotogel's published market schedule.
+// WIB polling windows follow the Indotogel market schedule.
+// The backup widget is queried only inside a channel window after a primary miss.
 // End times are polling cut-offs, not guaranteed result publication times.
 const MARKETS = {
   CAM: { slug: 'MC', periods: ['MC'], resultMinute: 11 * 60 + 50, endMinute: 12 * 60 + 35 },
@@ -196,7 +209,14 @@ async function runScheduledPoll_(controller, env) {
   // No Apps Script call and no external request outside exact WIB draw windows.
   if (!categories.length) return;
 
-  await Promise.all(categories.map(category => pollOneMarket_(category, date, scheduledAt, env)));
+  let widgetRowsPromise = null;
+  const getWidgetRows = () => {
+    if (!widgetRowsPromise) widgetRowsPromise = fetchWidgetResultRows_();
+    return widgetRowsPromise;
+  };
+  await Promise.all(categories.map(category =>
+    pollOneMarket_(category, date, scheduledAt, env, getWidgetRows)
+  ));
 }
 
 function getJakartaDateKey(date) {
@@ -236,81 +256,201 @@ async function fetchIndotogelMarket_(category, date) {
   };
 }
 
-// Diagnostic only: reads all seven pages from Indotogel and never writes to Sheets.
+// Diagnostic only: Indotogel first; use the widget backup only when its row is unavailable.
+// This endpoint never writes to Google Sheets.
 async function testIndotogelSources_(date) {
-  const results = await Promise.all(Object.keys(MARKETS).map(async category => {
+  const categories = Object.keys(MARKETS);
+  const primaryResults = await Promise.all(categories.map(async category => {
     const market = MARKETS[category];
     const sourceUrl = `${INDOTOGEL_BASE}/result/${market.slug}`;
     try {
       const fetched = await fetchIndotogelMarket_(category, date);
       if (!fetched.parsed) {
-        return {
-          category, date, url: sourceUrl, status: 'NOT_READY',
-          value: '', rawDigits: '', period: '',
-          message: 'Hasil belum terbit pada tanggal ini atau struktur halaman tidak dikenali.'
-        };
+        return { category, date, primaryUrl: sourceUrl, primary: null,
+          primaryMessage: 'Baris hasil untuk tanggal/periode ini belum tersedia.' };
       }
-      return {
-        category, date, url: sourceUrl, status: 'FOUND',
-        value: fetched.parsed.displayValue,
-        rawDigits: fetched.parsed.resultDigits,
-        period: fetched.parsed.period,
-        message: 'Hasil berhasil dibaca dari Indotogel.'
-      };
+      return { category, date, primaryUrl: sourceUrl, primary: fetched.parsed,
+        primaryMessage: '' };
     } catch (error) {
-      return {
-        category, date, url: sourceUrl, status: 'ERROR',
-        value: '', rawDigits: '', period: '',
-        message: String(error && error.message ? error.message : error)
-      };
+      return { category, date, primaryUrl: sourceUrl, primary: null,
+        primaryMessage: String(error && error.message ? error.message : error) };
     }
   }));
 
+  const missing = primaryResults.filter(item => !item.primary);
+  let widgetRows = null;
+  let widgetError = '';
+  if (missing.length) {
+    try {
+      widgetRows = await fetchWidgetResultRows_();
+    } catch (error) {
+      widgetError = String(error && error.message ? error.message : error);
+    }
+  }
+
+  const results = primaryResults.map(item => {
+    if (item.primary) {
+      return {
+        category: item.category, date, status: 'FOUND_PRIMARY',
+        sourceName: 'INDOTOGEL', url: item.primaryUrl,
+        value: item.primary.displayValue, rawDigits: item.primary.resultDigits,
+        period: item.primary.period, message: 'Dibaca dari sumber utama Indotogel.'
+      };
+    }
+
+    const backup = widgetRows ? findWidgetMarketResult_(widgetRows, item.category, date) : null;
+    if (backup) {
+      return {
+        category: item.category, date, status: 'FOUND_BACKUP',
+        sourceName: 'WIDGET_BACKUP', url: WIDGET_BACKUP_URL,
+        value: backup.value, rawDigits: backup.rawDigits,
+        period: 'WIDGET', message: 'Indotogel tidak menyediakan hasil yang cocok; hasil diambil dari widget cadangan.'
+      };
+    }
+
+    return {
+      category: item.category, date, status: widgetError ? 'ERROR' : 'NOT_READY',
+      sourceName: '', url: item.primaryUrl,
+      value: '', rawDigits: '', period: '',
+      message: [item.primaryMessage, widgetError ? 'Widget cadangan: ' + widgetError : 'Widget cadangan belum memiliki baris untuk tanggal ini.'].filter(Boolean).join(' | ')
+    };
+  });
+
   return {
     ok: true,
-    source: 'INDOTOGEL',
+    source: 'INDOTOGEL_WITH_WIDGET_BACKUP',
     date,
     results,
-    found: results.filter(item => item.status === 'FOUND').length,
+    found: results.filter(item => item.status === 'FOUND_PRIMARY' || item.status === 'FOUND_BACKUP').length,
+    primary: results.filter(item => item.status === 'FOUND_PRIMARY').length,
+    backup: results.filter(item => item.status === 'FOUND_BACKUP').length,
     notReady: results.filter(item => item.status === 'NOT_READY').length,
     errors: results.filter(item => item.status === 'ERROR').length,
     saved: false
   };
 }
 
-async function pollOneMarket_(category, date, scheduledAt, env) {
+async function fetchWidgetResultRows_() {
+  const response = await fetch(WIDGET_BACKUP_URL, {
+    method: 'GET',
+    redirect: 'follow',
+    cache: 'no-store',
+    headers: {
+      'Accept': 'text/html,application/xhtml+xml',
+      'Cache-Control': 'no-cache',
+      'Pragma': 'no-cache',
+      'User-Agent': 'Mozilla/5.0 (compatible; TypeAndShootWidgetBackup/1.0)'
+    },
+    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS)
+  });
+  if (!response.ok) throw new Error('Widget backup HTTP ' + response.status);
+  const finalUrl = new URL(response.url || WIDGET_BACKUP_URL);
+  if (finalUrl.protocol !== 'https:' || finalUrl.hostname !== 'widgets2.livesgp.day') {
+    throw new Error('Redirect widget ke domain yang tidak diizinkan.');
+  }
+  const html = await response.text();
+  if (html.length > MAX_SOURCE_HTML_BYTES) throw new Error('Halaman widget melebihi batas ukuran 2 MB.');
+  return parseWidgetResultPage_(html);
+}
+
+function parseWidgetResultPage_(html) {
+  const rows = String(html).match(/<tr\b[^>]*>[\s\S]*?<\/tr>/gi) || [];
+  const parsedRows = [];
+  for (const row of rows) {
+    const cells = row.match(/<(?:td|th)\b[^>]*>[\s\S]*?<\/(?:td|th)>/gi) || [];
+    if (cells.length < 3) continue;
+
+    const marketName = normalizeWidgetMarketName_(htmlToText_(cells[0]));
+    const date = findDateKey_(htmlToText_(cells[1]));
+    const rawDigits = (htmlToText_(cells[2]).match(/\d+/g) || []).join('');
+    if (!marketName || !date || !/^\d{4}$/.test(rawDigits)) continue;
+    parsedRows.push({ marketName, date, value: rawDigits, rawDigits });
+  }
+  return parsedRows;
+}
+
+function normalizeWidgetMarketName_(value) {
+  return String(value || '').trim().toUpperCase()
+    .replace(/&/g, ' AND ')
+    .replace(/[^A-Z0-9 ]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function findWidgetMarketResult_(rows, category, targetDate) {
+  const acceptedNames = WIDGET_MARKET_NAMES[category] || [];
+  return (Array.isArray(rows) ? rows : []).find(row =>
+    acceptedNames.includes(row.marketName) && row.date === targetDate
+  ) || null;
+}
+
+async function pollOneMarket_(category, date, scheduledAt, env, getWidgetRows) {
   const state = await callAppsScript_(env, { action: 'pollState', category, date });
   if (state.done) return;
 
+  let result = null;
+  let sourceName = 'INDOTOGEL';
+  let sourceUrl = `${INDOTOGEL_BASE}/result/${MARKETS[category].slug}`;
+  let period = '';
+  let primaryError = '';
+
   try {
     const fetched = await fetchIndotogelMarket_(category, date);
-    if (!fetched.parsed) {
-      console.log(category + ' ' + date + ': hasil Indotogel belum tersedia atau format belum dikenali.');
-      return;
+    if (fetched.parsed) {
+      result = fetched.parsed;
+      period = result.period;
     }
-
-    const stored = await callAppsScript_(env, {
-      action: 'ingest',
-      category,
-      date,
-      period: fetched.parsed.period,
-      resultDigits: fetched.parsed.resultDigits,
-      sourceUrl: fetched.sourceUrl,
-      sourceName: 'INDOTOGEL',
-      fetchedAt: scheduledAt.toISOString()
-    });
-
-    console.log(JSON.stringify({
-      source: 'INDOTOGEL', category, date,
-      raw: fetched.parsed.resultDigits,
-      value: stored.value,
-      status: stored.status,
-      previousValue: stored.previousValue || '',
-      action: stored.action
-    }));
   } catch (error) {
-    console.error(category + ' ' + date + ' gagal:', String(error && error.message ? error.message : error));
+    primaryError = String(error && error.message ? error.message : error);
   }
+
+  // Fallback only when Indotogel has no matching result row or cannot be fetched.
+  if (!result) {
+    try {
+      const widgetRows = await getWidgetRows();
+      const backup = findWidgetMarketResult_(widgetRows, category, date);
+      if (backup) {
+        result = {
+          date,
+          period: 'WIDGET',
+          resultDigits: backup.rawDigits,
+          displayValue: backup.value
+        };
+        sourceName = 'WIDGET_BACKUP';
+        sourceUrl = WIDGET_BACKUP_URL;
+        period = 'WIDGET';
+      }
+    } catch (error) {
+      const backupError = String(error && error.message ? error.message : error);
+      console.error(category + ' ' + date + ' — widget cadangan gagal: ' + backupError);
+    }
+  }
+
+  if (!result) {
+    console.log(category + ' ' + date + ': hasil tidak tersedia pada Indotogel maupun widget cadangan.' +
+      (primaryError ? ' Indotogel: ' + primaryError : ''));
+    return;
+  }
+
+  const stored = await callAppsScript_(env, {
+    action: 'ingest',
+    category,
+    date,
+    period,
+    resultDigits: result.resultDigits,
+    sourceUrl,
+    sourceName,
+    fetchedAt: scheduledAt.toISOString()
+  });
+
+  console.log(JSON.stringify({
+    source: sourceName, category, date,
+    raw: result.resultDigits,
+    value: stored.value,
+    status: stored.status,
+    previousValue: stored.previousValue || '',
+    action: stored.action
+  }));
 }
 
 function parseIndotogelResultPage_(html, category, targetDate) {
