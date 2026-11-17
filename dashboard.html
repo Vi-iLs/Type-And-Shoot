@@ -411,6 +411,7 @@
         .source-test-state.found { color: #34d399; }
         .source-test-state.error { color: #f87171; }
         .source-test-value { margin-top: 3px; color: #cbd5e1; font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: 11px; font-weight: 800; overflow-wrap: anywhere; }
+        .source-test-detail { margin-top: 3px; color: #94a3b8; font-size: 8px; line-height: 1.35; overflow-wrap: anywhere; }
         @media (max-width: 560px) { .source-test-results { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 
         .data-history-shell { margin: 0 0 24px; padding: 12px; border: 1px solid var(--border-color); border-radius: 10px; background: var(--bg-container); }
@@ -1555,11 +1556,20 @@ function renderIndotogelSourceTest(results) {
         const value = document.createElement('div');
         value.className = 'source-test-value';
         value.textContent = item.status === 'FOUND'
-            ? String(item.value || '—')
+            ? (String(item.rawDigits || '') !== String(item.value || '')
+                ? String(item.rawDigits || '') + ' → ' + String(item.value || '')
+                : String(item.value || '—'))
             : '—';
+        value.title = String(item.url || '');
 
         card.append(head, value);
         head.append(market, state);
+        if (item.status === 'ERROR' || item.status === 'NOT_READY') {
+            const detail = document.createElement('div');
+            detail.className = 'source-test-detail';
+            detail.textContent = String(item.message || 'Tidak ada detail tambahan.');
+            card.appendChild(detail);
+        }
         wrapper.appendChild(card);
     });
 }
