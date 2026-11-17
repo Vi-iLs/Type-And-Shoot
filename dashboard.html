@@ -647,6 +647,7 @@
                 <div class="source-test-title">PEMERIKSAAN SUMBER OTOMATIS — INDOTOGEL SAJA</div>
                 <div class="source-test-actions">
                     <button type="button" class="data-settings-action" id="sourceTestButton" onclick="testIndotogelSource()">UJI 7 CHANNEL</button>
+                    <button type="button" class="data-settings-action" id="sourceSyncButton" onclick="syncIndotogelSources()">AMBIL &amp; SIMPAN 7 CHANNEL</button>
                 </div>
                 <span id="sourceTestStatus" role="status" aria-live="polite">Tes membaca tujuh halaman Indotogel tanpa menyimpan angka.</span>
                 <div id="sourceTestResults" class="source-test-results" aria-live="polite"></div>
@@ -1572,12 +1573,17 @@ function renderIndotogelSourceTest(results) {
 
         card.append(head, value);
         head.append(market, state);
-        if (isBackup || isError || isNotReady || !isFound) {
+        if (item.saveStatus || isBackup || isError || isNotReady || !isFound) {
             const detail = document.createElement('div');
             detail.className = 'source-test-detail';
-            detail.textContent = isBackup
-                ? 'Indotogel tidak tersedia; memakai widget cadangan.'
-                : String(item.message || (isError ? 'Sumber gagal dibaca.' : 'Belum ada hasil untuk tanggal ini.'));
+            if (item.saveStatus) {
+                detail.textContent = String(item.saveStatus) + ' — ' +
+                    String(item.saveMessage || item.message || 'Status penyimpanan diterima.');
+            } else if (isBackup) {
+                detail.textContent = 'Indotogel tidak tersedia; memakai widget cadangan.';
+            } else {
+                detail.textContent = String(item.message || (isError ? 'Sumber gagal dibaca.' : 'Belum ada hasil untuk tanggal ini.'));
+            }
             card.appendChild(detail);
         }
         wrapper.appendChild(card);
@@ -1617,6 +1623,51 @@ async function testIndotogelSource() {
     } finally {
         dashboardDataRequestInProgress = false;
         if (button) { button.disabled = false; button.textContent = 'UJI 7 CHANNEL'; }
+    }
+}
+
+async function syncIndotogelSources() {
+    const panel = document.getElementById('dataSettingsPanel');
+    const button = document.getElementById('sourceSyncButton');
+    if (!dataSettingsUnlocked || !dashboardSettingsPin || !panel || !panel.classList.contains('is-open')) {
+        setSourceTestStatus('Buka pengaturan dengan PIN terlebih dahulu.', true);
+        return;
+    }
+    if (dashboardDataRequestInProgress) return;
+
+    const confirmed = window.confirm(
+        'Ambil hasil dari Indotogel dan widget cadangan bila diperlukan, lalu simpan ke Google Sheets untuk tanggal hari ini?'
+    );
+    if (!confirmed) return;
+
+    dashboardDataRequestInProgress = true;
+    if (button) { button.disabled = true; button.textContent = 'MENYIMPAN...'; }
+    setSourceTestStatus('Mengambil hasil dan mengirimkannya ke Google Sheets...');
+    const wrapper = document.getElementById('sourceTestResults');
+    if (wrapper) wrapper.replaceChildren();
+
+    try {
+        const result = await callDashboardDataApi({
+            action: 'sourceSync',
+            pin: dashboardSettingsPin
+        });
+        renderIndotogelSourceTest(result.results);
+        setSourceTestStatus(
+            'Tanggal ' + result.date + ' · disimpan ' + (result.saved || 0) +
+            ' · sama ' + (result.matched || 0) +
+            ' · berbeda ' + (result.mismatched || 0) +
+            ' · sudah diproses ' + (result.alreadySaved || 0) +
+            ' · gagal ' + (result.failed || 0) +
+            ' · belum tersedia ' + (result.notReady || 0) + '. ' +
+            (result.message || ''),
+            Number(result.failed || 0) > 0
+        );
+        await loadDashboardData();
+    } catch (error) {
+        setSourceTestStatus(error.message || 'Sinkronisasi gagal.', true);
+    } finally {
+        dashboardDataRequestInProgress = false;
+        if (button) { button.disabled = false; button.textContent = 'AMBIL & SIMPAN 7 CHANNEL'; }
     }
 }
 
