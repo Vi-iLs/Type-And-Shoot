@@ -1547,15 +1547,19 @@ function renderIndotogelSourceTest(results) {
         market.className = 'source-test-market';
         market.textContent = String(item.category || '—');
 
-        const isPrimary = item.status === 'FOUND_PRIMARY';
+        // Compatible with both the current Worker response (FOUND) and
+        // the extended primary/backup statuses used by newer Worker builds.
+        const isPrimary = item.status === 'FOUND' || item.status === 'FOUND_PRIMARY';
         const isBackup = item.status === 'FOUND_BACKUP';
         const isFound = isPrimary || isBackup;
+        const isError = item.status === 'ERROR';
+        const isNotReady = item.status === 'NOT_READY' || item.status === 'WAITING';
         const state = document.createElement('span');
         state.className = 'source-test-state ' +
-            (isPrimary ? 'found' : (isBackup ? 'backup' : (item.status === 'ERROR' ? 'error' : '')));
+            (isPrimary ? 'found' : (isBackup ? 'backup' : (isError ? 'error' : '')));
         state.textContent = isPrimary
-            ? 'UTAMA'
-            : (isBackup ? 'CADANGAN' : (item.status === 'ERROR' ? 'ERROR' : 'MENUNGGU'));
+            ? 'TERBACA'
+            : (isBackup ? 'CADANGAN' : (isError ? 'ERROR' : (isNotReady ? 'BELUM TERBIT' : 'STATUS?')));
 
         const value = document.createElement('div');
         value.className = 'source-test-value';
@@ -1568,12 +1572,12 @@ function renderIndotogelSourceTest(results) {
 
         card.append(head, value);
         head.append(market, state);
-        if (isBackup || item.status === 'ERROR' || item.status === 'NOT_READY') {
+        if (isBackup || isError || isNotReady || !isFound) {
             const detail = document.createElement('div');
             detail.className = 'source-test-detail';
             detail.textContent = isBackup
                 ? 'Indotogel tidak tersedia; memakai widget cadangan.'
-                : String(item.message || 'Belum ada hasil untuk tanggal ini.');
+                : String(item.message || (isError ? 'Sumber gagal dibaca.' : 'Belum ada hasil untuk tanggal ini.'));
             card.appendChild(detail);
         }
         wrapper.appendChild(card);
@@ -1602,9 +1606,10 @@ async function testIndotogelSource() {
         });
         renderIndotogelSourceTest(result.results);
         setSourceTestStatus(
-            'Tanggal ' + result.date + ' · utama ' + (result.primary || 0) +
-            ' · cadangan ' + (result.backup || 0) + ' · belum tersedia ' +
-            result.notReady + ' · error ' + result.errors +
+            'Tanggal ' + result.date + ' · utama ' +
+            (result.primary ?? result.found ?? 0) +
+            ' · cadangan ' + (result.backup ?? 0) + ' · belum tersedia ' +
+            (result.notReady ?? 0) + ' · error ' + (result.errors ?? 0) +
             '. Tes ini hanya membaca, tidak menyimpan angka.'
         );
     } catch (error) {
