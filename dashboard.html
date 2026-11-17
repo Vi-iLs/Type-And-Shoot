@@ -1653,7 +1653,6 @@ let showAllDashboardData = false;
 let dashboardDataRequestInProgress = false;
 let dashboardNumberFilterActive = false;
 let dashboardDataRecords = [];
-const DASHBOARD_FILTER_PREVIOUS_RESULTS = 4;
 const DASHBOARD_FILTER_MAX_HIGHLIGHTS = 3;
 
 function setDashboardDataStatus(message, isError = false) {
@@ -2030,7 +2029,7 @@ function applyDashboardNumberFilter() {
         return [];
     }
 
-    // Ambil hasil 4 digit kategori terpilih, urut terbaru ke terlama.
+    // Urutkan semua hasil 4 digit yang tersedia dari yang terbaru ke terlama.
     const entries = rows.map(row => {
         const cell = row.querySelector('td[data-category="' + category + '"]');
         return {
@@ -2048,57 +2047,63 @@ function applyDashboardNumberFilter() {
         return [];
     }
 
-    // Hasil terbaru menjadi acuan; empat hasil sebelumnya menjadi jendela historis.
-    const visibleEntries = entries.slice(0, DASHBOARD_FILTER_PREVIOUS_RESULTS + 1);
-    const visibleDates = new Set(visibleEntries.map(entry => entry.date));
+    // Hasil terbaru menjadi acuan. Cari terus ke bawah sampai 3 pasangan valid
+    // ditemukan, atau sampai seluruh riwayat yang dimuat sudah diperiksa.
+    const referencePair = entries[0].value.slice(-2);
+    const excludedPrefix = referencePair.charAt(0);
+    const excludedSuffix = referencePair.charAt(1);
+    const seenPairs = new Set([referencePair]);
+    const highlightedPairs = [];
+    const inspectedEntries = [entries[0]];
+    let mutedCount = 1;
+
+    for (let index = 1; index < entries.length; index++) {
+        const entry = entries[index];
+        const pair = entry.value.slice(-2);
+        const isDouble = pair.charAt(0) === pair.charAt(1);
+        const hasExcludedPrefix = pair.charAt(0) === excludedPrefix;
+        const hasExcludedSuffix = pair.charAt(1) === excludedSuffix;
+        const isDuplicate = seenPairs.has(pair);
+
+        // Pasangan yang tidak memenuhi syarat dilewati, bukan menghentikan pencarian.
+        const excluded = isDouble || hasExcludedPrefix || hasExcludedSuffix || isDuplicate;
+
+        inspectedEntries.push(entry);
+        if (entry.suffix) {
+            entry.suffix.classList.add(excluded ? 'is-filter-muted' : 'is-filter-highlighted');
+        }
+
+        if (excluded) {
+            mutedCount++;
+        } else if (highlightedPairs.length < DASHBOARD_FILTER_MAX_HIGHLIGHTS) {
+            highlightedPairs.push(pair);
+        }
+
+        seenPairs.add(pair);
+
+        // Berhenti hanya setelah tiga pasangan valid terkumpul.
+        if (highlightedPairs.length >= DASHBOARD_FILTER_MAX_HIGHLIGHTS) break;
+    }
+
+    // Tampilkan hanya hasil yang benar-benar sudah diperiksa, sampai kandidat ke-3.
+    const visibleDates = new Set(inspectedEntries.map(entry => entry.date));
     rows.forEach(row => {
         if (!visibleDates.has(row.dataset.date || '')) {
             row.classList.add('is-filter-hidden');
         }
     });
 
-    const referencePair = visibleEntries[0].value.slice(-2);
-    const excludedPrefix = referencePair.charAt(0);
-    const excludedSuffix = referencePair.charAt(1);
-    const seenPairs = new Set();
-    const highlightedPairs = [];
-    let mutedCount = 0;
-
-    visibleEntries.forEach((entry, index) => {
-        const pair = entry.value.slice(-2);
-        const isDouble = pair.charAt(0) === pair.charAt(1);
-        const hasExcludedPrefix = pair.charAt(0) === excludedPrefix;
-        const hasExcludedSuffix = pair.charAt(1) === excludedSuffix;
-        const isDuplicate = seenPairs.has(pair);
-        const isReference = index === 0;
-
-        // Maksimal 3 pasangan unik: selain itu dibuat abu-abu.
-        const excluded = isReference || isDouble || hasExcludedPrefix ||
-            hasExcludedSuffix || isDuplicate || highlightedPairs.length >= DASHBOARD_FILTER_MAX_HIGHLIGHTS;
-
-        if (entry.suffix) {
-            entry.suffix.classList.add(excluded ? 'is-filter-muted' : 'is-filter-highlighted');
-        }
-
-        if (!excluded) {
-            highlightedPairs.push(pair);
-        } else {
-            mutedCount++;
-        }
-
-        seenPairs.add(pair);
-    });
-
     updateDashboardHistoryMoreButton(rows.length);
     const candidateText = highlightedPairs.length ? highlightedPairs.join(' · ') : 'belum ada pasangan valid';
     updateDashboardFilterUI(
         'Filter ' + category + ' aktif. Kandidat: ' + candidateText +
-        '. ' + mutedCount + ' pasangan abu-abu; data yang lebih lama disembunyikan.'
+        '. Diperiksa ' + inspectedEntries.length + ' hasil; ' +
+        highlightedPairs.length + '/3 pasangan valid ditemukan. ' +
+        mutedCount + ' hasil dilewati/diredupkan.'
     );
 
     return highlightedPairs;
 }
-
 function selectDataRow(date) {
     selectedDataDate = selectedDataDate === date ? '' : date;
 
