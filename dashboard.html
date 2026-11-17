@@ -246,6 +246,28 @@
             transition: background-color 0.2s;
         }
 
+        .copy-title-select {
+            position: absolute;
+            top: 8px;
+            right: 65px;
+            width: 70px;
+            max-width: calc(100% - 125px);
+            padding: 5px 4px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background: #1e293b;
+            color: #cbd5e1;
+            font-size: 9.5px;
+            font-weight: 800;
+            line-height: 1.2;
+            cursor: pointer;
+        }
+        .copy-title-select:focus {
+            outline: none;
+            border-color: #60a5fa;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, .18);
+        }
+
         button.btn-copy:hover {
             background-color: #334155;
         }
@@ -739,6 +761,18 @@
             <div class="output-container">
                 <!-- Atribut "readonly" telah dihapus di sini agar bisa diisi manual -->
                 <textarea id="outputData"></textarea>
+                <select id="copyTitleSelect" class="copy-title-select"
+                    aria-label="Judul yang ditambahkan saat menyalin hasil"
+                    title="Pilih judul untuk hasil yang disalin">
+                    <option value="">TANPA JUDUL</option>
+                    <option value="sdy">SDY</option>
+                    <option value="sgp">SGP</option>
+                    <option value="hkp">HKP</option>
+                    <option value="cam">CAM</option>
+                    <option value="chn">CHN</option>
+                    <option value="jpn">JPN</option>
+                    <option value="twn">TWN</option>
+                </select>
                 <button class="btn-copy" onclick="copyHasil()" id="btnCopyText">Copy</button>
             </div>
         </div>
@@ -1125,20 +1159,45 @@
     outputTextArea.value = finalOutput.join('\n');
 }
 
-    function copyHasil() {
+    async function copyHasil() {
         const outputTextArea = document.getElementById('outputData');
-        if (!outputTextArea.value) return;
+        const titleSelect = document.getElementById('copyTitleSelect');
+        const btnCopy = document.getElementById('btnCopyText');
+        const originalText = outputTextArea ? outputTextArea.value.trimEnd() : '';
 
-        outputTextArea.select();
-        outputTextArea.setSelectionRange(0, 99999);
+        if (!originalText) return;
 
-        navigator.clipboard.writeText(outputTextArea.value).then(() => {
-            const btnCopy = document.getElementById('btnCopyText');
-            btnCopy.innerText = "Copied!";
-            setTimeout(() => {
-                btnCopy.innerText = "Copy";
-            }, 2000);
-        });
+        const selectedTitle = titleSelect ? String(titleSelect.value || '').trim().toLowerCase() : '';
+        const copyText = selectedTitle
+            ? originalText + '\\n\\n' + selectedTitle
+            : originalText;
+
+        try {
+            await navigator.clipboard.writeText(copyText);
+            if (btnCopy) {
+                btnCopy.innerText = "Copied!";
+                setTimeout(() => {
+                    btnCopy.innerText = "Copy";
+                }, 2000);
+            }
+        } catch (error) {
+            // Fallback for browsers where Clipboard API is unavailable.
+            outputTextArea.value = copyText;
+            outputTextArea.focus();
+            outputTextArea.select();
+            const copied = document.execCommand('copy');
+            outputTextArea.value = originalText;
+            if (!copied) {
+                alert('Gagal menyalin hasil. Periksa izin clipboard browser.');
+                return;
+            }
+            if (btnCopy) {
+                btnCopy.innerText = "Copied!";
+                setTimeout(() => {
+                    btnCopy.innerText = "Copy";
+                }, 2000);
+            }
+        }
     }
 
     // FUNGSI PENCOCOK DATA
