@@ -1557,7 +1557,7 @@ function renderIndotogelSourceTest(results) {
         const isNotReady = item.status === 'NOT_READY' || item.status === 'WAITING';
         const state = document.createElement('span');
         state.className = 'source-test-state ' +
-            (isPrimary ? 'found' : (isBackup ? 'backup' : (isError ? 'error' : '')));
+            (isError ? 'error' : (isPrimary ? 'found' : (isBackup ? 'backup' : '')));
         const saveState = String(item.saveStatus || '').toUpperCase();
         state.textContent = saveState === 'SAVED'
             ? 'TERSIMPAN'
@@ -1567,7 +1567,7 @@ function renderIndotogelSourceTest(results) {
                     ? 'DIPERBARUI'
                     : (saveState === 'IGNORED_BACKUP'
                         ? 'BACKUP DIABAIKAN'
-                        : (isPrimary ? 'TERBACA' : (isBackup ? 'CADANGAN' : (isError ? 'ERROR' : (isNotReady ? 'BELUM TERBIT' : 'STATUS?')))))));
+                        : (isError ? 'ERROR' : (isPrimary ? 'TERBACA' : (isBackup ? 'CADANGAN' : (isNotReady ? 'BELUM TERBIT' : 'STATUS?')))))));
 
         const value = document.createElement('div');
         value.className = 'source-test-value';
