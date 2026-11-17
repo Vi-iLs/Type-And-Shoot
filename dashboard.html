@@ -68,7 +68,7 @@
             gap: 5px;
         }
 
-        .web-url-toggle {
+        .data-settings-toggle {
             position: absolute;
             top: 0;
             left: 0;
@@ -88,8 +88,8 @@
             transition: color 0.2s, border-color 0.2s, background 0.2s;
         }
 
-        .web-url-toggle:hover,
-        .web-url-toggle:focus-visible {
+        .data-settings-toggle:hover,
+        .data-settings-toggle:focus-visible {
             color: var(--text-color);
             border-color: #3b82f6;
             outline: none;
@@ -356,14 +356,14 @@
             .floating-nav { display: none; }
         }
     
-        /* Pengaturan URL website: ringkas dan tertutup secara default */
-        .web-url-panel {
+        /* Pengaturan data manual: ringkas dan tertutup secara default */
+        .data-settings-panel {
             margin: 0 0 14px;
             padding: 0;
             border: 0;
             background: transparent;
         }
-        .web-url-panel-content {
+        .data-settings-panel-content {
             display: none;
             max-width: 100%;
             margin-top: 8px;
@@ -372,32 +372,10 @@
             border-radius: 8px;
             background: #101827;
         }
-        .web-url-panel.is-open .web-url-panel-content {
+        .data-settings-panel.is-open .data-settings-panel-content {
             display: block;
         }
-        .web-url-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
-            gap: 7px;
-        }
-        .web-url-field label {
-            margin: 0 0 3px;
-            font-size: 10px;
-        }
-        .web-url-field input {
-            min-width: 0;
-            font-size: 12px;
-            padding: 7px 8px;
-            border-radius: 6px;
-        }
-        .web-url-actions {
-            display: flex;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 6px;
-            margin-top: 8px;
-        }
-        .web-url-action {
+        .data-settings-action {
             border: 1px solid #3b82f6;
             border-radius: 6px;
             padding: 7px 10px;
@@ -406,10 +384,6 @@
             font-size: 10px;
             font-weight: 700;
             cursor: pointer;
-        }
-        #webUrlStatus {
-            color: #94a3b8;
-            font-size: 10px;
         }
 
         /* Dashboard data input and 30-day history */
@@ -583,13 +557,10 @@
         .data-history-more[hidden] { display: none !important; }
         #dataHistoryStatus { display: block; min-height: 14px; margin-top: 8px; color: #94a3b8; font-size: 10px; text-align: center; }
         @media (max-width: 560px) {
-            .web-url-panel-content { padding: 9px; }
-            .web-url-panel-heading { align-items: flex-start; flex-direction: column; }
-            .web-url-actions { align-items: stretch; }
-            .web-url-action { flex: 1; }
-            .web-viewer-heading { align-items: flex-start; }
-            .web-viewer-heading h2 { font-size: 12.75px; }
-            .web-viewer-frame-wrap { height: 49vh; min-height: 255px; }
+            .data-settings-panel-content { padding: 9px; }
+            .data-settings-panel-heading { align-items: flex-start; flex-direction: column; }
+            .data-settings-actions { align-items: stretch; }
+            .data-settings-action { flex: 1; }
             .data-history-shell { padding: 8px; }
             .data-history-heading { gap: 5px; }
             .data-history-heading h2 { font-size: 13px; }
@@ -612,10 +583,10 @@
 <div class="container">
     <div class="dashboard-title-row">
         <h1>Kalkulator</h1>
-        <button type="button" class="web-url-toggle" id="webUrlToggle"
+        <button type="button" class="data-settings-toggle" id="dataSettingsToggle"
             onclick="toggleWebsiteSettings()" title="Pengaturan data"
             aria-label="Pengaturan data" aria-expanded="false"
-            aria-controls="webUrlPanelContent">⚙</button>
+            aria-controls="dataSettingsPanelContent">⚙</button>
         <div class="dashboard-title-actions">
             <button type="button" id="forceResetBtn" class="force-reset-btn"
                 onclick="forceResetDashboard()" title="Bersihkan cache aplikasi dan muat kode terbaru"
@@ -623,15 +594,15 @@
         </div>
     </div>
 
-    <section class="web-url-panel" id="webUrlPanel" aria-labelledby="webUrlPanelTitle">
-        <div class="web-url-panel-content" id="webUrlPanelContent" hidden>
+    <section class="data-settings-panel" id="dataSettingsPanel" aria-label="Pengaturan data">
+        <div class="data-settings-panel-content" id="dataSettingsPanelContent" hidden>
             <div class="data-entry-panel">
                 <div class="data-entry-title">INPUT DATA MANUAL</div>
                 <form class="data-entry-form" onsubmit="submitDashboardData(event)">
                     <input id="dataEntryInput" type="text" inputmode="text"
                         autocomplete="off" autocapitalize="characters" spellcheck="false"
                         placeholder="CAM 1234" aria-label="Masukkan kategori dan angka">
-                    <button type="submit" id="dataEntrySubmit" class="web-url-action">SIMPAN DATA</button>
+                    <button type="submit" id="dataEntrySubmit" class="data-settings-action">SIMPAN DATA</button>
                 </form>
                 <span id="dataEntryStatus" role="status" aria-live="polite"></span>
             </div>
@@ -1422,34 +1393,34 @@ function pasteHasilManual() {
 
     
 // PIN panel pengaturan data. PIN yang sama dipakai Worker untuk validasi input manual.
-const DASHBOARD_WEBSITE_SETTINGS_PIN = '654321';
-let websiteSettingsUnlocked = false;
+const DASHBOARD_SETTINGS_PIN = '654321';
+let dataSettingsUnlocked = false;
 
 // Panel input data manual tetap dikunci PIN.
 function toggleWebsiteSettings() {
-    const panel = document.getElementById('webUrlPanel');
-    const content = document.getElementById('webUrlPanelContent');
-    const button = document.getElementById('webUrlToggle');
+    const panel = document.getElementById('dataSettingsPanel');
+    const content = document.getElementById('dataSettingsPanelContent');
+    const button = document.getElementById('dataSettingsToggle');
     if (!panel || !content || !button) return;
 
     const isOpen = panel.classList.contains('is-open');
     if (isOpen) {
         panel.classList.remove('is-open');
         content.hidden = true;
-        websiteSettingsUnlocked = false;
+        dataSettingsUnlocked = false;
         button.setAttribute('aria-expanded', 'false');
         return;
     }
 
     const enteredPin = window.prompt('Masukkan PIN untuk membuka pengaturan data:');
     if (enteredPin === null) return;
-    if (enteredPin !== DASHBOARD_WEBSITE_SETTINGS_PIN) {
+    if (enteredPin !== DASHBOARD_SETTINGS_PIN) {
         window.alert('PIN salah. Pengaturan data tetap terkunci.');
-        websiteSettingsUnlocked = false;
+        dataSettingsUnlocked = false;
         return;
     }
 
-    websiteSettingsUnlocked = true;
+    dataSettingsUnlocked = true;
     panel.classList.add('is-open');
     content.hidden = false;
     button.setAttribute('aria-expanded', 'true');
@@ -1507,8 +1478,8 @@ async function callDashboardDataApi(payload) {
 async function submitDashboardData(event) {
     if (event) event.preventDefault();
 
-    const panel = document.getElementById('webUrlPanel');
-    if (!websiteSettingsUnlocked || !panel || !panel.classList.contains('is-open')) {
+    const panel = document.getElementById('dataSettingsPanel');
+    if (!dataSettingsUnlocked || !panel || !panel.classList.contains('is-open')) {
         setDataEntryStatus('Buka pengaturan dengan PIN terlebih dahulu.', true);
         return;
     }
@@ -1536,7 +1507,7 @@ async function submitDashboardData(event) {
     try {
         const result = await callDashboardDataApi({
             action: 'save',
-            pin: DASHBOARD_WEBSITE_SETTINGS_PIN,
+            pin: DASHBOARD_SETTINGS_PIN,
             input: rawValue
         });
 
