@@ -508,6 +508,21 @@
             box-shadow: 0 0 4px #a855f7, 0 0 9px rgba(168, 85, 247, .95), 0 0 17px rgba(168, 85, 247, .8);
             text-shadow: 0 0 4px #fff, 0 0 9px #c084fc, 0 0 14px #a855f7;
         }
+        .data-history-table[data-focus-column="SDY"] tbody td[data-category="SDY"] .data-value-suffix {
+            color: #fff7ed; background: rgba(249, 115, 22, .22); border-color: #fb923c;
+            box-shadow: 0 0 4px #f97316, 0 0 9px rgba(249, 115, 22, .95), 0 0 17px rgba(249, 115, 22, .8);
+            text-shadow: 0 0 4px #fff, 0 0 9px #fb923c, 0 0 14px #f97316;
+        }
+        .data-history-table[data-focus-column="SGP"] tbody td[data-category="SGP"] .data-value-suffix {
+            color: #f0fdfa; background: rgba(20, 184, 166, .22); border-color: #2dd4bf;
+            box-shadow: 0 0 4px #14b8a6, 0 0 9px rgba(20, 184, 166, .95), 0 0 17px rgba(20, 184, 166, .8);
+            text-shadow: 0 0 4px #fff, 0 0 9px #2dd4bf, 0 0 14px #14b8a6;
+        }
+        .data-history-table[data-focus-column="HKP"] tbody td[data-category="HKP"] .data-value-suffix {
+            color: #f7fee7; background: rgba(132, 204, 22, .22); border-color: #a3e635;
+            box-shadow: 0 0 4px #84cc16, 0 0 9px rgba(132, 204, 22, .95), 0 0 17px rgba(132, 204, 22, .8);
+            text-shadow: 0 0 4px #fff, 0 0 9px #a3e635, 0 0 14px #84cc16;
+        }
 
         /* Pilihan tanggal: border dan glow lebih tegas pada dua digit terakhir di empat kolom. */
         .data-history-table .data-row.is-selected td[data-category="CAM"] .data-value-suffix {
@@ -529,6 +544,21 @@
             color: #faf5ff; background: rgba(168, 85, 247, .24); border-color: #c084fc;
             box-shadow: 0 0 5px #a855f7, 0 0 11px rgba(168, 85, 247, .95), 0 0 18px rgba(168, 85, 247, .8);
             text-shadow: 0 0 4px #fff, 0 0 9px #c084fc;
+        }
+        .data-history-table .data-row.is-selected td[data-category="SDY"] .data-value-suffix {
+            color: #fff7ed; background: rgba(249, 115, 22, .24); border-color: #fb923c;
+            box-shadow: 0 0 5px #f97316, 0 0 11px rgba(249, 115, 22, .95), 0 0 18px rgba(249, 115, 22, .8);
+            text-shadow: 0 0 4px #fff, 0 0 9px #fb923c;
+        }
+        .data-history-table .data-row.is-selected td[data-category="SGP"] .data-value-suffix {
+            color: #f0fdfa; background: rgba(20, 184, 166, .24); border-color: #2dd4bf;
+            box-shadow: 0 0 5px #14b8a6, 0 0 11px rgba(20, 184, 166, .95), 0 0 18px rgba(20, 184, 166, .8);
+            text-shadow: 0 0 4px #fff, 0 0 9px #2dd4bf;
+        }
+        .data-history-table .data-row.is-selected td[data-category="HKP"] .data-value-suffix {
+            color: #f7fee7; background: rgba(132, 204, 22, .24); border-color: #a3e635;
+            box-shadow: 0 0 5px #84cc16, 0 0 11px rgba(132, 204, 22, .95), 0 0 18px rgba(132, 204, 22, .8);
+            text-shadow: 0 0 4px #fff, 0 0 9px #a3e635;
         }
         .data-history-empty {
             padding: 22px 10px !important; color: #94a3b8 !important;
@@ -1782,7 +1812,7 @@ function updateDashboardFilterUI(message) {
     if (message) {
         status.textContent = message;
     } else if (dashboardNumberFilterActive) {
-        status.textContent = 'Filter ' + category + ' aktif: 4 hasil sebelumnya diperiksa; maksimal 3 pasangan valid disorot.';
+        status.textContent = 'Filter ' + category + ' aktif: hasil historis dipindai hingga 3 pasangan valid ditemukan.';
     } else {
         status.textContent = hasCategory
             ? 'Kategori ' + category + ' dipilih. Tekan FILTER 2D untuk menyaring hasil historis.'
