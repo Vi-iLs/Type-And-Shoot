@@ -426,8 +426,7 @@
             align-items: center;
             justify-content: space-between;
             gap: 10px;
-            padding: 2px 2px 12px;
-            border-bottom: 1px solid var(--border-color);
+            padding: 2px 2px 12px;            border-bottom: 1px solid var(--border-color);
             margin-bottom: 12px;
         }
         .web-viewer-heading h2 {
@@ -542,17 +541,20 @@
         .data-history-table-wrap { width: 100%; overflow-x: hidden; border: 1px solid var(--border-color); border-radius: 7px; }
         .data-history-table { width: 100%; min-width: 0; border-collapse: separate; border-spacing: 0; table-layout: fixed; font-variant-numeric: tabular-nums; }
         .data-history-table th, .data-history-table td { padding: 7px 3px; border-right: 1px solid #27364e; border-bottom: 1px solid #27364e; text-align: center; white-space: nowrap; }
-        .data-history-table th:first-child, .data-history-table td:first-child { width: 66px; text-align: center; padding-left: 1px; padding-right: 1px; }
+        .data-history-table th:first-child, .data-history-table td:first-child { width: 42px; text-align: center; padding-left: 1px; padding-right: 1px; }
         .data-history-table th:last-child, .data-history-table td:last-child { border-right: 0; }
         .data-history-table tbody tr:last-child td { border-bottom: 0; }
         .data-history-table thead th { position: sticky; top: 0; z-index: 1; background: #101827; font-size: 10px; }
         .data-category-button { width: 100%; padding: 5px 2px; border: 1px solid transparent; border-radius: 5px; background: transparent; font-size: 11px; font-weight: 900; cursor: pointer; }
         .data-category-button[data-category="CAM"] { color: #f87171; }
+        .data-category-button[data-category="SDY"] { color: #fb923c; }
         .data-category-button[data-category="CHN"] { color: #60a5fa; }
         .data-category-button[data-category="JPN"] { color: #facc15; }
+        .data-category-button[data-category="SGP"] { color: #2dd4bf; }
         .data-category-button[data-category="TWN"] { color: #c084fc; }
+        .data-category-button[data-category="HKP"] { color: #a3e635; }
         .data-category-button[aria-pressed="true"] { border-color: currentColor; background: rgba(148, 163, 184, .10); box-shadow: 0 0 0 1px currentColor; }
-        .data-history-table tbody td { color: #e2e8f0; font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: 13px; font-weight: 700; }
+        .data-history-table tbody td { color: #e2e8f0; font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: 11px; font-weight: 700; }
         .data-history-table tbody td:first-child { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 8.5px; font-weight: 600; }
         .data-value-prefix { font-size: 1em; }
         .data-value-suffix { display: inline-block; font-size: 1.10em; line-height: 1.1; border: 1px solid transparent; border-radius: 4px; padding: 0 1px; }
@@ -641,10 +643,10 @@
             .data-history-filter { padding: 6px 7px; font-size: 8.5px; }
             .data-history-filter-status { font-size: 8.5px; }
             .data-history-table th, .data-history-table td { padding: 6px 2px; }
-            .data-history-table th:first-child, .data-history-table td:first-child { width: 62px; }
+            .data-history-table th:first-child, .data-history-table td:first-child { width: 42px; }
             .data-history-table thead th { font-size: 9px; }
-            .data-category-button { padding: 4px 0; font-size: 10px; }
-            .data-history-table tbody td { font-size: 12px; }
+            .data-category-button { padding: 4px 0; font-size: 8.5px; }
+            .data-history-table tbody td { font-size: 10px; padding-left: 1px; padding-right: 1px; }
             .data-history-table tbody td:first-child, .data-date-button { font-size: 8px; }
         }
 
@@ -862,15 +864,18 @@
         <table id="dataHistoryTable" class="data-history-table">
             <thead>
                 <tr>
-                    <th scope="col">TANGGAL</th>
+                    <th scope="col">TGL</th>
                     <th scope="col"><button type="button" class="data-category-button" data-category="CAM" aria-pressed="false" onclick="selectDataColumn('CAM')">CAM</button></th>
+                    <th scope="col"><button type="button" class="data-category-button" data-category="SDY" aria-pressed="false" onclick="selectDataColumn('SDY')">SDY</button></th>
                     <th scope="col"><button type="button" class="data-category-button" data-category="CHN" aria-pressed="false" onclick="selectDataColumn('CHN')">CHN</button></th>
                     <th scope="col"><button type="button" class="data-category-button" data-category="JPN" aria-pressed="false" onclick="selectDataColumn('JPN')">JPN</button></th>
+                    <th scope="col"><button type="button" class="data-category-button" data-category="SGP" aria-pressed="false" onclick="selectDataColumn('SGP')">SGP</button></th>
                     <th scope="col"><button type="button" class="data-category-button" data-category="TWN" aria-pressed="false" onclick="selectDataColumn('TWN')">TWN</button></th>
+                    <th scope="col"><button type="button" class="data-category-button" data-category="HKP" aria-pressed="false" onclick="selectDataColumn('HKP')">HKP</button></th>
                 </tr>
             </thead>
             <tbody id="dataHistoryBody">
-                <tr><td class="data-history-empty" colspan="5">Memuat data...</td></tr>
+                <tr><td class="data-history-empty" colspan="8">Memuat data...</td></tr>
             </tbody>
         </table>
     </div>
@@ -896,7 +901,6 @@
             window.history.replaceState(null, document.title, cleanUrl);
         }
     })();
-
     async function forceResetDashboard() {
         const confirmed = window.confirm(
             'Force Reset akan membersihkan cache aplikasi dan memuat ulang kode terbaru. Semua input serta hasil sementara di halaman ini akan hilang. Lanjutkan?'
@@ -1446,8 +1450,7 @@ function bagiHasilAkhirDuaBagian() {
             return;
         }
     } else {
-        alert(
-            'Format sumber belum sesuai. Gunakan BB 4 terlebih dahulu, sehingga hasil berisi ' +
+        alert(            'Format sumber belum sesuai. Gunakan BB 4 terlebih dahulu, sehingga hasil berisi ' +
             '2 BB 4 angka dan 45 angka biasa. Jika sudah pernah dibagi, hasil harus berisi ' +
             '2 BB 4 angka, 2 BB 3 angka, dan 33 angka biasa. ' +
             'Saat ini ditemukan BB 4: ' + bb4Lines.length +
@@ -1711,7 +1714,7 @@ function refreshIframe() {
 
 // GOOGLE SHEETS DASHBOARD API
 const DASHBOARD_DATA_API_URL = 'https://type-shoot-sheet-test.vails.workers.dev';
-const DASHBOARD_DATA_CATEGORIES = ['CAM', 'CHN', 'JPN', 'TWN'];
+const DASHBOARD_DATA_CATEGORIES = ['CAM', 'SDY', 'CHN', 'JPN', 'SGP', 'TWN', 'HKP'];
 let selectedDataDate = '';
 let showAllDashboardData = false;
 let dashboardDataRequestInProgress = false;
@@ -1772,10 +1775,10 @@ async function submitDashboardData(event) {
     const input = document.getElementById('dataEntryInput');
     const button = document.getElementById('dataEntrySubmit');
     const rawValue = input ? input.value.trim() : '';
-    const parsed = rawValue.match(/^(CAM|CHN|JPN|TWN)\s*[-:=]?\s*(\d+)$/i);
+    const parsed = rawValue.match(/^(CAM|SDY|CHN|JPN|SGP|TWN|HKP)\s*[-:=]?\s*(\d+)$/i);
 
     if (!parsed) {
-        setDataEntryStatus('Format: CAM 1234, CHN 1234, JPN 1234, atau TWN 1234.', true);
+        setDataEntryStatus('Format: CAM 1234, SDY 1234, CHN 1234, JPN 1234, SGP 1234, TWN 1234, atau HKP 1234.', true);
         if (input) input.focus();
         return;
     }
@@ -1849,7 +1852,7 @@ function renderDashboardData(records) {
     if (!records.length) {
         const row = document.createElement('tr');
         const cell = document.createElement('td');
-        cell.colSpan = 5;
+        cell.colSpan = 8;
         cell.className = 'data-history-empty';
         cell.textContent = 'Belum ada data untuk ditampilkan.';
         row.appendChild(cell);
@@ -1878,7 +1881,9 @@ function renderDashboardData(records) {
         const dateButton = document.createElement('button');
         dateButton.type = 'button';
         dateButton.className = 'data-date-button';
-        dateButton.textContent = String(record.displayDate || record.date || '');
+        const rawDate = String(record.displayDate || record.date || '');
+        const dateParts = rawDate.split('/');
+        dateButton.textContent = dateParts.length >= 2 ? dateParts[0] + '/' + dateParts[1] : rawDate;
         dateButton.setAttribute('aria-pressed', row.classList.contains('is-selected') ? 'true' : 'false');
         dateButton.addEventListener('click', () => selectDataRow(row.dataset.date));
         dateCell.appendChild(dateButton);
@@ -2007,7 +2012,7 @@ async function toggleDashboardNumberFilter() {
     const category = table ? (table.dataset.focusColumn || '') : '';
 
     if (!DASHBOARD_DATA_CATEGORIES.includes(category)) {
-        updateDashboardFilterUI('Pilih kolom CAM, CHN, JPN, atau TWN terlebih dahulu.');
+        updateDashboardFilterUI('Pilih salah satu dari 7 kategori terlebih dahulu.');
         return;
     }
 
@@ -2096,8 +2101,7 @@ function applyDashboardNumberFilter() {
     if (!DASHBOARD_DATA_CATEGORIES.includes(category)) {
         dashboardNumberFilterActive = false;
         updateDashboardHistoryMoreButton(rows.length);
-        return [];
-    }
+        return [];    }
 
     // Urutkan semua hasil 4 digit yang tersedia dari yang terbaru ke terlama.
     const entries = rows.map(row => {
