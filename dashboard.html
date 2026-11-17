@@ -512,6 +512,11 @@
             border-color: #34d399; box-shadow: 0 0 6px rgba(16, 185, 129, .55);
             text-shadow: 0 0 5px rgba(52, 211, 153, .8);
         }
+        .data-history-table .data-value-suffix.is-filter-reference {
+            color: #fff7ed !important; background: rgba(245, 158, 11, .28) !important;
+            border-color: #fbbf24 !important; box-shadow: 0 0 7px rgba(245, 158, 11, .75) !important;
+            text-shadow: 0 0 5px rgba(251, 191, 36, .95) !important; opacity: 1 !important;
+        }
         .data-history-table-wrap { width: 100%; overflow-x: hidden; border: 1px solid var(--border-color); border-radius: 7px; }
         .data-history-table { width: 100%; min-width: 0; border-collapse: separate; border-spacing: 0; table-layout: fixed; font-variant-numeric: tabular-nums; }
         .data-history-table th, .data-history-table td { padding: 7px 3px; border-right: 1px solid #27364e; border-bottom: 1px solid #27364e; text-align: center; white-space: nowrap; }
@@ -1938,7 +1943,7 @@ async function copyDashboardFilterResults(value) {
     return true;
 }
 
-async function toggleDashboardNumberFilter() {
+async async function toggleDashboardNumberFilter() {
     const table = document.getElementById('dataHistoryTable');
     const category = table ? (table.dataset.focusColumn || '') : '';
 
@@ -1960,16 +1965,22 @@ async function toggleDashboardNumberFilter() {
         return;
     }
 
-    const clipboardText = selectedPairs.join('.');
+    const reverseReferencePair = selectedPairs.referenceReverse || '';
+    const clipboardPairs = reverseReferencePair
+        ? [...selectedPairs, reverseReferencePair]
+        : [...selectedPairs];
+    const clipboardText = clipboardPairs.join('.');
     try {
         await copyDashboardFilterResults(clipboardText);
         updateDashboardFilterUI(
             'Filter ' + category + ' aktif. Kandidat ' + selectedPairs.join(' · ') +
+            (reverseReferencePair ? ' + balik acuan ' + reverseReferencePair : '') +
             ' berhasil disalin: ' + clipboardText
         );
     } catch (error) {
         updateDashboardFilterUI(
             'Filter ' + category + ' aktif. Kandidat ' + selectedPairs.join(' · ') +
+            (reverseReferencePair ? ' + balik acuan ' + reverseReferencePair : '') +
             '. Penyalinan otomatis diblokir browser; salin manual: ' + clipboardText
         );
     }
@@ -2013,7 +2024,7 @@ function applyDashboardNumberFilter() {
     rows.forEach(row => {
         row.classList.remove('is-filter-hidden');
         row.querySelectorAll('.data-value-suffix').forEach(suffix => {
-            suffix.classList.remove('is-filter-muted', 'is-filter-highlighted');
+            suffix.classList.remove('is-filter-muted', 'is-filter-highlighted', 'is-filter-reference');
         });
     });
 
@@ -2050,12 +2061,21 @@ function applyDashboardNumberFilter() {
     // Hasil terbaru menjadi acuan. Cari terus ke bawah sampai 3 pasangan valid
     // ditemukan, atau sampai seluruh riwayat yang dimuat sudah diperiksa.
     const referencePair = entries[0].value.slice(-2);
+    const reverseReferencePair = referencePair.charAt(1) + referencePair.charAt(0);
     const excludedPrefix = referencePair.charAt(0);
     const excludedSuffix = referencePair.charAt(1);
-    const seenPairs = new Set([referencePair]);
+
+    // Pasangan acuan dan kebalikannya diperlakukan khusus.
+    // Pasangan terbalik dicadangkan agar tidak terpilih dua kali.
+    const seenPairs = new Set([referencePair, reverseReferencePair]);
     const highlightedPairs = [];
     const inspectedEntries = [entries[0]];
     let mutedCount = 1;
+
+    // Hasil terbaru juga harus terlihat sebagai highlight khusus.
+    if (entries[0].suffix) {
+        entries[0].suffix.classList.add('is-filter-reference');
+    }
 
     for (let index = 1; index < entries.length; index++) {
         const entry = entries[index];
@@ -2102,6 +2122,7 @@ function applyDashboardNumberFilter() {
         mutedCount + ' hasil dilewati/diredupkan.'
     );
 
+    highlightedPairs.referenceReverse = reverseReferencePair;
     return highlightedPairs;
 }
 function selectDataRow(date) {
