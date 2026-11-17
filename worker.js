@@ -104,11 +104,11 @@ export default {
     }
 
     const action = String(payload.action || '').trim();
-    if (!['save', 'list', 'sourceTest', 'verifyPin'].includes(action)) {
+    if (!['save', 'list', 'sourceTest', 'sourceSync', 'verifyPin'].includes(action)) {
       return jsonResponse({ ok: false, error: 'Action tidak dikenal.' }, 400, origin);
     }
 
-    if (['sourceTest', 'verifyPin', 'save'].includes(action)) {
+    if (['sourceTest', 'sourceSync', 'verifyPin', 'save'].includes(action)) {
       if (!env.DASHBOARD_PIN || String(payload.pin || '') !== env.DASHBOARD_PIN) {
         return jsonResponse({ ok: false, error: 'PIN tidak sesuai.' }, 403, origin);
       }
@@ -118,16 +118,26 @@ export default {
       return jsonResponse({ ok: true, authenticated: true }, 200, origin);
     }
 
-    if (action === 'sourceTest') {
+    if (action === 'sourceTest' || action === 'sourceSync') {
       try {
         const date = String(payload.date || getJakartaDateKey(new Date())).trim();
         if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
           return jsonResponse({ ok: false, error: 'Tanggal tes tidak valid.' }, 400, origin);
         }
         const result = await testIndotogelSources_(date);
+        if (action === 'sourceSync') {
+          const stored = await persistSourceTestResults_(env, result.results);
+          result.results = stored.results;
+          result.saved = stored.saved;
+          result.matched = stored.matched;
+          result.mismatched = stored.mismatched;
+          result.failed = stored.failed;
+          result.alreadySaved = 0;
+          result.message = 'Hasil valid telah dikirim ke Google Sheets.';
+        }
         return jsonResponse(result, 200, origin);
       } catch (error) {
-        return jsonResponse({ ok: false, error: error.message || 'Tes sumber gagal.' }, 502, origin);
+        return jsonResponse({ ok: false, error: error.message || 'Tes/sinkronisasi sumber gagal.' }, 502, origin);
       }
     }
 
@@ -330,6 +340,38 @@ async function testIndotogelSources_(date) {
   };
 }
 
+
+async function persistSourceTestResults_(env, results) {
+  const output = [];
+  let saved = 0, matched = 0, mismatched = 0, failed = 0;
+  for (const item of (Array.isArray(results) ? results : [])) {
+    if (!['FOUND_PRIMARY', 'FOUND_BACKUP'].includes(item.status)) {
+      output.push(item);
+      continue;
+    }
+    try {
+      const stored = await callAppsScript_(env, {
+        action: 'ingest',
+        category: item.category,
+        date: item.date,
+        period: item.period,
+        resultDigits: item.rawDigits,
+        sourceUrl: item.url,
+        sourceName: item.sourceName,
+        fetchedAt: new Date().toISOString()
+      });
+      if (stored.status === 'SAVED') saved++;
+      else if (stored.status === 'MATCH') matched++;
+      else if (stored.status === 'MISMATCH') mismatched++;
+      output.push({ ...item, saveStatus: stored.status, saveMessage: stored.message, savedValue: stored.value });
+    } catch (error) {
+      failed++;
+      output.push({ ...item, saveStatus: 'SAVE_ERROR', saveMessage: String(error && error.message ? error.message : error) });
+    }
+  }
+  return { results: output, saved, matched, mismatched, failed };
+}
+
 async function fetchWidgetResultRows_() {
   const response = await fetch(WIDGET_BACKUP_URL, {
     method: 'GET',
@@ -385,8 +427,8 @@ function findWidgetMarketResult_(rows, category, targetDate) {
 }
 
 async function pollOneMarket_(category, date, scheduledAt, env, getWidgetRows) {
-  const state = await callAppsScript_(env, { action: 'pollState', category, date });
-  if (state.done) return;
+  // Recheck on each scheduled run: a primary result published after a backup
+  // must still replace the backup value and create an audit entry.
 
   let result = null;
   let sourceName = 'INDOTOGEL';
