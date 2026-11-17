@@ -48,13 +48,13 @@ const FETCH_TIMEOUT_MS = 12_000;
 // the end of the Jakarta day. The trigger runs every five minutes. This broad
 // retry window catches delayed source publication without guessing a result.
 const MARKETS = {
-  CAM: { slug: 'MC', periods: ['MC'], resultMinute: 11 * 60 + 50, endMinute: 12 * 60 + 35 },
-  SDY: { slug: 'SD', periods: ['SD'], resultMinute: 13 * 60 + 50, endMinute: 14 * 60 + 35 },
-  CHN: { slug: 'CN', periods: ['CN'], resultMinute: 15 * 60 + 30, endMinute: 16 * 60 + 15 },
-  JPN: { slug: 'JPN', periods: ['JPN', 'JP'], resultMinute: 17 * 60 + 20, endMinute: 18 * 60 + 5 },
-  SGP: { slug: 'sg', periods: ['SG'], resultMinute: 17 * 60 + 40, endMinute: 18 * 60 + 25, drawDays: [0, 1, 3, 4, 6] },
-  TWN: { slug: 'TW', periods: ['TW'], resultMinute: 20 * 60 + 45, endMinute: 21 * 60 + 30 },
-  HKP: { slug: 'HK', periods: ['HK'], resultMinute: 23 * 60, endMinute: 23 * 60 + 45 }
+  CAM: { slug: 'MC', periods: ['MC'], resultMinute: 11 * 60 + 50 },
+  SDY: { slug: 'SD', periods: ['SD'], resultMinute: 13 * 60 + 50 },
+  CHN: { slug: 'CN', periods: ['CN'], resultMinute: 15 * 60 + 30 },
+  JPN: { slug: 'JPN', periods: ['JPN', 'JP'], resultMinute: 17 * 60 + 20 },
+  SGP: { slug: 'sg', periods: ['SG'], resultMinute: 17 * 60 + 40, drawDays: [0, 1, 3, 4, 6] },
+  TWN: { slug: 'TW', periods: ['TW'], resultMinute: 20 * 60 + 45 },
+  HKP: { slug: 'HK', periods: ['HK'], resultMinute: 23 * 60 }
 };
 
 function corsHeaders(origin) {
