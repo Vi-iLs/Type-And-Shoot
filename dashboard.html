@@ -2039,7 +2039,7 @@ function applyDashboardNumberFilter() {
             value: cell ? cell.textContent.trim() : '',
             suffix: cell ? cell.querySelector('.data-value-suffix') : null
         };
-    }).filter(entry => /^\\d{4}$/.test(entry.value))
+    }).filter(entry => /^\d{4}$/.test(entry.value))
       .sort((a, b) => b.date.localeCompare(a.date));
 
     if (!entries.length) {
