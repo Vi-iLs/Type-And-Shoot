@@ -1856,7 +1856,7 @@ function renderDashboardData(records) {
 
     updateDashboardHistoryMoreButton(records.length);
     applyDashboardNumberFilter();
-    updateDashboardFilterUI();
+    if (!dashboardNumberFilterActive) updateDashboardFilterUI();
 }
 
 function updateDashboardHistoryMoreButton(totalRows) {
@@ -1905,7 +1905,7 @@ function selectDataColumn(category) {
     // Filter mengikuti kategori yang sedang dipilih; melepas pilihan kolom mematikan filter.
     if (!next) dashboardNumberFilterActive = false;
     applyDashboardNumberFilter();
-    updateDashboardFilterUI();
+    if (!dashboardNumberFilterActive) updateDashboardFilterUI();
 }
 
 function toggleDashboardNumberFilter() {
@@ -1919,7 +1919,7 @@ function toggleDashboardNumberFilter() {
 
     dashboardNumberFilterActive = !dashboardNumberFilterActive;
     applyDashboardNumberFilter();
-    updateDashboardFilterUI();
+    if (!dashboardNumberFilterActive) updateDashboardFilterUI();
 }
 
 function updateDashboardFilterUI(message) {
