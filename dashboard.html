@@ -1553,14 +1553,21 @@ function renderIndotogelSourceTest(results) {
         const isPrimary = item.status === 'FOUND' || item.status === 'FOUND_PRIMARY';
         const isBackup = item.status === 'FOUND_BACKUP';
         const isFound = isPrimary || isBackup;
-        const isError = item.status === 'ERROR';
+        const isError = item.status === 'ERROR' || item.saveStatus === 'SAVE_ERROR';
         const isNotReady = item.status === 'NOT_READY' || item.status === 'WAITING';
         const state = document.createElement('span');
         state.className = 'source-test-state ' +
             (isPrimary ? 'found' : (isBackup ? 'backup' : (isError ? 'error' : '')));
-        state.textContent = isPrimary
-            ? 'TERBACA'
-            : (isBackup ? 'CADANGAN' : (isError ? 'ERROR' : (isNotReady ? 'BELUM TERBIT' : 'STATUS?')));
+        const saveState = String(item.saveStatus || '').toUpperCase();
+        state.textContent = saveState === 'SAVED'
+            ? 'TERSIMPAN'
+            : (saveState === 'MATCH'
+                ? 'SUDAH SAMA'
+                : (saveState === 'MISMATCH'
+                    ? 'DIPERBARUI'
+                    : (saveState === 'IGNORED_BACKUP'
+                        ? 'BACKUP DIABAIKAN'
+                        : (isPrimary ? 'TERBACA' : (isBackup ? 'CADANGAN' : (isError ? 'ERROR' : (isNotReady ? 'BELUM TERBIT' : 'STATUS?')))))));
 
         const value = document.createElement('div');
         value.className = 'source-test-value';
@@ -1601,7 +1608,7 @@ async function testIndotogelSource() {
 
     dashboardDataRequestInProgress = true;
     if (button) { button.disabled = true; button.textContent = 'MEMERIKSA...'; }
-    setSourceTestStatus('Membaca Indotogel terlebih dahulu; widget cadangan hanya diambil jika hasil utama tidak tersedia. Tes ini tidak menyimpan angka.');
+    setSourceTestStatus('Memeriksa tepat 7 pasaran. Indotogel diperiksa lebih dahulu; widget hanya menjadi cadangan bila hasil utama belum tersedia. Mode uji tidak menyimpan data.');
     const wrapper = document.getElementById('sourceTestResults');
     if (wrapper) wrapper.replaceChildren();
 
@@ -1745,7 +1752,7 @@ async function loadDashboardData() {
         }, 0);
         setDashboardDataStatus(
             records.length + ' tanggal dimuat · ' + mismatchCount +
-            ' perbedaan Indotogel ditandai (!). Nilai tabel mengikuti Indotogel.'
+            ' perbedaan sumber ditandai (!). Data akan diperbarui otomatis setiap 60 detik.'
         );
     } catch (error) {
         renderDashboardData([]);
@@ -2136,8 +2143,13 @@ function selectDataRow(date) {
     });
 }
 
-// Ambil data saat dashboard selesai memuat.
+// Ambil data saat dashboard selesai memuat, lalu segarkan otomatis saat tab aktif.
 loadDashboardData();
+window.setInterval(() => {
+    if (!document.hidden && !dashboardDataRequestInProgress) {
+        loadDashboardData();
+    }
+}, 60 * 1000);
 
 </script>
 
