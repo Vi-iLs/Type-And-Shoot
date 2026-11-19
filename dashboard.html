@@ -250,27 +250,203 @@
             background-color: #334155;
         }
 
-        .filter-source-toast {
+        .process-report-overlay {
             position: fixed;
-            top: 14px;
-            left: 50%;
-            z-index: 10000;
-            width: max-content;
-            max-width: calc(100vw - 28px);
-            transform: translateX(-50%);
-            padding: 11px 16px;
-            border: 1px solid #0f766e;
-            border-radius: 9px;
-            background: rgba(15, 23, 42, .97);
-            color: #ccfbf1;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, .38);
-            font-size: 12px;
-            font-weight: 800;
-            line-height: 1.45;
-            text-align: center;
-            pointer-events: none;
+            inset: 0;
+            z-index: 20000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+            background: rgba(2, 6, 23, .86);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
         }
-        .filter-source-toast[hidden] { display: none; }
+        .process-report-overlay[hidden] { display: none; }
+        .process-report-dialog {
+            width: min(560px, 100%);
+            max-height: min(90vh, 760px);
+            overflow-y: auto;
+            padding: 22px;
+            border: 1px solid #45617f;
+            border-radius: 16px;
+            background: #142238;
+            color: #f8fafc;
+            box-shadow: 0 24px 70px rgba(0, 0, 0, .62);
+        }
+        .process-report-kicker {
+            margin: 0 0 6px;
+            color: #5eead4;
+            font-size: 11px;
+            font-weight: 900;
+            letter-spacing: 1.1px;
+            text-align: center;
+        }
+        .process-report-dialog h2 {
+            margin: 0;
+            color: #fff;
+            font-size: clamp(19px, 4vw, 24px);
+            font-weight: 900;
+            letter-spacing: .35px;
+            line-height: 1.25;
+            text-align: center;
+        }
+        .process-report-source {
+            margin: 14px 0 10px;
+            padding: 12px;
+            border: 1px solid #0f766e;
+            border-radius: 10px;
+            background: #0d2b34;
+            text-align: center;
+        }
+        .process-report-source-label {
+            display: block;
+            margin-bottom: 4px;
+            color: #99f6e4;
+            font-size: 10px;
+            font-weight: 900;
+            letter-spacing: .8px;
+        }
+        #processReportSource {
+            color: #fff;
+            font-size: 22px;
+            font-weight: 900;
+            letter-spacing: .8px;
+        }
+        .process-report-description {
+            margin: 10px 0 15px;
+            color: #cbd5e1;
+            font-size: 12px;
+            line-height: 1.55;
+            text-align: center;
+        }
+        .process-report-stats {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+        .process-report-stat {
+            min-width: 0;
+            padding: 12px 7px;
+            border: 1px solid #344963;
+            border-radius: 9px;
+            background: #0e1a2b;
+            text-align: center;
+        }
+        .process-report-stat-label {
+            display: block;
+            min-height: 27px;
+            color: #aebed0;
+            font-size: 9px;
+            font-weight: 800;
+            line-height: 1.35;
+        }
+        .process-report-stat-value {
+            display: block;
+            margin-top: 3px;
+            color: #fff;
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: clamp(23px, 5vw, 29px);
+            font-weight: 900;
+            line-height: 1.1;
+        }
+        .process-report-stat.remaining .process-report-stat-value { color: #5eead4; }
+        .process-report-stat.removed .process-report-stat-value { color: #fca5a5; }
+        .process-report-section-title {
+            margin: 13px 0 8px;
+            color: #f8fafc;
+            font-size: 12px;
+            font-weight: 900;
+            letter-spacing: .45px;
+        }
+        .process-report-breakdown {
+            display: grid;
+            gap: 7px;
+            padding: 11px 12px;
+            border: 1px solid #344963;
+            border-radius: 9px;
+            background: #0e1a2b;
+        }
+        .process-report-breakdown-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            color: #dbe5ef;
+            font-size: 12px;
+        }
+        .process-report-breakdown-row strong {
+            color: #fff;
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 13px;
+        }
+        .process-report-filter-values {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 7px;
+        }
+        .process-report-filter-value {
+            min-width: 0;
+            padding: 9px;
+            border: 1px solid #344963;
+            border-radius: 8px;
+            background: #0e1a2b;
+        }
+        .process-report-filter-value span {
+            display: block;
+            margin-bottom: 5px;
+            color: #9fb0c4;
+            font-size: 9px;
+            font-weight: 900;
+            text-transform: uppercase;
+        }
+        .process-report-filter-value strong {
+            display: block;
+            overflow-wrap: anywhere;
+            color: #fff;
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 12px;
+        }
+        .process-report-note {
+            margin: 12px 0 15px;
+            padding: 9px 10px;
+            border-left: 3px solid #60a5fa;
+            border-radius: 5px;
+            background: rgba(30, 64, 175, .16);
+            color: #cbd5e1;
+            font-size: 10px;
+            line-height: 1.5;
+        }
+        .process-report-confirm {
+            width: 100%;
+            min-height: 46px;
+            padding: 12px 16px;
+            border: 0;
+            border-radius: 9px;
+            background: #0f9f86;
+            color: #fff;
+            font-size: 13px;
+            font-weight: 900;
+            letter-spacing: .35px;
+            cursor: pointer;
+        }
+        .process-report-confirm:hover,
+        .process-report-confirm:focus-visible {
+            background: #0d8a76;
+            outline: 3px solid rgba(94, 234, 212, .28);
+            outline-offset: 2px;
+        }
+        @media (max-width: 480px) {
+            .process-report-overlay { padding: 10px; }
+            .process-report-dialog { padding: 16px 13px; border-radius: 13px; }
+            .process-report-stats { gap: 5px; }
+            .process-report-stat { padding: 10px 4px; }
+            .process-report-stat-label { font-size: 8px; }
+            .process-report-filter-values { gap: 5px; }
+            .process-report-filter-value { padding: 8px 6px; }
+            .process-report-filter-value strong { font-size: 10px; }
+        }
 
         .match-box {
             background-color: #0f172a;
@@ -837,7 +1013,80 @@
     <button class="nav-btn" onclick="window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'})" title="Ke Bawah">⬇️</button>
 </div>
 
-<div id="filterSourceToast" class="filter-source-toast" role="status" aria-live="polite" hidden></div>
+<div id="processReportModal" class="process-report-overlay" hidden>
+    <section class="process-report-dialog" role="dialog" aria-modal="true"
+        aria-labelledby="processReportTitle" aria-describedby="processReportDescription">
+        <p class="process-report-kicker">PROSES SELESAI</p>
+        <h2 id="processReportTitle">LAPORAN HASIL FILTER</h2>
+
+        <div class="process-report-source">
+            <span class="process-report-source-label">ASAL FILTER</span>
+            <strong id="processReportSource">MANUAL</strong>
+        </div>
+
+        <p id="processReportDescription" class="process-report-description">
+            Periksa jumlah angka dan rincian aturan berikut sebelum menyalin hasil.
+        </p>
+
+        <div class="process-report-stats">
+            <div class="process-report-stat">
+                <span class="process-report-stat-label">TOTAL ANGKA AWAL</span>
+                <strong id="processReportTotal" class="process-report-stat-value">0</strong>
+            </div>
+            <div class="process-report-stat remaining">
+                <span class="process-report-stat-label">ANGKA TERSISA</span>
+                <strong id="processReportRemaining" class="process-report-stat-value">0</strong>
+            </div>
+            <div class="process-report-stat removed">
+                <span class="process-report-stat-label">TOTAL DIBUANG</span>
+                <strong id="processReportRemoved" class="process-report-stat-value">0</strong>
+            </div>
+        </div>
+
+        <h3 class="process-report-section-title">RINCIAN ANGKA YANG DIBUANG</h3>
+        <div class="process-report-breakdown">
+            <div class="process-report-breakdown-row">
+                <span>Buangan berdasarkan awalan</span>
+                <strong id="processReportPrefix">0</strong>
+            </div>
+            <div class="process-report-breakdown-row">
+                <span>Buangan berdasarkan akhiran</span>
+                <strong id="processReportSuffix">0</strong>
+            </div>
+            <div class="process-report-breakdown-row">
+                <span>Buangan angka spesifik</span>
+                <strong id="processReportSpecific">0</strong>
+            </div>
+        </div>
+
+        <h3 class="process-report-section-title">FILTER YANG DIGUNAKAN</h3>
+        <div class="process-report-filter-values">
+            <div class="process-report-filter-value">
+                <span>Awalan</span>
+                <strong id="processReportPrefixValues">—</strong>
+            </div>
+            <div class="process-report-filter-value">
+                <span>Akhiran</span>
+                <strong id="processReportSuffixValues">—</strong>
+            </div>
+            <div class="process-report-filter-value">
+                <span>Spesifik</span>
+                <strong id="processReportSpecificValues">—</strong>
+            </div>
+        </div>
+
+        <p class="process-report-note">
+            Setiap angka dihitung satu kali berdasarkan aturan pertama yang cocok:
+            AWALAN, kemudian AKHIRAN, kemudian SPESIFIK. Urutan perhitungan mengikuti
+            aturan kalkulator yang sedang digunakan.
+        </p>
+
+        <button type="button" id="processReportConfirm"
+            class="process-report-confirm" onclick="acknowledgeProcessReport()">
+            OKE, LANJUTKAN KE COPY
+        </button>
+    </section>
+</div>
 
 <script>
     // Bersihkan parameter cache-buster setelah versi terbaru selesai dimuat.
@@ -893,27 +1142,40 @@
         let rawArray = inputStr.replace(/\n/g, '.').split('.');
         let numArray = rawArray.map(n => n.trim()).filter(n => n !== '');
 
-        if (numArray.length === 0) {
-            document.getElementById('outputData').value = "";
-            return;
-        }
-
         let hasil = [];
+        let removedByPrefix = 0;
+        let removedBySuffix = 0;
+        let removedBySpecific = 0;
 
+        // Preserve the existing rule order: prefix, then suffix, then specific.
+        // Each input item is counted once, under the first rule that removes it.
         for (let angka of numArray) {
             let harusDihapus = false;
+
             for (let awalan of awalanArr) {
-                if (angka.startsWith(awalan)) { harusDihapus = true; break; }
-            }
-            if (!harusDihapus) {
-                for (let akhiran of akhiranArr) {
-                    if (angka.endsWith(akhiran)) { harusDihapus = true; break; }
+                if (angka.startsWith(awalan)) {
+                    harusDihapus = true;
+                    removedByPrefix++;
+                    break;
                 }
             }
+
             if (!harusDihapus) {
-                if (spesifikArr.includes(angka)) { harusDihapus = true; }
+                for (let akhiran of akhiranArr) {
+                    if (angka.endsWith(akhiran)) {
+                        harusDihapus = true;
+                        removedBySuffix++;
+                        break;
+                    }
+                }
             }
-            if (!harusDihapus) { hasil.push(angka); }
+
+            if (!harusDihapus && spesifikArr.includes(angka)) {
+                harusDihapus = true;
+                removedBySpecific++;
+            }
+
+            if (!harusDihapus) hasil.push(angka);
         }
 
         let barisHasil = [];
@@ -923,6 +1185,18 @@
 
         document.getElementById('outputData').value = barisHasil.join('\n');
         document.getElementById('btnCopyText').innerText = "Copy";
+
+        showProcessReport({
+            total: numArray.length,
+            remaining: hasil.length,
+            removedByPrefix,
+            removedBySuffix,
+            removedBySpecific,
+            sourceCategory: dashboardFilterSourceCategory,
+            prefixValues: document.getElementById('hapusAwalan').value,
+            suffixValues: document.getElementById('hapusAkhiran').value,
+            specificValues: document.getElementById('hapusSpesifik').value
+        });
     }
 
     // FUNGSI UNTUK MEMECAH FORMAT "123 bb 2a X" KEMBALI JADI ANGKA SATUAN
@@ -1109,29 +1383,85 @@
     outputTextArea.value = finalOutput.join('\n');
 }
 
-    function showDashboardFilterSourceToast(category) {
-        const toast = document.getElementById('filterSourceToast');
-        if (!toast || !DASHBOARD_DATA_CATEGORIES.includes(category)) return;
+    function showProcessReport(report) {
+        const modal = document.getElementById('processReportModal');
+        const confirmButton = document.getElementById('processReportConfirm');
+        const copyButton = document.getElementById('btnCopyText');
+        if (!modal) return;
 
-        if (dashboardFilterToastDismissHandler) {
-            document.removeEventListener('click', dashboardFilterToastDismissHandler, true);
+        const setText = (id, value) => {
+            const element = document.getElementById(id);
+            if (element) element.textContent = String(value);
+        };
+        const displayFilterValue = value => {
+            const text = String(value || '').trim();
+            return text || '—';
+        };
+
+        const sourceCategory = DASHBOARD_DATA_CATEGORIES.includes(report.sourceCategory)
+            ? report.sourceCategory
+            : 'MANUAL';
+
+        setText('processReportSource', sourceCategory);
+        setText('processReportTotal', report.total);
+        setText('processReportRemaining', report.remaining);
+        setText('processReportRemoved',
+            report.removedByPrefix + report.removedBySuffix + report.removedBySpecific);
+        setText('processReportPrefix', report.removedByPrefix);
+        setText('processReportSuffix', report.removedBySuffix);
+        setText('processReportSpecific', report.removedBySpecific);
+        setText('processReportPrefixValues', displayFilterValue(report.prefixValues));
+        setText('processReportSuffixValues', displayFilterValue(report.suffixValues));
+        setText('processReportSpecificValues', displayFilterValue(report.specificValues));
+
+        const description = document.getElementById('processReportDescription');
+        if (description) {
+            description.textContent = report.total
+                ? 'Periksa asal filter dan jumlah angka yang tersisa maupun dibuang. Setelah menekan OKE, hasil dapat disalin.'
+                : 'Tidak ada angka yang dapat diproses. Periksa kolom Angka Asli sebelum melanjutkan.';
         }
 
-        toast.textContent = 'Angka filter ini berasal dari channel ' + category +
-            '. Identitas ' + category.toLowerCase() + ' ikut tercopy otomatis.';
-        toast.hidden = false;
+        processReportPending = true;
+        if (copyButton) copyButton.disabled = true;
+        modal.hidden = false;
+        document.body.style.overflow = 'hidden';
+        if (confirmButton) confirmButton.focus();
 
-        dashboardFilterToastDismissHandler = (event) => {
-            // Abaikan klik Copy yang sedang menampilkan notifikasi ini.
-            if (event.target && event.target.closest && event.target.closest('#btnCopyText')) return;
-            toast.hidden = true;
-            document.removeEventListener('click', dashboardFilterToastDismissHandler, true);
-            dashboardFilterToastDismissHandler = null;
+        // Modal tidak dapat ditutup melalui klik latar, tombol Escape, atau Tab keluar.
+        modal.onkeydown = event => {
+            if (event.key === 'Escape') {
+                event.preventDefault();
+                event.stopPropagation();
+            } else if (event.key === 'Tab') {
+                event.preventDefault();
+                if (confirmButton) confirmButton.focus();
+            }
         };
-        document.addEventListener('click', dashboardFilterToastDismissHandler, true);
+    }
+
+    function acknowledgeProcessReport() {
+        if (!processReportPending) return;
+
+        const modal = document.getElementById('processReportModal');
+        const copyButton = document.getElementById('btnCopyText');
+
+        processReportPending = false;
+        if (modal) {
+            modal.hidden = true;
+            modal.onkeydown = null;
+        }
+        document.body.style.overflow = '';
+
+        if (copyButton) {
+            copyButton.disabled = false;
+            copyButton.focus();
+        }
     }
 
     async function copyHasil() {
+        // A processed result cannot be copied until its report has been acknowledged.
+        if (processReportPending) return;
+
         const outputTextArea = document.getElementById('outputData');
         const btnCopy = document.getElementById('btnCopyText');
         const originalText = outputTextArea ? outputTextArea.value.trimEnd() : '';
@@ -1152,7 +1482,6 @@
                     btnCopy.innerText = "Copy";
                 }, 2000);
             }
-            if (sourceCategory) showDashboardFilterSourceToast(sourceCategory);
         };
 
         try {
@@ -1515,7 +1844,7 @@ let dashboardNumberFilterActive = false;
 let dashboardDataRecords = [];
 let dashboardFilterInputPayload = null;
 let dashboardFilterSourceCategory = '';
-let dashboardFilterToastDismissHandler = null;
+let processReportPending = false;
 const DASHBOARD_FILTER_MAX_HIGHLIGHTS = 3;
 
 function setDashboardDataStatus(message, isError = false) {
