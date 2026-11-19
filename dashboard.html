@@ -2622,10 +2622,7 @@ function applyDashboardNumberFilter() {
             highlightedPairs.push(pair);
         }
 
-        // Catat pasangan dan bentuk terbaliknya agar keduanya tidak dapat
-        // masuk lagi dari baris riwayat berikutnya, termasuk jika baris ini dilewati.
         seenPairs.add(pair);
-        seenPairs.add(pair.charAt(1) + pair.charAt(0));
 
         // Berhenti hanya setelah tiga pasangan valid terkumpul.
         if (highlightedPairs.length >= DASHBOARD_FILTER_MAX_HIGHLIGHTS) break;
