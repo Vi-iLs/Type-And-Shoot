@@ -433,6 +433,15 @@
             box-shadow: 0 0 8px rgba(59, 130, 246, .3);
         }
         .data-history-filter:disabled { opacity: .42; cursor: not-allowed; }
+        .data-history-apply {
+            padding: 7px 9px; border: 1px solid #0f766e; border-radius: 5px;
+            background: #134e4a; color: #ccfbf1; font-size: 10px; font-weight: 800;
+            letter-spacing: .2px; cursor: pointer; white-space: nowrap;
+        }
+        .data-history-apply:not(:disabled):hover {
+            background: #0f766e; border-color: #5eead4; color: #fff;
+        }
+        .data-history-apply:disabled { opacity: .38; cursor: not-allowed; }
         .data-history-filter-status {
             display: block; min-height: 13px; margin: -3px 0 9px;
             color: #94a3b8; font-size: 9.5px; line-height: 1.35;
@@ -797,7 +806,10 @@
         <div class="data-history-actions">
             <button type="button" id="dataHistoryFilterToggle" class="data-history-filter"
                 aria-pressed="false" disabled onclick="toggleDashboardNumberFilter()"
-                title="Pilih kategori CAM, CHN, JPN, atau TWN terlebih dahulu">FILTER 2D</button>
+                title="Pilih salah satu dari 7 kategori terlebih dahulu">FILTER 2D</button>
+            <button type="button" id="dataHistoryApplyFilter" class="data-history-apply"
+                disabled onclick="applyDashboardFilterToCalculator()"
+                title="Aktif setelah channel dipilih dan FILTER 2D dijalankan">ISI KE FILTER</button>
             <button type="button" class="data-history-refresh" onclick="loadDashboardData()">↻ REFRESH DATA</button>
         </div>
     </div>
@@ -1485,6 +1497,7 @@ let showAllDashboardData = false;
 let dashboardDataRequestInProgress = false;
 let dashboardNumberFilterActive = false;
 let dashboardDataRecords = [];
+let dashboardFilterInputPayload = null;
 const DASHBOARD_FILTER_MAX_HIGHLIGHTS = 3;
 
 function setDashboardDataStatus(message, isError = false) {
@@ -1869,7 +1882,7 @@ function renderDashboardData(records) {
 
     updateDashboardHistoryMoreButton(records.length);
     applyDashboardNumberFilter();
-    if (!dashboardNumberFilterActive) updateDashboardFilterUI();
+    updateDashboardFilterUI();
 }
 
 function updateDashboardHistoryMoreButton(totalRows) {
@@ -1918,41 +1931,10 @@ function selectDataColumn(category) {
     // Filter mengikuti kategori yang sedang dipilih; melepas pilihan kolom mematikan filter.
     if (!next) dashboardNumberFilterActive = false;
     applyDashboardNumberFilter();
-    if (!dashboardNumberFilterActive) updateDashboardFilterUI();
+    updateDashboardFilterUI();
 }
 
-async function copyDashboardFilterResults(value) {
-    const text = String(value || '').trim();
-    if (!text) return false;
-
-    if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
-        await navigator.clipboard.writeText(text);
-        return true;
-    }
-
-    // Fallback untuk browser yang tidak menyediakan Clipboard API.
-    const temporaryInput = document.createElement('textarea');
-    temporaryInput.value = text;
-    temporaryInput.setAttribute('readonly', '');
-    temporaryInput.style.position = 'fixed';
-    temporaryInput.style.left = '-9999px';
-    temporaryInput.style.top = '0';
-    document.body.appendChild(temporaryInput);
-    temporaryInput.select();
-    temporaryInput.setSelectionRange(0, temporaryInput.value.length);
-
-    let copied = false;
-    try {
-        copied = document.execCommand('copy');
-    } finally {
-        temporaryInput.remove();
-    }
-
-    if (!copied) throw new Error('Browser menolak akses clipboard.');
-    return true;
-}
-
-async function toggleDashboardNumberFilter() {
+function toggleDashboardNumberFilter() {
     const table = document.getElementById('dataHistoryTable');
     const category = table ? (table.dataset.focusColumn || '') : '';
 
@@ -1970,51 +1952,80 @@ async function toggleDashboardNumberFilter() {
     }
 
     if (!selectedPairs.length) {
-        updateDashboardFilterUI('Filter aktif, tetapi belum ada pasangan valid untuk disalin.');
+        updateDashboardFilterUI('Filter aktif, tetapi belum ada pasangan valid untuk dimasukkan.');
         return;
     }
 
-    const reverseReferencePair = selectedPairs.referenceReverse || '';
-    const clipboardPairs = reverseReferencePair
-        ? [...selectedPairs, reverseReferencePair]
-        : [...selectedPairs];
-    const clipboardText = clipboardPairs.join('.');
-    try {
-        await copyDashboardFilterResults(clipboardText);
-        updateDashboardFilterUI(
-            'Filter ' + category + ' aktif. Kandidat ' + selectedPairs.join(' · ') +
-            (reverseReferencePair ? ' + balik acuan ' + reverseReferencePair : '') +
-            ' berhasil disalin: ' + clipboardText
-        );
-    } catch (error) {
-        updateDashboardFilterUI(
-            'Filter ' + category + ' aktif. Kandidat ' + selectedPairs.join(' · ') +
-            (reverseReferencePair ? ' + balik acuan ' + reverseReferencePair : '') +
-            '. Penyalinan otomatis diblokir browser; salin manual: ' + clipboardText
-        );
+    updateDashboardFilterUI(
+        'Filter ' + category + ' aktif. Kandidat: ' + selectedPairs.join(' · ') +
+        (selectedPairs.referenceReverse ? ' · balik acuan ' + selectedPairs.referenceReverse : '') +
+        '. Tekan ISI KE FILTER untuk memasukkan angka ke kalkulator.'
+    );
+}
+
+function applyDashboardFilterToCalculator() {
+    const data = dashboardFilterInputPayload;
+    if (!data || !dashboardNumberFilterActive) {
+        updateDashboardFilterUI('Pilih channel dan aktifkan FILTER 2D terlebih dahulu.');
+        return;
     }
+
+    const prefixInput = document.getElementById('hapusAwalan');
+    const suffixInput = document.getElementById('hapusAkhiran');
+    const specificInput = document.getElementById('hapusSpesifik');
+    if (!prefixInput || !suffixInput || !specificInput) {
+        updateDashboardFilterUI('Kolom filter kalkulator tidak ditemukan.');
+        return;
+    }
+
+    // Replace the three calculator filters from the latest selected market result.
+    // Example: 1234 -> prefix 3, suffix 4, and reversed reference 43 first.
+    prefixInput.value = data.prefix;
+    suffixInput.value = data.suffix;
+    specificInput.value = data.specific;
+
+    updateDashboardFilterUI(
+        'Berhasil dimasukkan dari ' + data.category + ' · bukaan terakhir ' +
+        data.latestValue + ' (' + data.date + '). Awalan ' + data.prefix +
+        ', akhiran ' + data.suffix + ', spesifik ' + data.specific +
+        '. Tekan PROSSES untuk menjalankan kalkulator.'
+    );
+
+    prefixInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    prefixInput.focus({ preventScroll: true });
 }
 
 function updateDashboardFilterUI(message) {
     const button = document.getElementById('dataHistoryFilterToggle');
+    const applyButton = document.getElementById('dataHistoryApplyFilter');
     const status = document.getElementById('dataHistoryFilterStatus');
     const table = document.getElementById('dataHistoryTable');
     if (!button || !status) return;
 
     const category = table ? (table.dataset.focusColumn || '') : '';
     const hasCategory = DASHBOARD_DATA_CATEGORIES.includes(category);
+    const canApply = hasCategory && dashboardNumberFilterActive && !!dashboardFilterInputPayload;
 
     button.disabled = !hasCategory;
     button.setAttribute('aria-pressed', dashboardNumberFilterActive ? 'true' : 'false');
     button.textContent = dashboardNumberFilterActive ? 'FILTER 2D: ON' : 'FILTER 2D';
     button.title = hasCategory
         ? 'Filter sedang memilih kategori ' + category
-        : 'Pilih kategori CAM, CHN, JPN, atau TWN terlebih dahulu';
+        : 'Pilih salah satu dari 7 kategori terlebih dahulu';
+
+    if (applyButton) {
+        applyButton.disabled = !canApply;
+        applyButton.title = canApply
+            ? 'Masukkan awalan, akhiran, dan angka spesifik hasil filter ke kalkulator'
+            : 'Pilih channel dan aktifkan FILTER 2D terlebih dahulu';
+    }
 
     if (message) {
         status.textContent = message;
     } else if (dashboardNumberFilterActive) {
-        status.textContent = 'Filter ' + category + ' aktif: hasil historis dipindai hingga 3 pasangan valid ditemukan.';
+        status.textContent = canApply
+            ? 'Filter ' + category + ' aktif. Tekan ISI KE FILTER untuk mengisi awalan, akhiran, dan angka spesifik secara otomatis.'
+            : 'Filter ' + category + ' aktif, tetapi belum ada hasil yang bisa dimasukkan.';
     } else {
         status.textContent = hasCategory
             ? 'Kategori ' + category + ' dipilih. Tekan FILTER 2D untuk menyaring hasil historis.'
@@ -2028,6 +2039,7 @@ function applyDashboardNumberFilter() {
     if (!table || !tbody) return [];
 
     const rows = Array.from(tbody.querySelectorAll('.data-row'));
+    dashboardFilterInputPayload = null;
 
     // Bersihkan jejak filter lebih dahulu agar mode OFF selalu kembali normal.
     rows.forEach(row => {
@@ -2130,6 +2142,20 @@ function applyDashboardNumberFilter() {
     );
 
     highlightedPairs.referenceReverse = reverseReferencePair;
+
+    if (highlightedPairs.length > 0) {
+        // Put the reversed latest pair first, followed by the three filtered candidates.
+        const specificPairs = [reverseReferencePair, ...highlightedPairs];
+        dashboardFilterInputPayload = {
+            category,
+            date: entries[0].date,
+            latestValue: entries[0].value,
+            prefix: referencePair.charAt(0),
+            suffix: referencePair.charAt(1),
+            specific: [...new Set(specificPairs)].join('.')
+        };
+    }
+
     return highlightedPairs;
 }
 function selectDataRow(date) {
