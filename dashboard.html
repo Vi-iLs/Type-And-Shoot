@@ -607,11 +607,12 @@
             .data-settings-actions { align-items: stretch; }
             .data-settings-action { flex: 1; }
             .data-history-shell { padding: 8px; }
-            .data-history-heading { gap: 5px; }
+            .data-history-heading { gap: 5px; align-items: flex-start; flex-direction: column; }
             .data-history-heading h2 { font-size: 13px; }
-            .data-history-refresh { padding: 6px 7px; font-size: 9px; }
-            .data-history-actions { gap: 4px; }
-            .data-history-filter { padding: 6px 7px; font-size: 8.5px; }
+            .data-history-refresh { padding: 6px 7px; font-size: 8.5px; flex: 1 1 auto; }
+            .data-history-actions { gap: 4px; width: 100%; }
+            .data-history-filter,
+            .data-history-apply { padding: 6px 7px; font-size: 8.5px; flex: 1 1 auto; }
             .data-history-filter-status { font-size: 8.5px; }
             .data-history-table th, .data-history-table td { padding: 6px 2px; }
             .data-history-table th:first-child, .data-history-table td:first-child { width: 42px; }
@@ -2062,10 +2063,15 @@ function applyDashboardNumberFilter() {
     // Urutkan semua hasil 4 digit yang tersedia dari yang terbaru ke terlama.
     const entries = rows.map(row => {
         const cell = row.querySelector('td[data-category="' + category + '"]');
+        const date = row.dataset.date || '';
+        const record = dashboardDataRecords.find(item => String(item.date || '') === date);
+        const value = record && record[category] !== undefined && record[category] !== null
+            ? String(record[category]).trim()
+            : (cell ? cell.textContent.trim() : '');
         return {
             row,
-            date: row.dataset.date || '',
-            value: cell ? cell.textContent.trim() : '',
+            date,
+            value,
             suffix: cell ? cell.querySelector('.data-value-suffix') : null
         };
     }).filter(entry => /^\d{4}$/.test(entry.value))
