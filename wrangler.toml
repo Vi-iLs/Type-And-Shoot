@@ -3,5 +3,13 @@ main = "worker.js"
 compatibility_date = "2026-11-17"
 workers_dev = true
 
+# Cron memakai UTC. Worker mengonversi scheduledTime ke WIB dan hanya
+# mengambil sumber saat salah satu dari tujuh jendela pasaran aktif.
 [triggers]
-crons = ["*/5 * * * *"]
+crons = [
+  "50-59 4,6 * * *",
+  "0-35 5,7 * * *",
+  "20-59 8,10 * * *",
+  "0-25 9,11 * * *",
+  "* 13-14,16 * * *"
+]
