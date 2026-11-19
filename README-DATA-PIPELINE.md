@@ -45,6 +45,32 @@ Tidak ada penambahan pasaran lain. Dashboard tetap menggunakan kolom tujuh kateg
 
 `TYPE_SHOOT_API_SECRET` disimpan oleh fungsi `generateApiSecret()` di Script Properties. Jangan menaruh token ini di file publik.
 
+## Jadwal polling per menit
+
+Worker dijadwalkan memeriksa sumber setiap **1 menit**, hanya pada jam-jam UTC berikut. Worker kemudian mengonversi waktu ke WIB dan hanya meminta halaman sumber pada jendela pasaran yang sesuai.
+
+| Pasaran | Jendela WIB | Jendela Cron UTC |
+|---|---:|---:|
+| CAM | 11:50–12:35 | 04:50–05:35 |
+| SDY | 13:50–14:35 | 06:50–07:35 |
+| CHN | 15:30–16:15 | 08:30–09:15 |
+| JPN | 17:20–18:05 | 10:20–11:05 |
+| SGP | 17:40–18:25 | 10:40–11:25 |
+| TWN | 20:45–21:30 | 13:45–14:30 |
+| HKP | 23:00–23:45 | 16:00–16:45 |
+
+Cron Trigger Cloudflare selalu menggunakan UTC. Cron yang dipakai di `wrangler.toml` digabung menjadi lima ekspresi untuk mengurangi jumlah trigger; pada beberapa menit di sekitar jendela aktif Worker hanya bangun lalu berhenti tanpa meminta halaman sumber. Pemeriksaan sumber sebenarnya tetap dibatasi oleh `resultMinute` dan `endMinute` di `worker.js`.
+
+```cron
+50-59 4,6 * * *
+0-35 5,7 * * *
+20-59 8,10 * * *
+0-25 9,11 * * *
+* 13-14,16 * * *
+```
+
+Batas akun Cloudflare Workers Free saat ini adalah **5 Cron Triggers per akun**; Workers Paid memiliki batas 250 per akun. Lima ekspresi di atas menggunakan seluruh kuota Cron Free akun tersebut, sehingga hapus/rapikan Cron Trigger lain yang tidak diperlukan sebelum menambahkan semuanya. Perubahan Cron dapat memerlukan hingga 15 menit untuk menyebar. <https://developers.cloudflare.com/workers/configuration/cron-triggers/> <https://developers.cloudflare.com/workers/platform/limits/>
+
 ## 2. Konfigurasi Cloudflare Worker
 
 1. Buka Worker bernama `type-shoot-sheet-test` atau sesuaikan nama pada `wrangler.toml`.
