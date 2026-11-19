@@ -246,31 +246,31 @@
             transition: background-color 0.2s;
         }
 
-        .copy-title-select {
-            position: absolute;
-            top: 8px;
-            right: 65px;
-            width: 70px;
-            max-width: calc(100% - 125px);
-            padding: 5px 4px;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            background: #1e293b;
-            color: #cbd5e1;
-            font-size: 9.5px;
-            font-weight: 800;
-            line-height: 1.2;
-            cursor: pointer;
-        }
-        .copy-title-select:focus {
-            outline: none;
-            border-color: #60a5fa;
-            box-shadow: 0 0 0 2px rgba(59, 130, 246, .18);
-        }
-
         button.btn-copy:hover {
             background-color: #334155;
         }
+
+        .filter-source-toast {
+            position: fixed;
+            top: 14px;
+            left: 50%;
+            z-index: 10000;
+            width: max-content;
+            max-width: calc(100vw - 28px);
+            transform: translateX(-50%);
+            padding: 11px 16px;
+            border: 1px solid #0f766e;
+            border-radius: 9px;
+            background: rgba(15, 23, 42, .97);
+            color: #ccfbf1;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, .38);
+            font-size: 12px;
+            font-weight: 800;
+            line-height: 1.45;
+            text-align: center;
+            pointer-events: none;
+        }
+        .filter-source-toast[hidden] { display: none; }
 
         .match-box {
             background-color: #0f172a;
@@ -735,18 +735,6 @@
             <div class="output-container">
                 <!-- Atribut "readonly" telah dihapus di sini agar bisa diisi manual -->
                 <textarea id="outputData"></textarea>
-                <select id="copyTitleSelect" class="copy-title-select"
-                    aria-label="Judul yang ditambahkan saat menyalin hasil"
-                    title="Pilih judul untuk hasil yang disalin">
-                    <option value="">TANPA JUDUL</option>
-                    <option value="sdy">SDY</option>
-                    <option value="sgp">SGP</option>
-                    <option value="hkp">HKP</option>
-                    <option value="cam">CAM</option>
-                    <option value="chn">CHN</option>
-                    <option value="jpn">JPN</option>
-                    <option value="twn">TWN</option>
-                </select>
                 <button class="btn-copy" onclick="copyHasil()" id="btnCopyText">Copy</button>
             </div>
         </div>
@@ -848,6 +836,8 @@
     <button class="nav-btn" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" title="Ke Atas">⬆️</button>
     <button class="nav-btn" onclick="window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'})" title="Ke Bawah">⬇️</button>
 </div>
+
+<div id="filterSourceToast" class="filter-source-toast" role="status" aria-live="polite" hidden></div>
 
 <script>
     // Bersihkan parameter cache-buster setelah versi terbaru selesai dimuat.
@@ -1119,27 +1109,55 @@
     outputTextArea.value = finalOutput.join('\n');
 }
 
+    function showDashboardFilterSourceToast(category) {
+        const toast = document.getElementById('filterSourceToast');
+        if (!toast || !DASHBOARD_DATA_CATEGORIES.includes(category)) return;
+
+        if (dashboardFilterToastDismissHandler) {
+            document.removeEventListener('click', dashboardFilterToastDismissHandler, true);
+        }
+
+        toast.textContent = 'Angka filter ini berasal dari channel ' + category +
+            '. Identitas ' + category.toLowerCase() + ' ikut tercopy otomatis.';
+        toast.hidden = false;
+
+        dashboardFilterToastDismissHandler = (event) => {
+            // Abaikan klik Copy yang sedang menampilkan notifikasi ini.
+            if (event.target && event.target.closest && event.target.closest('#btnCopyText')) return;
+            toast.hidden = true;
+            document.removeEventListener('click', dashboardFilterToastDismissHandler, true);
+            dashboardFilterToastDismissHandler = null;
+        };
+        document.addEventListener('click', dashboardFilterToastDismissHandler, true);
+    }
+
     async function copyHasil() {
         const outputTextArea = document.getElementById('outputData');
-        const titleSelect = document.getElementById('copyTitleSelect');
         const btnCopy = document.getElementById('btnCopyText');
         const originalText = outputTextArea ? outputTextArea.value.trimEnd() : '';
 
         if (!originalText) return;
 
-        const selectedTitle = titleSelect ? String(titleSelect.value || '').trim().toLowerCase() : '';
-        const copyText = selectedTitle
-            ? originalText + '\n\n' + selectedTitle
+        const sourceCategory = DASHBOARD_DATA_CATEGORIES.includes(dashboardFilterSourceCategory)
+            ? dashboardFilterSourceCategory
+            : '';
+        const copyText = sourceCategory
+            ? originalText + '\n\n' + sourceCategory.toLowerCase()
             : originalText;
 
-        try {
-            await navigator.clipboard.writeText(copyText);
+        const markCopied = () => {
             if (btnCopy) {
                 btnCopy.innerText = "Copied!";
                 setTimeout(() => {
                     btnCopy.innerText = "Copy";
                 }, 2000);
             }
+            if (sourceCategory) showDashboardFilterSourceToast(sourceCategory);
+        };
+
+        try {
+            await navigator.clipboard.writeText(copyText);
+            markCopied();
         } catch (error) {
             // Fallback for browsers where Clipboard API is unavailable.
             outputTextArea.value = copyText;
@@ -1151,12 +1169,7 @@
                 alert('Gagal menyalin hasil. Periksa izin clipboard browser.');
                 return;
             }
-            if (btnCopy) {
-                btnCopy.innerText = "Copied!";
-                setTimeout(() => {
-                    btnCopy.innerText = "Copy";
-                }, 2000);
-            }
+            markCopied();
         }
     }
 
@@ -1251,6 +1264,7 @@ function toggleInputData() {
 
 // FUNGSI CLEAR ALL FIELDS
 function clearAllFields() {
+    clearDashboardFilterSource();
     document.getElementById('hapusAwalan').value = '';
     document.getElementById('hapusAkhiran').value = '';
     document.getElementById('hapusSpesifik').value = '';
@@ -1442,6 +1456,7 @@ function bagiHasilAkhirDuaBagian() {
 
 // FUNGSI PASTE HASIL AKHIR MANUAL
 function pasteHasilManual() {
+    clearDashboardFilterSource();
     navigator.clipboard.readText()
     .then(text => {
         document.getElementById('outputData').value = text;
@@ -1499,6 +1514,8 @@ let dashboardDataRequestInProgress = false;
 let dashboardNumberFilterActive = false;
 let dashboardDataRecords = [];
 let dashboardFilterInputPayload = null;
+let dashboardFilterSourceCategory = '';
+let dashboardFilterToastDismissHandler = null;
 const DASHBOARD_FILTER_MAX_HIGHLIGHTS = 3;
 
 function setDashboardDataStatus(message, isError = false) {
@@ -1984,6 +2001,7 @@ function applyDashboardFilterToCalculator() {
     prefixInput.value = data.prefix;
     suffixInput.value = data.suffix;
     specificInput.value = data.specific;
+    dashboardFilterSourceCategory = data.category;
 
     updateDashboardFilterUI(
         'Berhasil dimasukkan dari ' + data.category + ' · bukaan terakhir ' +
@@ -2174,6 +2192,16 @@ function selectDataRow(date) {
         if (button) button.setAttribute('aria-pressed', selected ? 'true' : 'false');
     });
 }
+
+function clearDashboardFilterSource() {
+    dashboardFilterSourceCategory = '';
+}
+
+// Jika angka/filter diedit manual, jangan menempelkan identitas channel lama.
+['inputData', 'hapusAwalan', 'hapusAkhiran', 'hapusSpesifik', 'outputData'].forEach(id => {
+    const element = document.getElementById(id);
+    if (element) element.addEventListener('input', clearDashboardFilterSource);
+});
 
 // Ambil data saat dashboard selesai memuat, lalu segarkan otomatis saat tab aktif.
 loadDashboardData();
