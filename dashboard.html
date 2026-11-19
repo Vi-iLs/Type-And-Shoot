@@ -1178,6 +1178,15 @@
     }
 
     function prosesAngka() {
+        if (dashboardChannelFilterPendingApply) {
+            const table = document.getElementById('dataHistoryTable');
+            const category = table ? (table.dataset.focusColumn || '') : '';
+            updateDashboardFilterUI(
+                'Channel ' + (category || 'baru') + ' sudah dipilih. Tekan ISI KE FILTER sebelum menekan PROSES.'
+            );
+            return;
+        }
+
         const inputStr = document.getElementById('inputData').value;
         const awalanArr = bersihkanInput(document.getElementById('hapusAwalan').value);
         const akhiranArr = bersihkanInput(document.getElementById('hapusAkhiran').value);
@@ -1982,6 +1991,7 @@ let dashboardFilterInputPayload = null;
 let dashboardFilterSourceCategory = '';
 let dashboardFilterReferenceRows = [];
 let processReportPending = false;
+let dashboardChannelFilterPendingApply = false;
 const DASHBOARD_FILTER_MAX_HIGHLIGHTS = 3;
 
 function setDashboardDataStatus(message, isError = false) {
@@ -2392,6 +2402,49 @@ function toggleDashboardHistory() {
     updateDashboardHistoryMoreButton(rows.length);
 }
 
+function resetCalculatorForChannelChange() {
+    // Bersihkan semua data hasil kerja channel sebelumnya.
+    // Angka Asli tidak dihapus karena merupakan daftar dasar tetap (readonly).
+    clearDashboardFilterSource();
+    dashboardFilterInputPayload = null;
+
+    [
+        'hapusAwalan',
+        'hapusAkhiran',
+        'hapusSpesifik',
+        'outputData',
+        'inputPembanding',
+        'outputDouble',
+        'outputTidakCocok',
+        'outputBerlebih'
+    ].forEach(id => {
+        const element = document.getElementById(id);
+        if (element) element.value = '';
+    });
+
+    ['wrapperHasilCocok', 'boxDouble', 'pesanCocok', 'gridPerbedaan'].forEach(id => {
+        const element = document.getElementById(id);
+        if (element) element.style.display = 'none';
+    });
+
+    const copyButton = document.getElementById('btnCopyText');
+    if (copyButton) {
+        copyButton.disabled = false;
+        copyButton.textContent = 'Copy';
+    }
+
+    // Hapus juga angka laporan tersembunyi agar tidak ada referensi lama tersisa.
+    ['processReportRemaining', 'processReportRemoved'].forEach(id => {
+        const element = document.getElementById(id);
+        if (element) element.textContent = '0';
+    });
+
+    const primary = document.getElementById('processReportReferencePrimary');
+    const referenceList = document.getElementById('processReportReferenceList');
+    if (primary) primary.replaceChildren();
+    if (referenceList) referenceList.replaceChildren();
+}
+
 function selectDataColumn(category) {
     if (!DASHBOARD_DATA_CATEGORIES.includes(category)) return;
 
@@ -2400,6 +2453,7 @@ function selectDataColumn(category) {
 
     const current = table.dataset.focusColumn || '';
     const next = current === category ? '' : category;
+    const filterWasActive = dashboardNumberFilterActive;
 
     if (next) {
         table.dataset.focusColumn = next;
@@ -2411,6 +2465,10 @@ function selectDataColumn(category) {
         button.setAttribute('aria-pressed',
             button.dataset.category === next ? 'true' : 'false');
     });
+
+    // Setiap pergantian channel memulai sesi kalkulator yang bersih.
+    resetCalculatorForChannelChange();
+    dashboardChannelFilterPendingApply = !!next && filterWasActive;
 
     // Filter mengikuti kategori yang sedang dipilih; melepas pilihan kolom mematikan filter.
     if (!next) dashboardNumberFilterActive = false;
@@ -2428,6 +2486,7 @@ function toggleDashboardNumberFilter() {
     }
 
     dashboardNumberFilterActive = !dashboardNumberFilterActive;
+    dashboardChannelFilterPendingApply = dashboardNumberFilterActive;
     const selectedPairs = applyDashboardNumberFilter();
 
     if (!dashboardNumberFilterActive) {
@@ -2468,6 +2527,7 @@ function applyDashboardFilterToCalculator() {
     suffixInput.value = data.suffix;
     specificInput.value = data.specific;
     dashboardFilterSourceCategory = data.category;
+    dashboardChannelFilterPendingApply = false;
     dashboardFilterReferenceRows = Array.isArray(data.referenceRows)
         ? data.referenceRows.map(row => ({ ...row }))
         : [];
@@ -2682,6 +2742,7 @@ function selectDataRow(date) {
 function clearDashboardFilterSource() {
     dashboardFilterSourceCategory = '';
     dashboardFilterReferenceRows = [];
+    dashboardChannelFilterPendingApply = false;
 }
 
 // Jika angka/filter diedit manual, jangan menempelkan identitas channel lama.
