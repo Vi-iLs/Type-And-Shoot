@@ -264,8 +264,8 @@
         }
         .process-report-overlay[hidden] { display: none; }
         .process-report-dialog {
-            width: min(560px, 100%);
-            max-height: min(90vh, 760px);
+            width: min(760px, 100%);
+            max-height: min(90vh, 820px);
             overflow-y: auto;
             padding: 22px;
             border: 1px solid #45617f;
@@ -322,8 +322,8 @@
         }
         .process-report-stats {
             display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: 8px;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 9px;
             margin-bottom: 16px;
         }
         .process-report-stat {
@@ -408,6 +408,110 @@
             font-family: 'JetBrains Mono', 'Fira Code', monospace;
             font-size: 12px;
         }
+        .process-report-columns {
+            display: grid;
+            grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr);
+            gap: 12px;
+            align-items: start;
+        }
+        .process-report-column {
+            min-width: 0;
+        }
+        .process-report-basis-primary {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            align-items: center;
+            gap: 7px 12px;
+            padding: 11px;
+            border: 1px solid #0f766e;
+            border-radius: 9px;
+            background: #0d2b34;
+        }
+        .process-report-basis-date {
+            color: #99f6e4;
+            font-size: 11px;
+            font-weight: 900;
+            white-space: nowrap;
+        }
+        .process-report-basis-result {
+            color: #fff;
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 22px;
+            font-weight: 900;
+            text-align: right;
+            letter-spacing: 1px;
+        }
+        .process-report-basis-rules {
+            grid-column: 1 / -1;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        .process-report-basis-rule {
+            padding: 5px 8px;
+            border: 1px solid #2b7a75;
+            border-radius: 6px;
+            background: rgba(13, 148, 136, .17);
+            color: #ccfbf1;
+            font-size: 10px;
+            font-weight: 900;
+        }
+        .process-report-reference-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 7px;
+            max-height: 210px;
+            margin-top: 8px;
+            overflow-y: auto;
+            padding-right: 2px;
+        }
+        .process-report-reference-item {
+            min-width: 0;
+            padding: 9px;
+            border: 1px solid #344963;
+            border-radius: 8px;
+            background: #0e1a2b;
+        }
+        .process-report-reference-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 5px;
+            margin-bottom: 5px;
+        }
+        .process-report-reference-date {
+            color: #b9c9da;
+            font-size: 10px;
+            font-weight: 800;
+        }
+        .process-report-reference-status {
+            color: #5eead4;
+            font-size: 8px;
+            font-weight: 900;
+            letter-spacing: .3px;
+        }
+        .process-report-reference-status.skipped { color: #94a3b8; }
+        .process-report-reference-value {
+            color: #fff;
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 18px;
+            font-weight: 900;
+            letter-spacing: .6px;
+        }
+        .process-report-reference-pair {
+            margin-top: 3px;
+            color: #9fb0c4;
+            font-size: 9px;
+        }
+        .process-report-reference-empty {
+            padding: 12px;
+            border: 1px dashed #475569;
+            border-radius: 8px;
+            color: #aebed0;
+            background: #0e1a2b;
+            font-size: 10px;
+            line-height: 1.45;
+        }
         .process-report-note {
             margin: 12px 0 15px;
             padding: 9px 10px;
@@ -437,15 +541,17 @@
             outline: 3px solid rgba(94, 234, 212, .28);
             outline-offset: 2px;
         }
-        @media (max-width: 480px) {
+        @media (max-width: 600px) {
             .process-report-overlay { padding: 10px; }
             .process-report-dialog { padding: 16px 13px; border-radius: 13px; }
-            .process-report-stats { gap: 5px; }
-            .process-report-stat { padding: 10px 4px; }
+            .process-report-columns { grid-template-columns: 1fr; gap: 4px; }
+            .process-report-stats { gap: 7px; }
+            .process-report-stat { padding: 10px 6px; }
             .process-report-stat-label { font-size: 8px; }
             .process-report-filter-values { gap: 5px; }
             .process-report-filter-value { padding: 8px 6px; }
             .process-report-filter-value strong { font-size: 10px; }
+            .process-report-reference-grid { max-height: 150px; }
         }
 
         .match-box {
@@ -1029,49 +1135,59 @@
         </p>
 
         <div class="process-report-stats">
-            <div class="process-report-stat">
-                <span class="process-report-stat-label">TOTAL ANGKA AWAL</span>
-                <strong id="processReportTotal" class="process-report-stat-value">0</strong>
-            </div>
             <div class="process-report-stat remaining">
                 <span class="process-report-stat-label">ANGKA TERSISA</span>
                 <strong id="processReportRemaining" class="process-report-stat-value">0</strong>
             </div>
             <div class="process-report-stat removed">
-                <span class="process-report-stat-label">TOTAL DIBUANG</span>
+                <span class="process-report-stat-label">ANGKA DIBUANG</span>
                 <strong id="processReportRemoved" class="process-report-stat-value">0</strong>
             </div>
         </div>
 
-        <h3 class="process-report-section-title">RINCIAN ANGKA YANG DIBUANG</h3>
-        <div class="process-report-breakdown">
-            <div class="process-report-breakdown-row">
-                <span>Buangan berdasarkan awalan</span>
-                <strong id="processReportPrefix">0</strong>
-            </div>
-            <div class="process-report-breakdown-row">
-                <span>Buangan berdasarkan akhiran</span>
-                <strong id="processReportSuffix">0</strong>
-            </div>
-            <div class="process-report-breakdown-row">
-                <span>Buangan angka spesifik</span>
-                <strong id="processReportSpecific">0</strong>
-            </div>
-        </div>
+        <div class="process-report-columns">
+            <div class="process-report-column">
+                <h3 class="process-report-section-title">RINCIAN ANGKA DIBUANG</h3>
+                <div class="process-report-breakdown">
+                    <div class="process-report-breakdown-row">
+                        <span>Aturan awalan</span>
+                        <strong id="processReportPrefix">0</strong>
+                    </div>
+                    <div class="process-report-breakdown-row">
+                        <span>Aturan akhiran</span>
+                        <strong id="processReportSuffix">0</strong>
+                    </div>
+                    <div class="process-report-breakdown-row">
+                        <span>Angka spesifik</span>
+                        <strong id="processReportSpecific">0</strong>
+                    </div>
+                </div>
 
-        <h3 class="process-report-section-title">FILTER YANG DIGUNAKAN</h3>
-        <div class="process-report-filter-values">
-            <div class="process-report-filter-value">
-                <span>Awalan</span>
-                <strong id="processReportPrefixValues">—</strong>
+                <h3 class="process-report-section-title">FILTER YANG DIGUNAKAN</h3>
+                <div class="process-report-filter-values">
+                    <div class="process-report-filter-value">
+                        <span>Awalan</span>
+                        <strong id="processReportPrefixValues">—</strong>
+                    </div>
+                    <div class="process-report-filter-value">
+                        <span>Akhiran</span>
+                        <strong id="processReportSuffixValues">—</strong>
+                    </div>
+                    <div class="process-report-filter-value">
+                        <span>Spesifik</span>
+                        <strong id="processReportSpecificValues">—</strong>
+                    </div>
+                </div>
             </div>
-            <div class="process-report-filter-value">
-                <span>Akhiran</span>
-                <strong id="processReportSuffixValues">—</strong>
-            </div>
-            <div class="process-report-filter-value">
-                <span>Spesifik</span>
-                <strong id="processReportSpecificValues">—</strong>
+
+            <div class="process-report-column">
+                <h3 class="process-report-section-title">DATA PATOKAN PEMBUANGAN</h3>
+                <div id="processReportReferencePrimary" class="process-report-basis-primary">
+                    <span class="process-report-basis-date">—</span>
+                    <strong class="process-report-basis-result">—</strong>
+                </div>
+                <div id="processReportReferenceList" class="process-report-reference-grid"></div>
+                <div id="processReportReferenceEmpty" class="process-report-reference-empty" hidden></div>
             </div>
         </div>
 
@@ -1193,6 +1309,7 @@
             removedBySuffix,
             removedBySpecific,
             sourceCategory: dashboardFilterSourceCategory,
+            referenceRows: dashboardFilterReferenceRows.slice(),
             prefixValues: document.getElementById('hapusAwalan').value,
             suffixValues: document.getElementById('hapusAkhiran').value,
             specificValues: document.getElementById('hapusSpesifik').value
@@ -1403,7 +1520,6 @@
             : 'MANUAL';
 
         setText('processReportSource', sourceCategory);
-        setText('processReportTotal', report.total);
         setText('processReportRemaining', report.remaining);
         setText('processReportRemoved',
             report.removedByPrefix + report.removedBySuffix + report.removedBySpecific);
@@ -1414,10 +1530,93 @@
         setText('processReportSuffixValues', displayFilterValue(report.suffixValues));
         setText('processReportSpecificValues', displayFilterValue(report.specificValues));
 
+        const referenceRows = Array.isArray(report.referenceRows) ? report.referenceRows : [];
+        const primaryContainer = document.getElementById('processReportReferencePrimary');
+        const referenceList = document.getElementById('processReportReferenceList');
+        const referenceEmpty = document.getElementById('processReportReferenceEmpty');
+
+        if (primaryContainer) {
+            primaryContainer.replaceChildren();
+            if (referenceRows.length) {
+                const primary = referenceRows[0];
+                const date = document.createElement('span');
+                date.className = 'process-report-basis-date';
+                date.textContent = primary.date || 'Tanggal tidak tersedia';
+
+                const value = document.createElement('strong');
+                value.className = 'process-report-basis-result';
+                value.textContent = primary.value || '—';
+
+                const rules = document.createElement('div');
+                rules.className = 'process-report-basis-rules';
+                const prefixRule = document.createElement('span');
+                prefixRule.className = 'process-report-basis-rule';
+                prefixRule.textContent = 'AWALAN ' + displayFilterValue(report.prefixValues);
+                const suffixRule = document.createElement('span');
+                suffixRule.className = 'process-report-basis-rule';
+                suffixRule.textContent = 'AKHIRAN ' + displayFilterValue(report.suffixValues);
+                rules.append(prefixRule, suffixRule);
+                primaryContainer.append(date, value, rules);
+            } else {
+                const manual = document.createElement('span');
+                manual.className = 'process-report-basis-date';
+                manual.textContent = 'PATOKAN MANUAL';
+                const value = document.createElement('strong');
+                value.className = 'process-report-basis-result';
+                value.textContent = '—';
+                const rules = document.createElement('div');
+                rules.className = 'process-report-basis-rules';
+                const text = document.createElement('span');
+                text.className = 'process-report-basis-rule';
+                text.textContent = 'Aturan diisi langsung pada kalkulator';
+                rules.appendChild(text);
+                primaryContainer.append(manual, value, rules);
+            }
+        }
+
+        if (referenceList) {
+            referenceList.replaceChildren();
+            referenceRows.slice(1).forEach(row => {
+                const card = document.createElement('div');
+                card.className = 'process-report-reference-item';
+
+                const top = document.createElement('div');
+                top.className = 'process-report-reference-top';
+
+                const date = document.createElement('span');
+                date.className = 'process-report-reference-date';
+                date.textContent = row.date || 'Tanggal —';
+
+                const status = document.createElement('span');
+                const isCandidate = row.status === 'CANDIDATE';
+                status.className = 'process-report-reference-status' + (isCandidate ? '' : ' skipped');
+                status.textContent = isCandidate ? 'KANDIDAT' : 'DILEWATI';
+
+                const value = document.createElement('div');
+                value.className = 'process-report-reference-value';
+                value.textContent = row.value || '—';
+
+                const pair = document.createElement('div');
+                pair.className = 'process-report-reference-pair';
+                pair.textContent = 'Pasangan 2D: ' + (row.pair || '—');
+
+                top.append(date, status);
+                card.append(top, value, pair);
+                referenceList.appendChild(card);
+            });
+        }
+
+        if (referenceEmpty) {
+            referenceEmpty.hidden = referenceRows.length > 1;
+            referenceEmpty.textContent = referenceRows.length
+                ? 'Tidak ada data riwayat tambahan yang perlu diperiksa.'
+                : 'Filter diisi secara manual. Tidak ada riwayat channel yang menjadi patokan.';
+        }
+
         const description = document.getElementById('processReportDescription');
         if (description) {
             description.textContent = report.total
-                ? 'Periksa asal filter dan jumlah angka yang tersisa maupun dibuang. Setelah menekan OKE, hasil dapat disalin.'
+                ? 'Periksa asal filter, angka patokan, serta jumlah angka yang tersisa dan dibuang sebelum menyalin hasil.'
                 : 'Tidak ada angka yang dapat diproses. Periksa kolom Angka Asli sebelum melanjutkan.';
         }
 
@@ -1844,6 +2043,7 @@ let dashboardNumberFilterActive = false;
 let dashboardDataRecords = [];
 let dashboardFilterInputPayload = null;
 let dashboardFilterSourceCategory = '';
+let dashboardFilterReferenceRows = [];
 let processReportPending = false;
 const DASHBOARD_FILTER_MAX_HIGHLIGHTS = 3;
 
@@ -2331,6 +2531,9 @@ function applyDashboardFilterToCalculator() {
     suffixInput.value = data.suffix;
     specificInput.value = data.specific;
     dashboardFilterSourceCategory = data.category;
+    dashboardFilterReferenceRows = Array.isArray(data.referenceRows)
+        ? data.referenceRows.map(row => ({ ...row }))
+        : [];
 
     updateDashboardFilterUI(
         'Berhasil dimasukkan dari ' + data.category + ' · bukaan terakhir ' +
@@ -2415,9 +2618,18 @@ function applyDashboardNumberFilter() {
         const value = record && record[category] !== undefined && record[category] !== null
             ? String(record[category]).trim()
             : (cell ? cell.textContent.trim() : '');
+        const rawDisplayDate = record && record.displayDate
+            ? String(record.displayDate)
+            : '';
+        const dateParts = rawDisplayDate.split('/');
+        const displayDate = dateParts.length >= 2
+            ? dateParts.slice(0, 2).join('/')
+            : (date.length >= 10 ? date.slice(8, 10) + '/' + date.slice(5, 7) : date);
+
         return {
             row,
             date,
+            displayDate,
             value,
             suffix: cell ? cell.querySelector('.data-value-suffix') : null
         };
@@ -2441,6 +2653,7 @@ function applyDashboardNumberFilter() {
     // Pasangan terbalik dicadangkan agar tidak terpilih dua kali.
     const seenPairs = new Set([referencePair, reverseReferencePair]);
     const highlightedPairs = [];
+    entries[0].filterStatus = 'REFERENCE';
     const inspectedEntries = [entries[0]];
     let mutedCount = 1;
 
@@ -2459,6 +2672,7 @@ function applyDashboardNumberFilter() {
 
         // Pasangan yang tidak memenuhi syarat dilewati, bukan menghentikan pencarian.
         const excluded = isDouble || hasExcludedPrefix || hasExcludedSuffix || isDuplicate;
+        entry.filterStatus = excluded ? 'SKIPPED' : 'CANDIDATE';
 
         inspectedEntries.push(entry);
         if (entry.suffix) {
@@ -2505,7 +2719,13 @@ function applyDashboardNumberFilter() {
             latestValue: entries[0].value,
             prefix: referencePair.charAt(0),
             suffix: referencePair.charAt(1),
-            specific: [...new Set(specificPairs)].join('.')
+            specific: [...new Set(specificPairs)].join('.'),
+            referenceRows: inspectedEntries.map(entry => ({
+                date: entry.displayDate,
+                value: entry.value,
+                pair: entry.value.slice(-2),
+                status: entry.filterStatus || 'SKIPPED'
+            }))
         };
     }
 
@@ -2524,6 +2744,7 @@ function selectDataRow(date) {
 
 function clearDashboardFilterSource() {
     dashboardFilterSourceCategory = '';
+    dashboardFilterReferenceRows = [];
 }
 
 // Jika angka/filter diedit manual, jangan menempelkan identitas channel lama.
