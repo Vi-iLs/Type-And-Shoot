@@ -1286,6 +1286,69 @@
             border-top-color: rgba(96, 165, 250, .30);
         }
 
+    
+        /* Comparison field stays compact until explicitly opened */
+        .comparison-heading {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 0;
+        }
+        .comparison-toggle {
+            flex: 0 0 auto;
+            padding: 7px 11px;
+            border: 1px solid rgba(96, 165, 250, .42);
+            border-radius: 7px;
+            background: linear-gradient(115deg, #0d2340, #15375d);
+            color: #bfdbfe;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: .2px;
+            cursor: pointer;
+            box-shadow: inset 0 1px rgba(255, 255, 255, .07);
+        }
+        .comparison-toggle:hover,
+        .comparison-toggle:focus-visible {
+            background: linear-gradient(115deg, #143052, #1b4772);
+            border-color: rgba(96, 165, 250, .65);
+            box-shadow: 0 0 10px rgba(59, 130, 246, .13);
+            outline: none;
+        }
+        .match-box[hidden] {
+            display: none !important;
+        }
+        .comparison-section .match-box {
+            margin-top: 10px;
+            border-color: rgba(96, 165, 250, .30);
+        }
+        .comparison-panel-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 8px;
+        }
+        .comparison-paste-button {
+            padding: 5px 10px;
+            border: 1px solid rgba(71, 126, 184, .48);
+            border-radius: 5px;
+            background: #0d2340;
+            color: #93c5fd;
+            font-size: 9px;
+            font-weight: 800;
+            cursor: pointer;
+        }
+        .comparison-paste-button:hover {
+            background: #15375d;
+            border-color: rgba(96, 165, 250, .62);
+        }
+        .container {
+            margin-bottom: 42px;
+        }
+        @media (max-width: 560px) {
+            .comparison-heading { gap: 7px; }
+            .comparison-toggle { padding: 7px 9px; font-size: 9px; }
+        }
+
     </style>
 </head>
 <body>
@@ -1403,14 +1466,18 @@
             </div>
         </div>
 
-        <div>
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <div class="comparison-section">
+            <div class="comparison-heading">
                 <label style="margin: 0; font-size: 13.6px;">Angka Pembanding</label>
-                <button onclick="pastePembanding()" style="background-color: #1e293b; color: #3b82f6; border: 1px solid #24324d; padding: 3.5px 8.5px; font-size: 9.4px; font-weight: bold; border-radius: 4px; cursor: pointer;">
-                    PASTE
+                <button type="button" id="toggleComparisonPanel" class="comparison-toggle"
+                    onclick="toggleComparisonPanel()" aria-expanded="false" aria-controls="comparisonPanel">
+                    ＋ Tampilkan Kolom
                 </button>
             </div>
-            <div class="match-box">
+            <div class="match-box" id="comparisonPanel" hidden>
+                <div class="comparison-panel-actions">
+                    <button type="button" onclick="pastePembanding()" class="comparison-paste-button">PASTE</button>
+                </div>
                 
                 <div class="match-layout">
                     <div class="match-input-side">
@@ -2160,6 +2227,18 @@ function clearAllFields() {
     document.getElementById('outputData').value = '';
     document.getElementById('wrapperHasilCocok').style.display = 'none';
     document.getElementById('btnCopyText').innerText = "Copy";
+}
+
+// BUKA/TUTUP KOLOM ANGKA PEMBANDING
+function toggleComparisonPanel() {
+    const panel = document.getElementById('comparisonPanel');
+    const button = document.getElementById('toggleComparisonPanel');
+    if (!panel || !button) return;
+
+    const willOpen = panel.hidden;
+    panel.hidden = !willOpen;
+    button.setAttribute('aria-expanded', String(willOpen));
+    button.innerHTML = willOpen ? '− Sembunyikan Kolom' : '＋ Tampilkan Kolom';
 }
 
 // FUNGSI PASTE PEMBANDING
