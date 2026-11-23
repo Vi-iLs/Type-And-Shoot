@@ -151,7 +151,18 @@
         .grid-inputs {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 12px;
+            gap: 6px;
+        }
+        .grid-inputs .form-group { margin-bottom: 7.5px; }
+        .grid-inputs label {
+            font-size: 13.3px;
+            margin-top: 2.5px;
+            margin-bottom: 2.5px;
+        }
+        .grid-inputs input,
+        .grid-inputs select {
+            font-size: 15.2px;
+            padding: 11.4px;
         }
 
         .people-config-container {
@@ -198,6 +209,22 @@
             font-size: 12px;
         }
 
+        .person-capacity-field {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            min-width: 0;
+        }
+        .person-capacity-field-label {
+            display: block;
+            margin: 0;
+            color: var(--text-muted);
+            font-size: 9px;
+            font-weight: 800;
+            line-height: 1;
+            letter-spacing: .35px;
+            text-align: center;
+        }
         .person-row input {
             width: 100%;
             min-width: 0;
@@ -211,6 +238,7 @@
             .layout-bds { gap: 6px; }
             .person-row { gap: 5px; padding: 6px; }
             .person-name-select, .person-row input { font-size: 11px; padding: 8px 3px; }
+            .person-capacity-field-label { font-size: 8px; }
         }
 
         button.btn-execute {
@@ -822,23 +850,37 @@
             name.value = saved.name || "";
             name.addEventListener("change", refreshBDNameDropdowns);
 
+            const lineField = document.createElement("div");
+            lineField.className = "person-capacity-field";
+            const lineLabel = document.createElement("span");
+            lineLabel.className = "person-capacity-field-label";
+            lineLabel.textContent = "LINE";
+
             const maxLine = document.createElement("input");
             maxLine.type = "number";
             maxLine.id = "maxBlocks_" + i;
             maxLine.value = saved.maxP;
-            maxLine.placeholder = "Max Line";
+            maxLine.placeholder = "20";
             maxLine.min = "1";
-            maxLine.setAttribute("aria-label", "Max Line BD " + i);
+            maxLine.setAttribute("aria-label", "Line BD " + i);
+            lineField.append(lineLabel, maxLine);
+
+            const maxXField = document.createElement("div");
+            maxXField.className = "person-capacity-field";
+            const maxXLabel = document.createElement("span");
+            maxXLabel.className = "person-capacity-field-label";
+            maxXLabel.textContent = "MAX X";
 
             const maxX = document.createElement("input");
             maxX.type = "number";
             maxX.id = "maxMultiplier_" + i;
             maxX.value = saved.maxX;
-            maxX.placeholder = "Max X";
+            maxX.placeholder = "50";
             maxX.min = "1";
             maxX.setAttribute("aria-label", "Max X BD " + i);
+            maxXField.append(maxXLabel, maxX);
 
-            row.append(name, maxLine, maxX);
+            row.append(name, lineField, maxXField);
             container.appendChild(row);
         }
         refreshBDNameDropdowns();
@@ -1185,26 +1227,16 @@
         globalWaText = "";
 
         if (hasError) {
-            let activeBDList = [];
-            for(let i=1; i<=personCount; i++) activeBDList.push(i);
-            let strActiveBD = activeBDList.join('/');
-            
-            let nextBDs = [];
-            for(let i = personCount + 1; i <= 10; i++) nextBDs.push(i);
-            let suggestTambahBD = nextBDs.length > 0 
-                ? `Tambah BD jadi <strong>${nextBDs.join('/')}</strong>`
-                : `Tambah jumlah BD (saat ini sudah maksimal 10 BD)`;
+            const suggestions = [];
+            if (personCount < 10) suggestions.push("Tambah BD.");
+            suggestions.push("Naikkan Max X pada BD yang masih memiliki kapasitas Line.");
 
-            let tipsHTML = `
-            <div class="tips-box">
-                <h3>💡 Solusi Mengatasi Sisa Angka:</h3>
-                <ul>
-                    <li>Naikkan <strong>Max X</strong> (atau Max Line) pada BD ${strActiveBD}</li>
-                    <li>Kecilkan <strong>Min X</strong></li>
-                    <li>${suggestTambahBD}</li>
-                </ul>
-            </div>`;
-            
+            const tipsHTML = `
+                <div class="tips-box">
+                    <h3>💡 Solusi:</h3>
+                    <ul>${suggestions.map(item => "<li>" + item + "</li>").join("")}</ul>
+                </div>`;
+
             statusDiv.innerHTML = `<div class="status-bar status-error">⚠️ Terdapat sisa angka (Batas kapasitas penuh)</div>` + tipsHTML;
         } else {
             statusDiv.innerHTML = `<div class="status-bar status-success">✅ Distribusi Selesai dan Sempurna</div>`;
