@@ -1668,7 +1668,7 @@
             ? dashboardFilterSourceCategory
             : '';
         const copyText = sourceCategory
-            ? originalText + '\n\n' + sourceCategory.toLowerCase()
+            ? sourceCategory.toUpperCase() + '\n\n' + originalText
             : originalText;
 
         const markCopied = () => {
