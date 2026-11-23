@@ -818,6 +818,44 @@
             }
         }
 
+    
+        /* Match Dashboard primary action: deep navy blue, not electric blue */
+        button.btn-execute {
+            background: linear-gradient(115deg, #17365f, #1e4b7e 58%, #17365f);
+            border: 1px solid rgba(96, 165, 250, .34);
+            box-shadow: 0 4px 12px rgba(15, 45, 85, .25), inset 0 1px rgba(255, 255, 255, .10);
+        }
+        button.btn-execute:hover {
+            background: linear-gradient(115deg, #1e4778, #285b91 58%, #1e4778);
+            box-shadow: 0 6px 15px rgba(15, 45, 85, .30), inset 0 1px rgba(255, 255, 255, .13);
+        }
+        button.btn-paste {
+            border-color: rgba(71, 126, 184, .48);
+            color: #93c5fd;
+            background: rgba(13, 35, 64, .72);
+        }
+        button.btn-paste:hover {
+            background: linear-gradient(115deg, #143052, #1b4772);
+            border-color: rgba(96, 165, 250, .58);
+            box-shadow: 0 0 10px rgba(59, 130, 246, .12);
+        }
+        .people-config-container {
+            border-color: rgba(96, 165, 250, .34);
+            border-left: 2px solid rgba(96, 165, 250, .65);
+        }
+        .person-row {
+            border-color: rgba(96, 165, 250, .24);
+            border-bottom-color: rgba(52, 211, 153, .24);
+        }
+        .person-section {
+            border-color: rgba(96, 165, 250, .30);
+            border-left: 2px solid rgba(96, 165, 250, .62);
+        }
+        .leftover-section {
+            border-color: rgba(248, 113, 113, .30);
+            border-left-color: rgba(248, 113, 113, .72);
+        }
+
     </style>
 </head>
 <body>
