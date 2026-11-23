@@ -787,6 +787,26 @@
             }
         }
 
+    
+        /* Restore the original stacked mobile layout: input panel first, results below */
+        @media (max-width: 850px) {
+            .layout-wrapper {
+                grid-template-columns: minmax(0, 1fr);
+            }
+            .sidebar-left {
+                position: relative;
+                top: 0;
+                max-height: none;
+                overflow-y: visible;
+                margin-bottom: 20px;
+            }
+            .main-content {
+                width: 100%;
+                min-width: 0;
+                grid-column: 1 / -1;
+            }
+        }
+
     </style>
 </head>
 <body>
