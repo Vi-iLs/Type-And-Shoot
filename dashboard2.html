@@ -806,7 +806,7 @@
         });
 
         container.innerHTML = "";
-        container.style.setProperty("--bd-grid-rows", String(Math.min(5, Math.ceil(count / 2)) || 1));
+        container.style.setProperty("--bd-grid-rows", String(Math.min(5, count) || 1));
 
         for (let i = 1; i <= count; i++) {
             const saved = bdConfigCache[i] || { name: "", maxP: "20", maxX: "50" };
