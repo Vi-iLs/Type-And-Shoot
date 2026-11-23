@@ -157,8 +157,14 @@
         .grid-inputs .form-group { margin-bottom: 7.5px; }
         .grid-inputs label {
             font-size: 13.3px;
+            font-weight: 800;
+            letter-spacing: .2px;
             margin-top: 2.5px;
             margin-bottom: 2.5px;
+        }
+        .sidebar-left > .form-group > div > label {
+            font-weight: 800;
+            letter-spacing: .25px;
         }
         .grid-inputs input,
         .grid-inputs select {
@@ -240,7 +246,7 @@
             min-height: 40px;
             box-sizing: border-box;
             padding: 8px 3px;
-            font-weight: bold;
+            font-weight: 800;
             color: var(--button-color);
             background-color: var(--bg-main);
             text-align: center;
@@ -261,7 +267,7 @@
             margin: 0;
             color: var(--text-muted);
             font-size: clamp(9px, 2.6vw, 11px);
-            font-weight: 800;
+            font-weight: 900;
             line-height: 1.1;
             letter-spacing: .35px;
             text-align: center;
@@ -354,7 +360,12 @@
         
         .header-result { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; }
         .title-box { display: flex; flex-direction: column; }
-        .person-title { font-weight: 600; color: var(--text-color); font-size: 16px; margin-bottom: 5px; }
+        .person-title { font-weight: 700; color: var(--text-color); font-size: 16px; margin-bottom: 5px; }
+        .person-result-name {
+            color: #f87171;
+            font-weight: 800;
+            text-shadow: 0 0 8px rgba(239, 68, 68, .32);
+        }
         .total-box { font-size: 12px; background: var(--input-bg); padding: 5px 10px; border-radius: 4px; border: 1px solid var(--border-color); color: var(--text-muted); }
         .total-box span { color: var(--accent-green); font-weight: bold; }
         .total-box span.danger { color: var(--danger-color); }
@@ -1753,7 +1764,7 @@
                     <div class="person-section">
                         <div class="header-result">
                             <div class="title-box" style="width:100%;">
-                                <div class="person-title">${bd.name} <span style="font-size:13px; font-weight:normal; color:var(--text-muted);">(${bd.currentPairs} Line)</span></div>
+                                <div class="person-title"><span class="person-result-name">${bd.name}</span> <span style="font-size:13px; font-weight:normal; color:var(--text-muted);">(${bd.currentPairs} Line)</span></div>
                                 <div class="total-box">Total: ${bd.currentCost} | -29%: <span>${totalCostDiskon.toFixed(2)}</span></div>
                             </div>
                         </div>`;
