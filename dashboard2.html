@@ -34,6 +34,7 @@
             margin: 0;
             padding: 15px;
             min-height: 100vh;
+            overflow-x: hidden;
         }
 
         .layout-wrapper {
@@ -179,6 +180,8 @@
         
         .layout-bds {
             display: grid;
+            width: 100%;
+            min-width: 0;
             grid-template-columns: repeat(2, minmax(0, 1fr));
             grid-template-rows: repeat(var(--bd-grid-rows, 5), minmax(0, auto));
             grid-auto-flow: column;
@@ -188,10 +191,11 @@
         .person-row {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 6px;
+            gap: 7px;
             align-items: center;
-            padding: 8px;
+            padding: 9px;
             min-width: 0;
+            box-sizing: border-box;
             background: var(--bg-container);
             border-radius: 6px;
             border: 1px solid var(--border-color);
@@ -201,44 +205,55 @@
             grid-column: 1 / -1;
             width: 100%;
             min-width: 0;
-            padding: 8px 5px;
+            min-height: 40px;
+            box-sizing: border-box;
+            padding: 8px 3px;
             font-weight: bold;
             color: var(--button-color);
             background-color: var(--bg-main);
             text-align: center;
-            font-size: 12px;
+            font-size: clamp(12px, 3.5vw, 15px);
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            overflow: hidden;
         }
 
         .person-capacity-field {
             display: flex;
             flex-direction: column;
-            gap: 3px;
+            gap: 4px;
             min-width: 0;
         }
         .person-capacity-field-label {
             display: block;
             margin: 0;
             color: var(--text-muted);
-            font-size: 9px;
+            font-size: clamp(9px, 2.6vw, 11px);
             font-weight: 800;
-            line-height: 1;
+            line-height: 1.1;
             letter-spacing: .35px;
             text-align: center;
         }
         .person-row input {
             width: 100%;
             min-width: 0;
-            padding: 8px 5px;
-            font-size: 12px;
+            min-height: 40px;
+            box-sizing: border-box;
+            padding: 7px 2px;
+            font-size: clamp(12px, 3.5vw, 15px);
             text-align: center;
         }
 
         @media (max-width: 520px) {
-            .people-config-container { padding: 10px; }
-            .layout-bds { gap: 6px; }
-            .person-row { gap: 5px; padding: 6px; }
-            .person-name-select, .person-row input { font-size: 11px; padding: 8px 3px; }
-            .person-capacity-field-label { font-size: 8px; }
+            .people-config-container { padding: 9px; }
+            .layout-bds { gap: 7px; }
+            .person-row { gap: 6px; padding: 7px; }
+            .person-name-select, .person-row input {
+                font-size: clamp(12px, 3.6vw, 14px);
+                padding: 7px 2px;
+                min-height: 39px;
+            }
+            .person-capacity-field-label { font-size: clamp(9px, 2.7vw, 10px); }
         }
 
         button.btn-execute {
@@ -359,10 +374,13 @@
         }
 
         .bd-settings-trigger {
-            position: fixed;
-            top: calc(env(safe-area-inset-top, 0px) + 11px);
-            left: calc(env(safe-area-inset-left, 0px) + 11px);
+            position: fixed !important;
+            top: calc(env(safe-area-inset-top, 0px) + 10px);
+            left: calc(env(safe-area-inset-left, 0px) + 10px);
             z-index: 12000;
+            transform: translate3d(0, 0, 0);
+            -webkit-transform: translate3d(0, 0, 0);
+            touch-action: manipulation;
             width: 32px;
             height: 32px;
             padding: 0;
