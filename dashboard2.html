@@ -443,9 +443,10 @@
             cursor: pointer;
         }
         .bd-name-help { margin: 0 0 12px; color: #aebed0; font-size: 11px; line-height: 1.5; }
-        .bd-pin-row, .bd-name-add-row { display: flex; gap: 8px; }
-        .bd-pin-row input, .bd-name-add-row input, .bd-name-edit-input {
+        .bd-pin-row { display: flex; gap: 8px; }
+        .bd-pin-row input, .bd-name-add-form input, .bd-name-edit-input {
             min-width: 0;
+            box-sizing: border-box;
             padding: 10px;
             border: 1px solid #405875;
             border-radius: 7px;
@@ -453,7 +454,12 @@
             color: #f8fafc;
             font-size: 14px;
         }
-        .bd-pin-row input, .bd-name-add-row input { flex: 1; }
+        .bd-pin-row input { flex: 1; }
+        .bd-name-add-form { display: grid; gap: 8px; }
+        .bd-name-add-form > input { width: 100%; }
+        .bd-name-default-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+        .bd-default-field { display: grid; gap: 4px; min-width: 0; color: #aebed0; font-size: 10px; font-weight: 800; letter-spacing: .3px; }
+        .bd-default-field input { width: 100%; }
         .bd-name-action {
             padding: 9px 12px;
             border: 1px solid #2563eb;
@@ -477,15 +483,19 @@
             text-align: center;
         }
         .bd-name-list-row {
-            display: flex;
-            align-items: center;
-            gap: 7px;
-            padding: 7px;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            align-items: end;
+            gap: 8px;
+            padding: 9px;
             border: 1px solid #344963;
             border-radius: 8px;
             background: #0e1a2b;
         }
-        .bd-name-edit-input { flex: 1; width: 100%; font-size: 13px; }
+        .bd-name-edit-input { grid-column: 1 / -1; width: 100%; font-size: 13px; }
+        .bd-name-default-input { width: 100%; font-size: 13px; }
+        .bd-name-row-actions { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+        .bd-name-row-actions .bd-name-action { width: 100%; }
         .bd-name-modal-foot { margin-top: 12px; color: #94a3b8; font-size: 9px; line-height: 1.45; }
         @media (max-width: 520px) {
             .bd-name-dialog { padding: 15px 12px; }
@@ -581,10 +591,18 @@
             <div id="bdPinError" class="bd-pin-error" role="status"></div>
         </section>
         <section id="bdNameManager" hidden>
-            <p class="bd-name-help">Tambahkan nama di sini. Pilih nama melalui dropdown pada masing-masing BD. Nama yang sudah dipakai tidak dapat dipilih oleh BD lain.</p>
-            <div class="bd-name-add-row">
+            <p class="bd-name-help">Atur nama dan kapasitas default untuk setiap BD. Saat nama dipilih, LINE dan MAX X otomatis mengikuti nilai di sini, tetapi tetap bisa diubah pada halaman utama.</p>
+            <div class="bd-name-add-form">
                 <input id="bdNewNameInput" type="text" maxlength="40" placeholder="Nama BD baru">
-                <button type="button" class="bd-name-action" onclick="addBdCustomName()">TAMBAH</button>
+                <div class="bd-name-default-fields">
+                    <label class="bd-default-field">LINE DEFAULT
+                        <input id="bdNewNameLine" type="number" min="1" step="1" value="20" inputmode="numeric">
+                    </label>
+                    <label class="bd-default-field">MAX X DEFAULT
+                        <input id="bdNewNameMaxX" type="number" min="1" step="1" value="50" inputmode="numeric">
+                    </label>
+                </div>
+                <button type="button" class="bd-name-action" onclick="addBdCustomName()">TAMBAH NAMA BD</button>
             </div>
             <div id="bdNameList" class="bd-name-list"></div>
             <div class="bd-name-modal-foot">Nama disimpan pada browser/perangkat ini.</div>
@@ -595,7 +613,9 @@
 <script>
     let globalWaText = "";
     const BD_NAMES_STORAGE_KEY = "splitterProBdNamesV2";
+    const BD_NAME_DEFAULTS_STORAGE_KEY = "splitterProBdNameDefaultsV1";
     let bdCustomNames = loadBdCustomNames();
+    let bdNameDefaults = loadBdNameDefaults();
     let bdConfigCache = {};
 
     function loadBdCustomNames() {
@@ -619,14 +639,65 @@
         }
     }
 
+    function loadBdNameDefaults() {
+        try {
+            const stored = JSON.parse(localStorage.getItem(BD_NAME_DEFAULTS_STORAGE_KEY) || "{}");
+            if (!stored || typeof stored !== "object" || Array.isArray(stored)) return {};
+            const defaults = {};
+            Object.entries(stored).forEach(([name, values]) => {
+                if (!name || !values || typeof values !== "object") return;
+                const line = Number.parseInt(values.maxP, 10);
+                const maxX = Number.parseInt(values.maxX, 10);
+                defaults[name] = {
+                    maxP: Number.isSafeInteger(line) && line > 0 ? String(line) : "20",
+                    maxX: Number.isSafeInteger(maxX) && maxX > 0 ? String(maxX) : "50"
+                };
+            });
+            return defaults;
+        } catch (error) {
+            console.warn("Default kapasitas BD tidak dapat dibaca:", error);
+            return {};
+        }
+    }
+
+    function getBdNameDefaults(name) {
+        const saved = bdNameDefaults[name] || {};
+        return {
+            maxP: String(saved.maxP || "20"),
+            maxX: String(saved.maxX || "50")
+        };
+    }
+
     function saveBdCustomNames() {
+        const previousNames = localStorage.getItem(BD_NAMES_STORAGE_KEY);
+        const previousDefaults = localStorage.getItem(BD_NAME_DEFAULTS_STORAGE_KEY);
         try {
             localStorage.setItem(BD_NAMES_STORAGE_KEY, JSON.stringify(bdCustomNames));
+            localStorage.setItem(BD_NAME_DEFAULTS_STORAGE_KEY, JSON.stringify(bdNameDefaults));
             return true;
         } catch (error) {
-            alert("Nama BD tidak dapat disimpan pada browser ini.");
+            try {
+                if (previousNames === null) localStorage.removeItem(BD_NAMES_STORAGE_KEY);
+                else localStorage.setItem(BD_NAMES_STORAGE_KEY, previousNames);
+                if (previousDefaults === null) localStorage.removeItem(BD_NAME_DEFAULTS_STORAGE_KEY);
+                else localStorage.setItem(BD_NAME_DEFAULTS_STORAGE_KEY, previousDefaults);
+            } catch (rollbackError) {
+                console.warn("Pemulihan penyimpanan nama BD gagal:", rollbackError);
+            }
+            alert("Nama dan default kapasitas BD tidak dapat disimpan pada browser ini.");
             return false;
         }
+    }
+
+    function readBdDefaultInput(id, label) {
+        const input = document.getElementById(id);
+        const value = Number(input ? input.value : NaN);
+        if (!Number.isSafeInteger(value) || value < 1) {
+            alert(label + " harus berupa angka bulat minimal 1.");
+            if (input) input.focus();
+            return null;
+        }
+        return String(value);
     }
 
     function escapeBdHtml(value) {
@@ -665,13 +736,22 @@
             list.innerHTML = '<div class="bd-name-list-empty">Belum ada nama. Tambahkan nama BD di atas.</div>';
             return;
         }
-        list.innerHTML = bdCustomNames.map((name, index) =>
-            '<div class="bd-name-list-row">' +
-                '<input class="bd-name-edit-input" id="bdNameEdit_' + index + '" type="text" maxlength="40" value="' + escapeBdHtml(name) + '">' +
-                '<button type="button" class="bd-name-action" onclick="saveBdNameEdit(' + index + ')">SIMPAN</button>' +
-                '<button type="button" class="bd-name-action danger" onclick="deleteBdCustomName(' + index + ')">HAPUS</button>' +
-            '</div>'
-        ).join("");
+        list.innerHTML = bdCustomNames.map((name, index) => {
+            const defaults = getBdNameDefaults(name);
+            return '<div class="bd-name-list-row">' +
+                '<input class="bd-name-edit-input" id="bdNameEdit_' + index + '" type="text" maxlength="40" aria-label="Nama BD" value="' + escapeBdHtml(name) + '">' +
+                '<label class="bd-default-field">LINE DEFAULT' +
+                    '<input class="bd-name-default-input" id="bdNameLineDefault_' + index + '" type="number" min="1" step="1" inputmode="numeric" value="' + escapeBdHtml(defaults.maxP) + '">' +
+                '</label>' +
+                '<label class="bd-default-field">MAX X DEFAULT' +
+                    '<input class="bd-name-default-input" id="bdNameMaxXDefault_' + index + '" type="number" min="1" step="1" inputmode="numeric" value="' + escapeBdHtml(defaults.maxX) + '">' +
+                '</label>' +
+                '<div class="bd-name-row-actions">' +
+                    '<button type="button" class="bd-name-action" onclick="saveBdNameEdit(' + index + ')">SIMPAN</button>' +
+                    '<button type="button" class="bd-name-action danger" onclick="deleteBdCustomName(' + index + ')">HAPUS</button>' +
+                '</div>' +
+            '</div>';
+        }).join("");
     }
 
     function addBdCustomName() {
@@ -686,12 +766,22 @@
             alert("Nama tersebut sudah ada.");
             return;
         }
+
+        const maxP = readBdDefaultInput("bdNewNameLine", "LINE DEFAULT");
+        if (maxP === null) return;
+        const maxX = readBdDefaultInput("bdNewNameMaxX", "MAX X DEFAULT");
+        if (maxX === null) return;
+
         bdCustomNames.push(name);
+        bdNameDefaults[name] = { maxP, maxX };
         if (!saveBdCustomNames()) {
             bdCustomNames.pop();
+            delete bdNameDefaults[name];
             return;
         }
         input.value = "";
+        document.getElementById("bdNewNameLine").value = "20";
+        document.getElementById("bdNewNameMaxX").value = "50";
         renderBdNameList();
         refreshBDNameDropdowns();
     }
@@ -710,20 +800,32 @@
             return;
         }
 
+        const maxP = readBdDefaultInput("bdNameLineDefault_" + index, "LINE DEFAULT");
+        if (maxP === null) return;
+        const maxX = readBdDefaultInput("bdNameMaxXDefault_" + index, "MAX X DEFAULT");
+        if (maxX === null) return;
+
         const selectedIds = [];
         document.querySelectorAll(".person-name-select").forEach(select => {
             if (select.value === oldName) selectedIds.push(select.id);
         });
 
+        const previousDefaults = bdNameDefaults;
+        const nextDefaults = { ...bdNameDefaults };
+        delete nextDefaults[oldName];
+        nextDefaults[nextName] = { maxP, maxX };
+
         bdCustomNames[index] = nextName;
-        Object.values(bdConfigCache).forEach(config => {
-            if (config.name === oldName) config.name = nextName;
-        });
+        bdNameDefaults = nextDefaults;
         if (!saveBdCustomNames()) {
             bdCustomNames[index] = oldName;
+            bdNameDefaults = previousDefaults;
             return;
         }
 
+        Object.values(bdConfigCache).forEach(config => {
+            if (config.name === oldName) config.name = nextName;
+        });
         refreshBDNameDropdowns();
         selectedIds.forEach(id => {
             const select = document.getElementById(id);
@@ -736,22 +838,62 @@
     function deleteBdCustomName(index) {
         if (!Number.isInteger(index) || index < 0 || index >= bdCustomNames.length) return;
         const oldName = bdCustomNames[index];
-        if (!confirm('Hapus nama "' + oldName + '"? BD yang menggunakannya akan kembali ke nama default.')) return;
+        if (!confirm('Hapus nama "' + oldName + '"? BD yang menggunakannya akan kembali ke kapasitas default 20 LINE dan 50 MAX X.')) return;
 
+        const selectedIds = [];
         document.querySelectorAll(".person-name-select").forEach(select => {
-            if (select.value === oldName) select.value = "";
+            if (select.value === oldName) selectedIds.push(select.id);
+        });
+
+        const previousDefaults = bdNameDefaults;
+        const removedName = bdCustomNames.splice(index, 1)[0];
+        bdNameDefaults = { ...bdNameDefaults };
+        delete bdNameDefaults[oldName];
+        if (!saveBdCustomNames()) {
+            bdCustomNames.splice(index, 0, removedName);
+            bdNameDefaults = previousDefaults;
+            return;
+        }
+
+        selectedIds.forEach(id => {
+            const select = document.getElementById(id);
+            const bdId = select ? (select.dataset.bdId || select.id.replace("bdName_", "")) : "";
+            if (select) select.value = "";
+            if (bdId) {
+                const line = document.getElementById("maxBlocks_" + bdId);
+                const maxX = document.getElementById("maxMultiplier_" + bdId);
+                if (line) line.value = "20";
+                if (maxX) maxX.value = "50";
+                if (bdConfigCache[bdId]) {
+                    bdConfigCache[bdId].name = "";
+                    bdConfigCache[bdId].maxP = "20";
+                    bdConfigCache[bdId].maxX = "50";
+                }
+            }
         });
         Object.values(bdConfigCache).forEach(config => {
             if (config.name === oldName) config.name = "";
         });
-
-        bdCustomNames.splice(index, 1);
-        if (!saveBdCustomNames()) {
-            bdCustomNames.splice(index, 0, oldName);
-            return;
-        }
         refreshBDNameDropdowns();
         renderBdNameList();
+    }
+
+    function handleBdNameSelection(event) {
+        const select = event.currentTarget;
+        const bdId = select.dataset.bdId || select.id.replace("bdName_", "");
+        refreshBDNameDropdowns();
+
+        const selectedName = select.value;
+        const defaults = selectedName ? getBdNameDefaults(selectedName) : { maxP: "20", maxX: "50" };
+        const line = document.getElementById("maxBlocks_" + bdId);
+        const maxX = document.getElementById("maxMultiplier_" + bdId);
+        if (line) line.value = defaults.maxP;
+        if (maxX) maxX.value = defaults.maxX;
+
+        if (!bdConfigCache[bdId]) bdConfigCache[bdId] = { name: "", maxP: "20", maxX: "50" };
+        bdConfigCache[bdId].name = selectedName;
+        bdConfigCache[bdId].maxP = defaults.maxP;
+        bdConfigCache[bdId].maxX = defaults.maxX;
     }
 
     function refreshBDNameDropdowns() {
@@ -866,7 +1008,7 @@
             name.appendChild(new Option("BD " + i, ""));
             bdCustomNames.forEach(alias => name.appendChild(new Option(alias, alias)));
             name.value = saved.name || "";
-            name.addEventListener("change", refreshBDNameDropdowns);
+            name.addEventListener("change", handleBdNameSelection);
 
             const lineField = document.createElement("div");
             lineField.className = "person-capacity-field";
