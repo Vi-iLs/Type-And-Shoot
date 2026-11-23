@@ -1204,6 +1204,88 @@
             }
         }
 
+    
+        /* Refined action palette: darker blue primary, distinct BB shortcuts, restrained card accents */
+        button.btn-execute {
+            background: linear-gradient(115deg, #17365f, #1e4b7e 58%, #17365f);
+            border: 1px solid rgba(96, 165, 250, .34);
+            box-shadow: 0 4px 12px rgba(15, 45, 85, .25), inset 0 1px rgba(255, 255, 255, .10);
+        }
+        button.btn-execute:hover {
+            background: linear-gradient(115deg, #1e4778, #285b91 58%, #1e4778);
+            box-shadow: 0 6px 15px rgba(15, 45, 85, .30), inset 0 1px rgba(255, 255, 255, .13);
+        }
+        button.btn-execute.btn-bb4 {
+            background: linear-gradient(115deg, #164e8a, #2563a6 58%, #164e8a) !important;
+            border: 1px solid rgba(96, 165, 250, .55);
+            box-shadow: 0 4px 11px rgba(37, 99, 235, .18), inset 0 1px rgba(255, 255, 255, .12);
+        }
+        button.btn-execute.btn-bb4:hover {
+            background: linear-gradient(115deg, #1d5da0, #3478bd 58%, #1d5da0) !important;
+        }
+        button.btn-execute.btn-bb5 {
+            background: linear-gradient(115deg, #086548, #11946a 58%, #086548) !important;
+            border: 1px solid rgba(52, 211, 153, .48);
+            box-shadow: 0 4px 11px rgba(16, 185, 129, .15), inset 0 1px rgba(255, 255, 255, .12);
+        }
+        button.btn-execute.btn-bb5:hover {
+            background: linear-gradient(115deg, #087a54, #16a36f 58%, #087a54) !important;
+        }
+        button.btn-execute.btn-bb6 {
+            background: linear-gradient(115deg, #861d35, #b42342 58%, #861d35) !important;
+            border: 1px solid rgba(248, 113, 113, .48);
+            box-shadow: 0 4px 11px rgba(220, 38, 38, .15), inset 0 1px rgba(255, 255, 255, .12);
+        }
+        button.btn-execute.btn-bb6:hover {
+            background: linear-gradient(115deg, #9b243f, #ca3453 58%, #9b243f) !important;
+        }
+        button.btn-execute.btn-clear {
+            background: linear-gradient(115deg, #0d2340, #15375d 58%, #0d2340) !important;
+            border: 1px solid rgba(71, 126, 184, .42);
+            box-shadow: 0 4px 11px rgba(5, 20, 40, .25), inset 0 1px rgba(255, 255, 255, .08);
+        }
+        button.btn-execute.btn-clear:hover {
+            background: linear-gradient(115deg, #143052, #1b4772 58%, #143052) !important;
+        }
+
+        .container {
+            border-color: rgba(96, 165, 250, .30);
+            border-top-color: rgba(96, 165, 250, .62);
+        }
+        .data-history-shell {
+            border-color: rgba(96, 165, 250, .30);
+            border-left: 2px solid rgba(52, 211, 153, .54);
+        }
+        .match-box {
+            border-color: rgba(96, 165, 250, .28);
+            border-left: 2px solid rgba(96, 165, 250, .60);
+        }
+        .data-settings-panel-content {
+            border-color: rgba(96, 165, 250, .28);
+            border-left: 2px solid rgba(59, 130, 246, .62);
+        }
+        .process-report-stat {
+            border-top: 2px solid rgba(96, 165, 250, .42);
+        }
+        .process-report-stat.remaining {
+            border-top-color: rgba(52, 211, 153, .72);
+        }
+        .process-report-stat.removed {
+            border-top-color: rgba(248, 113, 113, .72);
+        }
+        .process-report-reference-item {
+            border-top-color: rgba(96, 165, 250, .48);
+        }
+        .source-test-item {
+            border-left: 2px solid rgba(96, 165, 250, .42);
+        }
+        .data-entry-panel {
+            border-top-color: rgba(52, 211, 153, .30);
+        }
+        .source-test-panel {
+            border-top-color: rgba(96, 165, 250, .30);
+        }
+
     </style>
 </head>
 <body>
@@ -1291,10 +1373,10 @@
 
             <div style="display: flex; gap: 8px; margin-top: 20px; flex-wrap: wrap;">
                 <button class="btn-execute" onclick="prosesAngka()" style="flex: 1; min-width: 100px;">Prosses</button>
-                <button class="btn-execute" onclick="ringkasBB(4)" style="background-color: #9b59b6; padding: 14px 10px; flex: 1; min-width: 60px;">BB 4</button>
-                <button class="btn-execute" onclick="ringkasBB(5)" style="background-color: #8e44ad; padding: 14px 10px; flex: 1; min-width: 60px;">BB 5</button>
-                <button class="btn-execute" onclick="ringkasBB(6)" style="background-color: #2980b9; padding: 14px 10px; flex: 1; min-width: 60px;">BB 6</button>
-                <button class="btn-execute" onclick="clearAllFields()" style="background-color: #64748b; padding: 14px 10px; flex: 1; min-width: 90px;">🗑️ Clear</button>
+                <button class="btn-execute btn-bb4" onclick="ringkasBB(4)" style="padding: 14px 10px; flex: 1; min-width: 60px;">BB 4</button>
+                <button class="btn-execute btn-bb5" onclick="ringkasBB(5)" style="padding: 14px 10px; flex: 1; min-width: 60px;">BB 5</button>
+                <button class="btn-execute btn-bb6" onclick="ringkasBB(6)" style="padding: 14px 10px; flex: 1; min-width: 60px;">BB 6</button>
+                <button class="btn-execute btn-clear" onclick="clearAllFields()" style="padding: 14px 10px; flex: 1; min-width: 90px;">🗑️ Clear</button>
             </div>
         </div>
     </div>
